@@ -1,5 +1,7 @@
 {
-  "name": "jsp-backend",
+  "private": true,
+  "name": "jspaste-backend",
+  "license": "EUPL-1.2-or-later",
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
