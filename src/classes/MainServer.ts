@@ -1,17 +1,19 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 
+import { indexRoute } from '../routes/index';
+
 export class MainServer {
 	app: Elysia;
 	port: string | number;
 
 	constructor() {
 		this.app = new Elysia();
-		this.port = process.env.PORT ?? 4004;
+		this.port = process.env.PORT ?? 4000;
 	}
 
 	setup() {
-		this.app.use(cors());
+		this.app.use(cors()).use(indexRoute);
 
 		console.log('JSP-Backend started.');
 
