@@ -1,21 +1,24 @@
 {
-  "private": true,
-  "name": "jspaste-backend",
-  "license": "EUPL-1.2-or-later",
-  "module": "src/index.ts",
-  "type": "module",
-  "scripts": {
-    "start": "NODE_ENV=production bun src/index.ts",
-    "dev": "NODE_ENV=development bun --hot src/index.ts"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@elysiajs/cors": "^0.8.0",
-    "elysia": "^0.8.8"
-  }
+	"private": true,
+	"name": "jspaste-backend",
+	"license": "EUPL-1.2-or-later",
+	"module": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"start": "NODE_ENV=production bun src/index.ts",
+		"dev": "NODE_ENV=development bun --hot src/index.ts",
+		"lint": "bun prettier --write ."
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"prettier": "^3.1.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@elysiajs/cors": "^0.8.0",
+		"elysia": "^0.8.8"
+	},
+	"packageManager": "bun@1.0.21"
 }

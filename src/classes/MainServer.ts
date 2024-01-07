@@ -22,7 +22,7 @@ export class MainServer {
 
 	listen() {
 		this.app.listen(this.port, () =>
-			console.log('Listening on port', this.port)
+			console.log('Listening on port', this.port),
 		);
 	}
 }
