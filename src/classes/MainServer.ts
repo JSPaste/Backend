@@ -1,7 +1,8 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
-
-import { indexRoute } from '../routes/index';
+import { documentAccessRoute } from '../routes/documents/access';
+import { documentPublishRoute } from '../routes/documents/publish';
+import { documentRemoveRoute } from '../routes/documents/remove';
 
 export class MainServer {
 	app: Elysia;
@@ -13,7 +14,11 @@ export class MainServer {
 	}
 
 	setup() {
-		this.app.use(cors()).use(indexRoute);
+		this.app
+			.use(cors())
+			.use(documentAccessRoute)
+			.use(documentPublishRoute)
+			.use(documentRemoveRoute);
 
 		console.log('JSP-Backend started.');
 
