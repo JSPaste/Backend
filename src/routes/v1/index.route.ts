@@ -1,8 +1,7 @@
 import { Elysia } from 'elysia';
 
-export const documentIndexRoute = new Elysia({
+export default new Elysia({
 	name: 'routes:v1:documents',
-	prefix: '/',
-}).post('/', () => {
+}).post('', () => {
 	return 'Welcome to JSPaste API v1';
 });

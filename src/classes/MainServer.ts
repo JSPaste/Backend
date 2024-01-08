@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
@@ -11,11 +12,9 @@ export class MainServer {
 	constructor() {
 		this.app = new Elysia();
 		this.port = process.env.PORT ?? 4000;
-
-		this.setup();
 	}
 
-	setup() {
+	async setup() {
 		this.app.use(cors()).use(
 			swagger({
 				documentation: {
@@ -35,9 +34,47 @@ export class MainServer {
 			}),
 		);
 
+		const cwd = './src/routes';
+
+		let i = 0;
+		for (const apiVersion of apiVersions) {
+			const isLatestVersion = i === apiVersions.length - 1;
+
+			const glob = new Bun.Glob(`${apiVersion}/**/*.route.ts`);
+
+			const routes = await Array.fromAsync(glob.scan({ cwd }));
+
+			for (const route of routes) {
+				const importedRoute = await import(join('../routes', route))
+					.then((m) => m.default)
+					.catch((err) =>
+						console.error('Unable to import route', err),
+					);
+
+				if (importedRoute) {
+					this.app.group(`/${apiVersion}/documents`, (app) =>
+						app.use(importedRoute),
+					);
+					if (isLatestVersion)
+						this.app.group('/documents', (app) =>
+							app.use(importedRoute),
+						);
+				}
+			}
+
+			console.log(
+				'Registered',
+				routes.length,
+				'routes for API version',
+				apiVersion,
+			);
+
+			i++;
+		}
+
 		console.log('JSP-Backend started.');
 
-		return this;
+		this.listen();
 	}
 
 	listen() {

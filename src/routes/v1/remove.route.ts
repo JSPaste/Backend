@@ -1,8 +1,7 @@
 import { Elysia, t } from 'elysia';
 
-export const documentRemoveRoute = new Elysia({
+export default new Elysia({
 	name: 'routes:v1:documents:remove',
-	prefix: '/',
 }).delete(
 	'',
 	({ params: { id } }) => {

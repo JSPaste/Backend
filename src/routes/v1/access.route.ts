@@ -1,8 +1,7 @@
 import { Elysia, t } from 'elysia';
 
-export const documentAccessRoute = new Elysia({
+export default new Elysia({
 	name: 'routes:v1:documents:access',
-	prefix: '/',
 })
 	.get(
 		':id',
