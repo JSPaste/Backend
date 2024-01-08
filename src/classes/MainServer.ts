@@ -18,6 +18,7 @@ export class MainServer {
 		this.app.use(cors()).use(
 			swagger({
 				documentation: {
+					servers: [{ url: 'https://jspaste.eu' }],
 					info: {
 						title: 'JSPaste documentation',
 						version: 'v1',
@@ -37,6 +38,7 @@ export class MainServer {
 		const cwd = './src/routes';
 
 		let i = 0;
+
 		for (const apiVersion of apiVersions) {
 			const isLatestVersion = i === apiVersions.length - 1;
 
@@ -55,6 +57,7 @@ export class MainServer {
 					this.app.group(`/api/${apiVersion}/documents`, (app) =>
 						app.use(importedRoute),
 					);
+
 					if (isLatestVersion)
 						this.app.group('/documents', (app) =>
 							app.use(importedRoute),
