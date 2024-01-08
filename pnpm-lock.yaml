@@ -11,11 +11,17 @@ dependencies:
   elysia:
     specifier: ^0.8.8
     version: 0.8.8
+  zlib:
+    specifier: ^1.0.5
+    version: 1.0.5
 
 devDependencies:
   '@types/bun':
     specifier: latest
     version: 1.0.0
+  prettier:
+    specifier: ^3.1.1
+    version: 3.1.1
 
 packages:
 
@@ -79,4 +85,15 @@ packages:
 
   /memoirist@0.1.4:
     resolution: {integrity: sha512-D6GbPSqO2nUVOmm7VZjJc5tC60pkOVUPzLwkKl1vCiYP+2b1cG8N9q1O3P0JmNM68u8vsgefPbxRUCSGxSXD+g==}
+    dev: false
+
+  /prettier@3.1.1:
+    resolution: {integrity: sha512-22UbSzg8luF4UuZtzgiUOfcGM8s4tjBv6dJRT7j275NXsy2jb4aJa4NNveul5x4eqlF1wuhuR2RElK71RvmVaw==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
+
+  /zlib@1.0.5:
+    resolution: {integrity: sha512-40fpE2II+Cd3k8HWTWONfeKE2jL+P42iWJ1zzps5W51qcTsOUKM5Q5m2PFb0CLxlmFAaUuUdJGc3OfZy947v0w==}
+    engines: {node: '>=0.2.0'}
     dev: false

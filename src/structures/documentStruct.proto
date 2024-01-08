@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message DocumentData {
+  string secret = 1;
+  string password = 2;
+  int64 deletion_time = 3; //Timespan in seconds
+
+  reserved 4 to 13;
+
+  bytes raw_file_data = 14;
+}
