@@ -1,10 +1,10 @@
 import { Elysia, t } from 'elysia';
 
 export const documentPublishRoute = new Elysia({
-	name: 'routes:documents:publish',
-	prefix: '/documents',
+	name: 'routes:v1:documents:publish',
+	prefix: '/',
 }).post(
-	'/',
+	'',
 	({ body }) => {
 		return body;
 	},

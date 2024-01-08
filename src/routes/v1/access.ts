@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia';
 
 export const documentAccessRoute = new Elysia({
-	name: 'routes:documents:access',
-	prefix: '/documents',
+	name: 'routes:v1:documents:access',
+	prefix: '/',
 })
 	.get(
-		'/:id',
+		':id',
 		({ params: { id } }) => {
 			return {
 				key: id,
@@ -15,7 +15,7 @@ export const documentAccessRoute = new Elysia({
 		{ params: t.Object({ id: t.String() }) },
 	)
 	.get(
-		'/:id/raw',
+		':id/raw',
 		({ params: { id } }) => {
 			return id;
 		},

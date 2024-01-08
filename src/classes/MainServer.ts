@@ -1,9 +1,8 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
+import swagger from '@elysiajs/swagger';
 
-import { documentAccessRoute } from '../routes/documents/access';
-import { documentPublishRoute } from '../routes/documents/publish';
-import { documentRemoveRoute } from '../routes/documents/remove';
+const apiVersions = ['v1', 'v2'];
 
 export class MainServer {
 	app: Elysia;
@@ -17,11 +16,24 @@ export class MainServer {
 	}
 
 	setup() {
-		this.app
-			.use(cors())
-			.use(documentAccessRoute)
-			.use(documentPublishRoute)
-			.use(documentRemoveRoute);
+		this.app.use(cors()).use(
+			swagger({
+				documentation: {
+					info: {
+						title: 'JSPaste documentation',
+						version: 'v1',
+						description: 'The JSPaste API documentation.',
+						license: {
+							name: 'EUPL-1.2-or-later',
+							url: 'https://github.com/JSPaste/JSP-Backend/blob/dev/LICENSE',
+						},
+					},
+				},
+				swaggerOptions: {},
+				path: '/docs',
+				exclude: ['/docs', '/docs/json'],
+			}),
+		);
 
 		console.log('JSP-Backend started.');
 
