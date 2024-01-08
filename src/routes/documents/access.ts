@@ -9,7 +9,7 @@ export const documentAccessRoute = new Elysia({
 		({ params: { id } }) => {
 			return {
 				key: id,
-				data: '',
+				data: 'cl',
 			};
 		},
 		{ params: t.Object({ id: t.String() }) },
@@ -17,7 +17,7 @@ export const documentAccessRoute = new Elysia({
 	.get(
 		'/:id/raw',
 		({ params: { id } }) => {
-			return id
+			return id;
 		},
 		{ params: t.Object({ id: t.String() }) },
 	);

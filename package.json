@@ -18,7 +18,8 @@
 	},
 	"dependencies": {
 		"@elysiajs/cors": "^0.8.0",
-		"elysia": "^0.8.8"
+		"elysia": "^0.8.8",
+		"zlib": "^1.0.5"
 	},
 	"packageManager": "bun@1.0.21"
 }

@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
+
 import { documentAccessRoute } from '../routes/documents/access';
 import { documentPublishRoute } from '../routes/documents/publish';
 import { documentRemoveRoute } from '../routes/documents/remove';
@@ -11,6 +12,8 @@ export class MainServer {
 	constructor() {
 		this.app = new Elysia();
 		this.port = process.env.PORT ?? 4000;
+
+		this.setup();
 	}
 
 	setup() {
