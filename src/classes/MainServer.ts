@@ -52,7 +52,7 @@ export class MainServer {
 					);
 
 				if (importedRoute) {
-					this.app.group(`/${apiVersion}/documents`, (app) =>
+					this.app.group(`/api/${apiVersion}/documents`, (app) =>
 						app.use(importedRoute),
 					);
 					if (isLatestVersion)
