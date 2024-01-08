@@ -15,7 +15,10 @@ export default new Elysia({
 	)
 	.get(
 		':id/raw',
-		({ params: { id } }) => {
+		({ set, params: { id } }) => {
+			
+			set.headers['document-keu'] = 'Elysia';
+
 			return id;
 		},
 		{ params: t.Object({ id: t.String() }) },
