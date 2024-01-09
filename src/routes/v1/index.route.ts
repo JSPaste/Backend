@@ -9,7 +9,8 @@ export default new Elysia({
 	},
 	{
 		response: t.String({
-			description: 'A small welcome with the current API version',
+			description: 'A small welcome message with the current API version',
+			examples: ['Welcome to JSPaste API v1'],
 		}),
 		detail: { summary: 'Index', tags: ['v1'] },
 	},

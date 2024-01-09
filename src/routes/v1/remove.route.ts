@@ -8,7 +8,7 @@ export default new Elysia({
 		return id;
 	},
 	{
-		params: t.Object({ id: t.String({ description: 'The document ID' }) }),
+		params: t.Object({ id: t.String({ description: 'The document ID', examples: ['abc123'] }) }),
 		detail: { summary: 'Remove document by ID', tags: ['v1'] },
 	},
 );
