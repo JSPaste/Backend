@@ -1,5 +1,7 @@
 import { Elysia, t } from 'elysia';
 
+const basePath = process.env.DOCUMENTS_PATH;
+
 export default new Elysia({
 	name: 'routes:v1:documents:access',
 })

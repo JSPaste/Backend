@@ -1,6 +1,5 @@
 import { Elysia, t } from 'elysia';
-
-import zlib from 'zlib';
+import zlib from 'node:zlib';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
@@ -21,22 +20,22 @@ export default new Elysia({
 	name: 'routes:v1:documents:publish',
 }).post(
 	'',
-	async ({ set, request, body }) => {
+	async ({ set, request, body: buffer }) => {
 		try {
-			const buffer = await request.arrayBuffer();
-
 			const selectedKey = await createKey();
 
-			await Bun.write(basePath + selectedKey, buffer);
+			await Bun.write(basePath + selectedKey, buffer as ArrayBuffer);
 
 			set.status = 200;
-		} catch {
-			set.status = 500;
-		}
 
-		return body;
+			return { key: selectedKey };
+		} catch (e) {
+			set.status = 500;
+			return e;
+		}
 	},
 	{
+		parse: ({ request }) => request.arrayBuffer(),
 		body: t.Any(),
 	},
 );
