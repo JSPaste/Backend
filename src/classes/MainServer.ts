@@ -3,7 +3,7 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 
-const apiVersions = ['v1', 'v2'];
+const apiVersions = ['v1'];
 
 export class MainServer {
 	app: Elysia;
