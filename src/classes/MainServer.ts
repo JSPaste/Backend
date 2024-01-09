@@ -37,7 +37,7 @@ export class MainServer {
 					syntaxHighlight: { activate: true, theme: 'monokai' },
 				},
 				path: '/docs',
-				exclude: ['/docs', '/docs/json', /^\/documents\//],
+				exclude: ['/docs', '/docs/json', /^\/documents/],
 			}),
 		);
 
@@ -60,13 +60,13 @@ export class MainServer {
 					);
 
 				if (importedRoute) {
-					this.app.group(`/api/${apiVersion}/documents`, (app) =>
-						app.use(importedRoute),
+					this.app.group(`/api/${apiVersion}/documents`, (groupApp) =>
+						groupApp.use(importedRoute),
 					);
 
 					if (isLatestVersion)
-						this.app.group('/documents', (app) =>
-							app.use(importedRoute),
+						this.app.group('/documents', (groupApp) =>
+							groupApp.use(importedRoute),
 						);
 				}
 			}
