@@ -3,7 +3,10 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 
-const apiVersions = ['v1'];
+const apiVersions = [
+	/*FIXME: Fix correct order when v2 is finished */ 'v2',
+	'v1',
+];
 
 export class MainServer {
 	app: Elysia;
@@ -31,7 +34,7 @@ export class MainServer {
 				},
 				swaggerOptions: {},
 				path: '/docs',
-				exclude: ['/docs', '/docs/json'],
+				exclude: ['/docs', '/docs/json', '/documents'],
 			}),
 		);
 
