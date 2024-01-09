@@ -7,10 +7,16 @@ export default new Elysia({
 })
 	.get(
 		':id',
-		({ params: { id } }) => {
+		async ({ params: { id } }) => {
+			const file = Bun.file(basePath + id);
+
+			if (!(await file.exists())) {
+				return { error: 'The file does not exists' };
+			}
+
 			return {
 				key: id,
-				data: 'cl',
+				data: await file.text(),
 			};
 		},
 		{
@@ -35,8 +41,18 @@ export default new Elysia({
 	)
 	.get(
 		':id/raw',
-		({ params: { id } }) => {
-			return id;
+		async ({ params: { id } }) => {
+			const file = Bun.file(basePath + id);
+
+			if (!(await file.exists())) {
+				return { error: 'The file does not exists' };
+			}
+
+
+			return {
+				key: id,
+				data: await file.arrayBuffer(),
+			};
 		},
 		{
 			params: t.Object(

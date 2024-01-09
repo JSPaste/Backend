@@ -15,7 +15,7 @@ async function makeId(length: number, chars = characters): Promise<string> {
 }
 
 async function createKey(length = 0) {
-	return await makeId(length <= 0 ? 4 : length);
+	return await makeId(length <= 0 ? 3 : length);
 }
 
 export default new Elysia({
@@ -38,6 +38,6 @@ export default new Elysia({
 	},
 	{
 		parse: ({ request }) => request.arrayBuffer(),
-		body: t.Any()
+		body: t.Any(),
 	},
 );
