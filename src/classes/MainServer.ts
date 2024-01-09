@@ -24,16 +24,18 @@ export class MainServer {
 					servers: [{ url: 'https://jspaste.eu' }],
 					info: {
 						title: 'JSPaste documentation',
-						version: 'v1',
+						version: apiVersions.join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
 							name: 'EUPL-1.2-or-later',
-							url: 'https://github.com/JSPaste/JSP-Backend/blob/dev/LICENSE',
+							url: 'https://github.com/JSPaste/JSP-Backend/blob/stable/LICENSE',
 						},
 					},
 				},
-				swaggerOptions: {},
+				swaggerOptions: {
+					syntaxHighlight: { activate: true, theme: 'monokai' },
+				},
 				path: '/docs',
 				exclude: ['/docs', '/docs/json', /^\/documents\//],
 			}),
