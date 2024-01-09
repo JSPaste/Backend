@@ -14,9 +14,13 @@ export default new Elysia({
 				return { error: 'The file does not exists' };
 			}
 
+			const fileData = Bun.inflateSync(
+				Buffer.from(await file.arrayBuffer()),
+			);
+
 			return {
 				key: id,
-				data: await file.text(),
+				data: new TextDecoder().decode(fileData),
 			};
 		},
 		{
@@ -48,10 +52,13 @@ export default new Elysia({
 				return { error: 'The file does not exists' };
 			}
 
+			const fileData = Bun.inflateSync(
+				Buffer.from(await file.arrayBuffer()),
+			);
 
 			return {
 				key: id,
-				data: await file.arrayBuffer(),
+				data: fileData,
 			};
 		},
 		{

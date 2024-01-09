@@ -26,7 +26,10 @@ export default new Elysia({
 		try {
 			const selectedKey = await createKey();
 
-			await Bun.write(basePath + selectedKey, buffer as ArrayBuffer);
+			await Bun.write(
+				basePath + selectedKey,
+				Bun.deflateSync(Buffer.from(buffer as ArrayBuffer)),
+			);
 
 			set.status = 200;
 
