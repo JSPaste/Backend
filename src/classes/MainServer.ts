@@ -3,7 +3,10 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 
-const apiVersions = ['v1'];
+const apiVersions = [
+	/*FIXME: Fix correct order when v2 is finished */ 'v2',
+	'v1',
+];
 
 export class MainServer {
 	app: Elysia;
@@ -22,7 +25,8 @@ export class MainServer {
 					info: {
 						title: 'JSPaste documentation',
 						version: 'v1',
-						description: 'The JSPaste API documentation.',
+						description:
+							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
 							name: 'EUPL-1.2-or-later',
 							url: 'https://github.com/JSPaste/JSP-Backend/blob/dev/LICENSE',
@@ -31,7 +35,7 @@ export class MainServer {
 				},
 				swaggerOptions: {},
 				path: '/docs',
-				exclude: ['/docs', '/docs/json'],
+				exclude: ['/docs', '/docs/json', /^\/documents\//],
 			}),
 		);
 

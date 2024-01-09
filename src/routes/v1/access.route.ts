@@ -19,6 +19,7 @@ export default new Elysia({
 				key: t.String({ description: 'The key of the document.' }),
 				data: t.Any({ description: 'The document.' }),
 			}),
+			detail: { summary: 'Get document by ID', tags: ['v1'] },
 		},
 	)
 	.get(
@@ -34,5 +35,6 @@ export default new Elysia({
 				{ description: 'The request parameters.' },
 			),
 			response: t.String({ description: 'The raw document.' }),
+			detail: { summary: 'Get raw document by ID', tags: ['v1'] },
 		},
 	);

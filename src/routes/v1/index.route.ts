@@ -11,5 +11,6 @@ export default new Elysia({
 		response: t.String({
 			description: 'A small welcome with the current API version.',
 		}),
+		detail: { summary: 'Index', tags: ['v1'] },
 	},
 );
