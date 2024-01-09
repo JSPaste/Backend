@@ -38,6 +38,6 @@ export default new Elysia({
 	},
 	{
 		parse: ({ request }) => request.arrayBuffer(),
-		body: t.Any()
+		body: t.Any(),
 	},
 );

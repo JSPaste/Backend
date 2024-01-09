@@ -1,8 +1,6 @@
 import { Elysia, t } from 'elysia';
 import fs from 'node:fs';
 
-import { bundlerModuleNameResolver } from 'typescript';
-
 const basePath = process.env.DOCUMENTS_PATH;
 
 export default new Elysia({
@@ -23,7 +21,12 @@ export default new Elysia({
 		});
 	},
 	{
-		params: t.Object({ id: t.String({ description: 'The document ID', examples: ['abc123'] }) }),
+		params: t.Object({
+			id: t.String({
+				description: 'The document ID',
+				examples: ['abc123'],
+			}),
+		}),
 		detail: { summary: 'Remove document by ID', tags: ['v1'] },
 	},
 );
