@@ -38,7 +38,7 @@ export default new Elysia({
 		return body;
 	},
 	{
-		body: t.Any({ description: 'A test with the body sent.' }),
+		body: t.Any({ description: 'A test with the body sent' }),
 		detail: { summary: 'Publish a document', tags: ['v1'] },
 	},
 );
