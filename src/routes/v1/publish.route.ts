@@ -1,19 +1,21 @@
 import { Elysia, t } from 'elysia';
-import zlib from 'node:zlib';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
 const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
 
-async function makeid(length: number, chars = characters): Promise<string> {
+async function makeId(length: number, chars = characters): Promise<string> {
 	let result = '';
+
 	while (length--) result += chars[Math.floor(Math.random() * chars.length)];
+
 	return (await Bun.file(basePath + result).exists())
-		? makeid(length + 1, chars)
+		? makeId(length + 1, chars)
 		: result;
 }
-async function createKey(length: number = 0) {
-	return await makeid(length <= 0 ? 4 : length);
+
+async function createKey(length = 0) {
+	return await makeId(length <= 0 ? 4 : length);
 }
 
 export default new Elysia({
@@ -36,6 +38,6 @@ export default new Elysia({
 	},
 	{
 		parse: ({ request }) => request.arrayBuffer(),
-		body: t.Any(),
+		body: t.Any()
 	},
 );

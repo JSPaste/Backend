@@ -3,7 +3,10 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 
-const apiVersions = ['v1', 'v2'];
+const apiVersions = [
+	/*FIXME: Fix correct order when v2 is finished */ 'v2',
+	'v1',
+];
 
 export class MainServer {
 	app: Elysia;
@@ -21,17 +24,20 @@ export class MainServer {
 					servers: [{ url: 'https://jspaste.eu' }],
 					info: {
 						title: 'JSPaste documentation',
-						version: 'v1',
-						description: 'The JSPaste API documentation.',
+						version: apiVersions.join(', '),
+						description:
+							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
 							name: 'EUPL-1.2-or-later',
-							url: 'https://github.com/JSPaste/JSP-Backend/blob/dev/LICENSE',
+							url: 'https://github.com/JSPaste/JSP-Backend/blob/stable/LICENSE',
 						},
 					},
 				},
-				swaggerOptions: {},
+				swaggerOptions: {
+					syntaxHighlight: { activate: true, theme: 'monokai' },
+				},
 				path: '/docs',
-				exclude: ['/docs', '/docs/json'],
+				exclude: ['/docs', '/docs/json', /^\/documents/],
 			}),
 		);
 
@@ -54,13 +60,13 @@ export class MainServer {
 					);
 
 				if (importedRoute) {
-					this.app.group(`/api/${apiVersion}/documents`, (app) =>
-						app.use(importedRoute),
+					this.app.group(`/api/${apiVersion}/documents`, (groupApp) =>
+						groupApp.use(importedRoute),
 					);
 
 					if (isLatestVersion)
-						this.app.group('/documents', (app) =>
-							app.use(importedRoute),
+						this.app.group('/documents', (groupApp) =>
+							groupApp.use(importedRoute),
 						);
 				}
 			}
