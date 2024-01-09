@@ -7,5 +7,5 @@ export default new Elysia({
 	({ params: { id } }) => {
 		return id;
 	},
-	{ params: t.Object({ id: t.String() }) },
+	{ params: t.Object({ id: t.String({ description: 'The document ID.' }) }) },
 );
