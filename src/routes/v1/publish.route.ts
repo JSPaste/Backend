@@ -14,10 +14,12 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ errorSender, request }) => {
+		async ({ errorSender, request, body }) => {
 			const selectedKey = await createKey();
 
-			const buffer = Buffer.from(await request.arrayBuffer());
+			const buffer = Buffer.from(
+				(body as ArrayBuffer) ?? (await request.arrayBuffer()),
+			);
 
 			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
 				return errorSender.sendError(400, {
@@ -44,7 +46,7 @@ export default new Elysia({
 			return { key: selectedKey, secret: selectedSecret };
 		},
 		{
-			parse: ({ request }) => null,
+			parse: ({ request }) => request.arrayBuffer(),
 			body: t.Any({ description: 'The file to be uploaded' }),
 			response: t.Union([
 				t.Object({
