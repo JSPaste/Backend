@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
+import { DataValidator } from '../../classes/DataValidator';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
@@ -11,7 +12,13 @@ export default new Elysia({
 	.get(
 		':id',
 		async ({ errorSender, params: { id } }) => {
-			// FIXME: Vulnerable to path traversal? 
+			if (!DataValidator.isAlphanumeric(id))
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_input',
+					message: 'Invalid ID provided',
+				}).response;
+
 			const file = Bun.file(basePath + id);
 
 			const fileExists = await file.exists();
