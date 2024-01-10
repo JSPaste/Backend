@@ -5,9 +5,7 @@
 	"module": "src/index.ts",
 	"type": "module",
 	"scripts": {
-		"//": "TODO: Correctly build for production",
-		"build": "bun build --entrypoints ./src/index.ts --outdir ./dist --target bun",
-		"start": "bun run build && NODE_ENV=production bun ./dist/index.js",
+		"start": "NODE_ENV=production bun ./src/index.ts",
 		"dev": "NODE_ENV=development bun --hot ./src/index.ts",
 		"lint": "bun prettier --write ."
 	},
