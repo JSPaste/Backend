@@ -17,15 +17,15 @@ export async function createKey(length = 0) {
 	return await makeId(length <= 0 ? 4 : length);
 }
 
-export async function createSecret(chunkLengh = 5) {
+export async function createSecret(chunkLength = 5) {
 	return (
-		randomChars(chunkLengh) +
+		randomChars(chunkLength) +
 		'-' +
-		randomChars(chunkLengh) +
+		randomChars(chunkLength) +
 		'-' +
-		randomChars(chunkLengh) +
+		randomChars(chunkLength) +
 		'-' +
-		randomChars(chunkLengh)
+		randomChars(chunkLength)
 	);
 }
 
