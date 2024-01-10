@@ -13,6 +13,7 @@ export default new Elysia({
 		async ({ body }) => {
 			const selectedKey = await createKey();
 
+			// FIXME: Check body type
 			// TODO: Add secret key & send it
 
 			await Bun.write(
@@ -24,7 +25,7 @@ export default new Elysia({
 		},
 		{
 			parse: ({ request }) => request.arrayBuffer(),
-			body: t.Any(),
+			body: t.Any({ description: 'The file to be uploaded' }),
 			response: t.Union([
 				t.Object({
 					key: t.String({
