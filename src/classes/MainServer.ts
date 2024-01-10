@@ -18,7 +18,7 @@ export class MainServer {
 	}
 
 	async setup() {
-		this.app.use(cors()).use(
+		this.app.use(cors({methods: ['GET', 'POST', 'DELETE'] })).use(
 			swagger({
 				documentation: {
 					servers: [{ url: 'https://jspaste.eu' }],
