@@ -12,7 +12,7 @@ export class DataValidator {
 	}
 
 	static isAlphanumeric(value: string) {
-		return DataValidator.isValidString(value) && /^[\w-.=:]+$/.test(value);
+		return DataValidator.isValidString(value) && /^\w+$/.test(value);
 	}
 
 	static isValidStringArray(values: string[]) {
