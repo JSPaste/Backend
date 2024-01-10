@@ -18,7 +18,7 @@ export class MainServer {
 	}
 
 	async setup() {
-		this.app.use(cors({methods: ['GET', 'POST', 'DELETE'] })).use(
+		this.app.use(cors({ methods: ['GET', 'POST', 'DELETE'] })).use(
 			swagger({
 				documentation: {
 					servers: [{ url: 'https://jspaste.eu' }],
@@ -60,12 +60,13 @@ export class MainServer {
 					);
 
 				if (importedRoute) {
-					this.app.group(`/api/${apiVersion}/documents`, (groupApp) =>
-						groupApp.use(importedRoute),
+					this.app.group(
+						`/api/${apiVersion}/documents`,
+						(groupApp: any) => groupApp.use(importedRoute),
 					);
 
 					if (isLatestVersion)
-						this.app.group('/documents', (groupApp) =>
+						this.app.group('/documents', (groupApp: any) =>
 							groupApp.use(importedRoute),
 						);
 				}
