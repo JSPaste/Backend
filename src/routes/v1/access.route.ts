@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
-import { errorSenderPlugin } from '../../plugins/errorSender';
 import { ErrorSender } from '../../classes/ErrorSender';
+import { errorSenderPlugin } from '../../plugins/errorSender';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
@@ -11,6 +11,7 @@ export default new Elysia({
 	.get(
 		':id',
 		async ({ errorSender, params: { id } }) => {
+			// FIXME: Vulnerable to path traversal? 
 			const file = Bun.file(basePath + id);
 
 			const fileExists = await file.exists();
@@ -21,6 +22,8 @@ export default new Elysia({
 					errorCode: 'jsp.file_not_found',
 					message: 'The requested file does not exist',
 				}).response;
+
+			// FIXME: Proper error handling
 
 			const ab = await file.arrayBuffer();
 

@@ -1,5 +1,5 @@
-import { Elysia, t } from 'elysia';
 import fs from 'node:fs/promises';
+import { Elysia, t } from 'elysia';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 
 const basePath = process.env.DOCUMENTS_PATH;
@@ -11,9 +11,12 @@ export default new Elysia({
 	.delete(
 		':id',
 		async ({ errorSender, params: { id } }) => {
+			// FIXME: Vulnerable to path traversal?
 			const file = Bun.file(basePath + id);
 
 			const fileExists = await file.exists();
+
+			// FIXME: Require a secret to delete the document
 
 			if (!fileExists)
 				return errorSender.sendError(400, {

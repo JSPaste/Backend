@@ -1,6 +1,8 @@
 import { Elysia, t } from 'elysia';
-import { basePath, createKey } from '../../util/createKey';
+import { createKey } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
+
+const basePath = process.env.DOCUMENTS_PATH;
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',
