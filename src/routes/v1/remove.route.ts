@@ -4,6 +4,7 @@ import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentDataStruct } from '../../structures/documentStruct';
+import { ReadDocument } from '../../util/documentReader';
 
 const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
 
@@ -34,10 +35,8 @@ export default new Elysia({
 					message: 'The requested file does not exist',
 				}).response;
 			}
-
-			var doc = DocumentDataStruct.fromBinary(
-				Bun.inflateSync(Buffer.from(await file.arrayBuffer())),
-			);
+			
+			let doc = await ReadDocument(file);
 
 			if (doc.secret != request.headers.get('secret')) {
 				return errorSender.sendError(401, {
