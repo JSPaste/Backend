@@ -3,6 +3,7 @@ import { Elysia, t } from 'elysia';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
+import { DocumentDataStruct } from '../../structures/documentStruct';
 
 const basePath = process.env.DOCUMENTS_PATH;
 

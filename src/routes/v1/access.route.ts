@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
+import { DocumentDataStruct } from '../../structures/documentStruct';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
@@ -34,7 +35,19 @@ export default new Elysia({
 
 			const ab = await file.arrayBuffer();
 
-			const fileData = Bun.inflateSync(Buffer.from(ab));
+			var doc = DocumentDataStruct.fromBinary(
+				Bun.inflateSync(Buffer.from(ab)),
+			);
+
+			if (doc.password != null) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.file_not_found',
+					message: 'The requested file does not exist',
+				}).response;
+			}
+
+			const fileData = doc.rawFileData;
 
 			return {
 				key: id,

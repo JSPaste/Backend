@@ -11,9 +11,18 @@ dependencies:
   '@elysiajs/swagger':
     specifier: ^0.8.3
     version: 0.8.3(elysia@0.8.8)
+  '@protobuf-ts/plugin':
+    specifier: ^2.9.3
+    version: 2.9.3
+  '@protobuf-ts/protoc':
+    specifier: ^2.9.3
+    version: 2.9.3
+  '@protobuf-ts/runtime':
+    specifier: ^2.9.3
+    version: 2.9.3
   elysia:
     specifier: ^0.8.8
-    version: 0.8.8(typescript@5.3.3)
+    version: 0.8.8
   typescript:
     specifier: ^5.0.0
     version: 5.3.3
@@ -33,7 +42,7 @@ packages:
     peerDependencies:
       elysia: '>= 0.8.0'
     dependencies:
-      elysia: 0.8.8(typescript@5.3.3)
+      elysia: 0.8.8
     dev: false
 
   /@elysiajs/swagger@0.8.3(elysia@0.8.8):
@@ -41,9 +50,42 @@ packages:
     peerDependencies:
       elysia: '>= 0.8.0'
     dependencies:
-      elysia: 0.8.8(typescript@5.3.3)
+      elysia: 0.8.8
       lodash.clonedeep: 4.5.0
       openapi-types: 12.1.3
+    dev: false
+
+  /@protobuf-ts/plugin-framework@2.9.3:
+    resolution: {integrity: sha512-iqdkhAu7fGPvBCVOoAEEFJ1/oaGIBoNIMgSv2WonTNJVHxv5FvvAfWFn6nG/eta34fHRZT38ZXTaYcMUkv8AiQ==}
+    dependencies:
+      '@protobuf-ts/runtime': 2.9.3
+      typescript: 3.9.10
+    dev: false
+
+  /@protobuf-ts/plugin@2.9.3:
+    resolution: {integrity: sha512-tHYACv+nnIV2eoiMxeZhrgMqGiUktzUzrhfgnROg/rr8TecPLp9v5/yqNibN+bad5k7d57aqlTuQKhFl+J4W/g==}
+    hasBin: true
+    dependencies:
+      '@protobuf-ts/plugin-framework': 2.9.3
+      '@protobuf-ts/protoc': 2.9.3
+      '@protobuf-ts/runtime': 2.9.3
+      '@protobuf-ts/runtime-rpc': 2.9.3
+      typescript: 3.9.10
+    dev: false
+
+  /@protobuf-ts/protoc@2.9.3:
+    resolution: {integrity: sha512-TJ0Ycx/CIBqpB4wpKt6K05kjXj6zv36s/qpdCT/wdJBhpayOVBqLF5NpLp3WIiw1PmIxvqalB6QHKjvnLzGKLA==}
+    hasBin: true
+    dev: false
+
+  /@protobuf-ts/runtime-rpc@2.9.3:
+    resolution: {integrity: sha512-WelHpctvZeG8yhbb7tnsrLzotq9xjMCXuGuhJ8qMyEdNoBBEodbXseofAYFTebo2/PN2LzyEq3X6vwr5f8jqTA==}
+    dependencies:
+      '@protobuf-ts/runtime': 2.9.3
+    dev: false
+
+  /@protobuf-ts/runtime@2.9.3:
+    resolution: {integrity: sha512-nivzCpg/qYD0RX2OmHOahJALb8ndjGmUhNBcTJ0BbXoqKwCSM6vYA+vegzS3rhuaPgbyC7Ec8idlnizzUfIRuw==}
     dev: false
 
   /@types/bun@1.0.0:
@@ -61,7 +103,7 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /elysia@0.8.8(typescript@5.3.3):
+  /elysia@0.8.8:
     resolution: {integrity: sha512-uHbq45CZ/NJfGc7IFT+dyuQnmcmOE9XLpZAGuppKgPItotN7GWdJCKEvs0zyLuMc/8EVykQzqaDhi0ZSZpmQLA==}
     peerDependencies:
       '@sinclair/typebox': '>= 0.31.0'
@@ -80,7 +122,6 @@ packages:
       fast-decode-uri-component: 1.0.1
       fast-querystring: 1.1.2
       memoirist: 0.1.4
-      typescript: 5.3.3
     dev: false
 
   /eventemitter3@5.0.1:
@@ -114,6 +155,12 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
     dev: true
+
+  /typescript@3.9.10:
+    resolution: {integrity: sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: false
 
   /typescript@5.3.3:
     resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
