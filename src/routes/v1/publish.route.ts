@@ -4,7 +4,8 @@ import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DocumentDataStruct } from '../../structures/documentStruct';
 
-const basePath = process.env.DOCUMENTS_PATH;
+const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
+
 const maxDocLength = parseInt(process.env.MAX_FILE_LENGHT ?? '0');
 
 export default new Elysia({

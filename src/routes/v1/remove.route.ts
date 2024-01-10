@@ -5,7 +5,7 @@ import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentDataStruct } from '../../structures/documentStruct';
 
-const basePath = process.env.DOCUMENTS_PATH;
+const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',
