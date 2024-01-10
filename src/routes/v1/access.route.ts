@@ -101,7 +101,7 @@ export default new Elysia({
 				}).response;
 			}
 
-			return new Response((doc.rawFileData));
+			return new Response(doc.rawFileData);
 		},
 		{
 			params: t.Object(

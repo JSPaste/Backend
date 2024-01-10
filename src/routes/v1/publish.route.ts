@@ -1,5 +1,4 @@
 import { Elysia, t } from 'elysia';
-import { ErrorSender } from '../../classes/ErrorSender';
 import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DocumentDataStruct } from '../../structures/documentStruct';
