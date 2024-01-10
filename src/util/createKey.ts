@@ -6,9 +6,7 @@ export async function makeId(
 	length: number,
 	chars = characters,
 ): Promise<string> {
-	let result = '';
-
-	while (length--) result += chars[Math.floor(Math.random() * chars.length)];
+	let result = randomChars(length);
 
 	return (await Bun.file(basePath + result).exists())
 		? makeId(length + 1, chars)
@@ -17,4 +15,22 @@ export async function makeId(
 
 export async function createKey(length = 0) {
 	return await makeId(length <= 0 ? 3 : length);
+}
+
+export async function createSecret(chunkLengh = 5) {
+	return (
+		randomChars(chunkLengh) +
+		'-' +
+		randomChars(chunkLengh) +
+		'-' +
+		randomChars(chunkLengh) +
+		'-' +
+		randomChars(chunkLengh)
+	);
+}
+
+function randomChars(length: number, chars = characters) {
+	let result = '';
+	while (length--) result += chars[Math.floor(Math.random() * chars.length)];
+	return result;
 }
