@@ -14,7 +14,7 @@ export async function makeId(
 }
 
 export async function createKey(length = 0) {
-	return await makeId(length <= 0 ? 4 : length);
+	return await makeId(length <= 0 ? 3 : length);
 }
 
 export function createSecret(chunkLength = 5) {
