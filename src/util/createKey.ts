@@ -4,17 +4,17 @@ export const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
 
 export async function makeId(
 	length: number,
-	chars = characters,
+	charsArray = characters,
 ): Promise<string> {
 	let result = randomChars(length);
 
-	return (await Bun.file(basePath + result).exists())
-		? makeId(length + 1, chars)
-		: result;
+	const fileExists = await Bun.file(basePath + result).exists();
+
+	return fileExists ? makeId(length + 1, charsArray) : result;
 }
 
 export async function createKey(length = 0) {
-	return await makeId(length <= 0 ? 3 : length);
+	return await makeId(length <= 0 ? 4 : length);
 }
 
 export async function createSecret(chunkLengh = 5) {
