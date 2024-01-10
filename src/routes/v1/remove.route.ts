@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { Elysia, t } from 'elysia';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
+import { ErrorSender } from '../../classes/ErrorSender';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
@@ -43,6 +44,15 @@ export default new Elysia({
 					examples: ['abc123'],
 				}),
 			}),
+			response: t.Union([
+				t.Object({
+					message: t.String({
+						description:
+							'A message saying that the deletion was successful',
+					}),
+				}),
+				ErrorSender.errorType(),
+			]),
 			detail: { summary: 'Remove document by ID', tags: ['v1'] },
 		},
 	);

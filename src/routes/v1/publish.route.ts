@@ -10,12 +10,14 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ set, body: buffer }) => {
+		async ({ body }) => {
 			const selectedKey = await createKey();
+
+			// TODO: Add secret key & send it
 
 			await Bun.write(
 				basePath + selectedKey,
-				Bun.deflateSync(Buffer.from(buffer as ArrayBuffer)),
+				Bun.deflateSync(Buffer.from(body as ArrayBuffer)),
 			);
 
 			return { key: selectedKey };
@@ -23,5 +25,13 @@ export default new Elysia({
 		{
 			parse: ({ request }) => request.arrayBuffer(),
 			body: t.Any(),
+			response: t.Union([
+				t.Object({
+					key: t.String({
+						description: 'The generated key to access the document',
+					}),
+				}),
+			]),
+			detail: { summary: 'Publish document', tags: ['v1'] },
 		},
 	);

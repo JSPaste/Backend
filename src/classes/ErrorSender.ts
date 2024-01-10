@@ -32,10 +32,13 @@ export class ErrorSender {
 	}
 
 	static errorType() {
-		return t.Object({
-			type: t.String(),
-			message: t.String(),
-			errorCode: t.String(),
-		});
+		return t.Object(
+			{
+				type: t.String({ description: 'The error type' }),
+				message: t.String({ description: 'The error message' }),
+				errorCode: t.String({ description: 'The error code' }),
+			},
+			{ description: 'An object representing an error' },
+		);
 	}
 }
