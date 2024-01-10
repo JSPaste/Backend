@@ -14,7 +14,7 @@ export class MainServer {
 
 	constructor() {
 		this.app = new Elysia();
-		this.port = process.env.PORT ?? 4000;
+		this.port = process.env['PORT'] ?? 4000;
 	}
 
 	async setup() {
