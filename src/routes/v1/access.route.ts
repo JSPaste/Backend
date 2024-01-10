@@ -24,19 +24,18 @@ export default new Elysia({
 
 			const fileExists = await file.exists();
 
-			if (!fileExists)
+			if (!fileExists) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.file_not_found',
 					message: 'The requested file does not exist',
 				}).response;
+			}
 
 			// FIXME: Proper error handling
 
-			const ab = await file.arrayBuffer();
-
 			var doc = DocumentDataStruct.fromBinary(
-				Bun.inflateSync(Buffer.from(ab)),
+				Bun.inflateSync(Buffer.from(await file.arrayBuffer())),
 			);
 
 			if (doc.password != null) {
@@ -47,11 +46,9 @@ export default new Elysia({
 				}).response;
 			}
 
-			const fileData = doc.rawFileData;
-
 			return {
 				key: id,
-				data: new TextDecoder().decode(fileData),
+				data: new TextDecoder().decode(doc.rawFileData),
 			};
 		},
 		{
@@ -84,18 +81,27 @@ export default new Elysia({
 
 			const fileExists = await file.exists();
 
-			if (!fileExists)
+			if (!fileExists) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.file_not_found',
 					message: 'The requested file does not exist',
 				});
+			}
 
-			const ab = await file.arrayBuffer();
+			var doc = DocumentDataStruct.fromBinary(
+				Bun.inflateSync(Buffer.from(await file.arrayBuffer())),
+			);
 
-			const fileData = Bun.inflateSync(Buffer.from(ab));
+			if (doc.password != null) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.file_not_found',
+					message: 'The requested file does not exist',
+				}).response;
+			}
 
-			return fileData;
+			return new Response((doc.rawFileData));
 		},
 		{
 			params: t.Object(
