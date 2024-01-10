@@ -1,43 +1,61 @@
 import { Elysia, t } from 'elysia';
+import { ErrorSender } from '../../classes/ErrorSender';
+import { createKey, createSecret } from '../../util/createKey';
+import { errorSenderPlugin } from '../../plugins/errorSender';
+import { DocumentDataStruct } from '../../structures/documentStruct';
 
 const basePath = process.env.DOCUMENTS_PATH;
-
-const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
-
-async function makeId(length: number, chars = characters): Promise<string> {
-	let result = '';
-
-	while (length--) result += chars[Math.floor(Math.random() * chars.length)];
-
-	return (await Bun.file(basePath + result).exists())
-		? makeId(length + 1, chars)
-		: result;
-}
-
-async function createKey(length = 0) {
-	return await makeId(length <= 0 ? 4 : length);
-}
+const maxDocLength = parseInt(process.env.MAX_FILE_LENGHT ?? '0');
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',
-}).post(
-	'',
-	async ({ set, request, body: buffer }) => {
-		try {
+})
+	.use(errorSenderPlugin)
+	.post(
+		'',
+		async ({ errorSender, body }) => {
 			const selectedKey = await createKey();
 
-			await Bun.write(basePath + selectedKey, buffer as ArrayBuffer);
+			const buffer = Buffer.from(body as ArrayBuffer);
 
-			set.status = 200;
+			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_file_length',
+					message:
+						'The document data its outside of max length or is null',
+				}).response;
+			}
 
-			return { key: selectedKey };
-		} catch (e) {
-			set.status = 500;
-			return e;
-		}
-	},
-	{
-		parse: ({ request }) => request.arrayBuffer(),
-		body: t.Any(),
-	},
-);
+			const selectedSecret = createSecret();
+
+			let newDoc: DocumentDataStruct = {
+				rawFileData: buffer,
+				secret: selectedSecret,
+				deletionTime: BigInt(0),
+			};
+
+			await Bun.write(
+				basePath + selectedKey,
+				Bun.deflateSync(DocumentDataStruct.toBinary(newDoc)),
+			);
+
+			return { key: selectedKey, secret: selectedSecret };
+		},
+		{
+			parse: ({ request }) => request.arrayBuffer(),
+			body: t.Any({ description: 'The file to be uploaded' }),
+			response: t.Union([
+				t.Object({
+					key: t.String({
+						description: 'The generated key to access the document',
+					}),
+					secret: t.String({
+						description:
+							'The generated secret to delete the document',
+					}),
+				}),
+			]),
+			detail: { summary: 'Publish document', tags: ['v1'] },
+		},
+	);

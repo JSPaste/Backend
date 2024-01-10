@@ -160,6 +160,10 @@ dist
 
 .vscode-test
 
+#documents folder
+
+documents/
+
 # yarn v2
 
 .yarn/cache

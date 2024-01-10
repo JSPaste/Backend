@@ -4,7 +4,7 @@ export class DataValidator {
 	}
 
 	static isValidInteger(value: number) {
-		return this.isValidNumber(value) && Number.isInteger(value);
+		return DataValidator.isValidNumber(value) && Number.isInteger(value);
 	}
 
 	static isValidString(value: string) {
@@ -12,15 +12,15 @@ export class DataValidator {
 	}
 
 	static isAlphanumeric(value: string) {
-		return this.isValidString(value) && /^[\w-.=:]+$/.test(value);
+		return DataValidator.isValidString(value) && /^\w+$/.test(value);
 	}
 
 	static isValidStringArray(values: string[]) {
-		return values.every((value) => this.isValidString(value));
+		return values.every((value) => DataValidator.isValidString(value));
 	}
 
 	static isValidStringList(...values: string[]) {
-		return this.isValidStringArray(values);
+		return DataValidator.isValidStringArray(values);
 	}
 
 	static isStringLengthBetweenLimits(
@@ -29,7 +29,7 @@ export class DataValidator {
 		max: number,
 	) {
 		return (
-			this.isValidString(value) &&
+			DataValidator.isValidString(value) &&
 			value.length >= min &&
 			value.length <= max
 		);
@@ -41,7 +41,7 @@ export class DataValidator {
 		values: string[],
 	) {
 		return values.every((value) =>
-			this.isStringLengthBetweenLimits(value, min, max),
+			DataValidator.isStringLengthBetweenLimits(value, min, max),
 		);
 	}
 
@@ -50,6 +50,6 @@ export class DataValidator {
 		max: number,
 		...values: string[]
 	) {
-		return this.isStringArrayLengthBetweenLimits(min, max, values);
+		return DataValidator.isStringArrayLengthBetweenLimits(min, max, values);
 	}
 }
