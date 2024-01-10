@@ -3,7 +3,8 @@ import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DocumentDataStruct } from '../../structures/documentStruct';
 
-const basePath = process.env.DOCUMENTS_PATH;
+const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
+
 const maxDocLength = parseInt(process.env.MAX_FILE_LENGHT ?? '0');
 
 export default new Elysia({
@@ -12,10 +13,10 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ errorSender, body }) => {
+		async ({ errorSender, request }) => {
 			const selectedKey = await createKey();
 
-			const buffer = Buffer.from(body as ArrayBuffer);
+			const buffer = Buffer.from(await request.arrayBuffer());
 
 			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
 				return errorSender.sendError(400, {
@@ -42,7 +43,7 @@ export default new Elysia({
 			return { key: selectedKey, secret: selectedSecret };
 		},
 		{
-			parse: ({ request }) => request.arrayBuffer(),
+			parse: ({ request }) => null,
 			body: t.Any({ description: 'The file to be uploaded' }),
 			response: t.Union([
 				t.Object({
