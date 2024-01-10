@@ -13,7 +13,7 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.delete(
 		':id',
-		async ({ errorSender, params: { id } }) => {
+		async ({ errorSender, request, params: { id } }) => {
 			if (!DataValidator.isAlphanumeric(id))
 				return errorSender.sendError(400, {
 					type: 'error',
@@ -27,12 +27,25 @@ export default new Elysia({
 
 			// FIXME: Require a secret to delete the document
 
-			if (!fileExists)
+			if (!fileExists) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.file_not_found',
 					message: 'The requested file does not exist',
 				}).response;
+			}
+
+			var doc = DocumentDataStruct.fromBinary(
+				Bun.inflateSync(Buffer.from(await file.arrayBuffer())),
+			);
+
+			if (doc.secret != request.headers.get('secret')) {
+				return errorSender.sendError(401, {
+					type: 'error',
+					errorCode: 'jsp.invalid_secret',
+					message: 'The secret is not correct',
+				}).response;
+			}
 
 			await fs.unlink(basePath + id);
 
