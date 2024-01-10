@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
-import { DocumentDataStruct } from '../../structures/documentStruct';
+import { ReadDocument } from '../../util/documentReader';
 
 const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
 
@@ -34,9 +34,7 @@ export default new Elysia({
 
 			// FIXME: Proper error handling
 
-			var doc = DocumentDataStruct.fromBinary(
-				Bun.inflateSync(Buffer.from(await file.arrayBuffer())),
-			);
+			let doc = await ReadDocument(file);
 
 			if (doc.password != null) {
 				return errorSender.sendError(400, {
@@ -74,6 +72,7 @@ export default new Elysia({
 			detail: { summary: 'Get document by ID', tags: ['v1'] },
 		},
 	)
+
 	.get(
 		':id/raw',
 		async ({ errorSender, params: { id } }) => {
@@ -89,9 +88,7 @@ export default new Elysia({
 				});
 			}
 
-			var doc = DocumentDataStruct.fromBinary(
-				Bun.inflateSync(Buffer.from(await file.arrayBuffer())),
-			);
+			let doc = await ReadDocument(file);
 
 			if (doc.password != null) {
 				return errorSender.sendError(400, {
@@ -101,7 +98,7 @@ export default new Elysia({
 				}).response;
 			}
 
-			return new Response((doc.rawFileData));
+			return new Response(doc.rawFileData);
 		},
 		{
 			params: t.Object(

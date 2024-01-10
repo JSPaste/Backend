@@ -3,6 +3,7 @@ import { ErrorSender } from '../../classes/ErrorSender';
 import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DocumentDataStruct } from '../../structures/documentStruct';
+import { WriteDocument } from '../../util/documentWriter';
 
 const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
 
@@ -36,10 +37,7 @@ export default new Elysia({
 				deletionTime: BigInt(0),
 			};
 
-			await Bun.write(
-				basePath + selectedKey,
-				Bun.deflateSync(DocumentDataStruct.toBinary(newDoc)),
-			);
+			await WriteDocument(basePath + selectedKey, newDoc);
 
 			return { key: selectedKey, secret: selectedSecret };
 		},
