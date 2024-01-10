@@ -1,4 +1,4 @@
-import { type Context, error } from 'elysia';
+import { type Context, error, t } from 'elysia';
 
 interface IError {
 	type: 'error';
@@ -29,5 +29,13 @@ export class ErrorSender {
 			'type' in (err.response as IError) &&
 			(err.response as IError).type === 'error'
 		);
+	}
+
+	static errorType() {
+		return t.Object({
+			type: t.String(),
+			message: t.String(),
+			errorCode: t.String(),
+		});
 	}
 }

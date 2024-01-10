@@ -1,22 +1,30 @@
 import { Elysia, t } from 'elysia';
+import { errorSenderPlugin } from '../../plugins/errorSender';
+import { ErrorSender } from '../../classes/ErrorSender';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
 export default new Elysia({
 	name: 'routes:v1:documents:access',
 })
+	.use(errorSenderPlugin)
 	.get(
 		':id',
-		async ({ params: { id } }) => {
+		async ({ errorSender, params: { id } }) => {
 			const file = Bun.file(basePath + id);
 
-			if (!(await file.exists())) {
-				return { error: 'The file does not exists' };
-			}
+			const fileExists = await file.exists();
 
-			const fileData = Bun.inflateSync(
-				Buffer.from(await file.arrayBuffer()),
-			);
+			if (!fileExists)
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.file_not_found',
+					message: 'The requested file does not exist',
+				}).response;
+
+			const ab = await file.arrayBuffer();
+
+			const fileData = Bun.inflateSync(Buffer.from(ab));
 
 			return {
 				key: id,
@@ -30,36 +38,41 @@ export default new Elysia({
 					examples: ['abc123'],
 				}),
 			}),
-			response: t.Object({
-				key: t.String({
-					description: 'The key of the document',
-					examples: ['abc123'],
+			response: t.Union([
+				t.Object({
+					key: t.String({
+						description: 'The key of the document',
+						examples: ['abc123'],
+					}),
+					data: t.String({
+						description: 'The document',
+						examples: ['Hello world'],
+					}),
 				}),
-				data: t.Any({
-					description: 'The document',
-					examples: ['Hello world'],
-				}),
-			}),
+				ErrorSender.errorType(),
+			]),
 			detail: { summary: 'Get document by ID', tags: ['v1'] },
 		},
 	)
 	.get(
 		':id/raw',
-		async ({ params: { id } }) => {
+		async ({ errorSender, params: { id } }) => {
 			const file = Bun.file(basePath + id);
 
-			if (!(await file.exists())) {
-				return { error: 'The file does not exists' };
-			}
+			const fileExists = await file.exists();
 
-			const fileData = Bun.inflateSync(
-				Buffer.from(await file.arrayBuffer()),
-			);
+			if (!fileExists)
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.file_not_found',
+					message: 'The requested file does not exist',
+				});
 
-			return {
-				key: id,
-				data: fileData,
-			};
+			const ab = await file.arrayBuffer();
+
+			const fileData = Bun.inflateSync(Buffer.from(ab));
+
+			return fileData;
 		},
 		{
 			params: t.Object(
@@ -74,7 +87,7 @@ export default new Elysia({
 					examples: [{ id: 'abc123' }],
 				},
 			),
-			response: t.String({
+			response: t.Any({
 				description: 'The raw document',
 				examples: ['Hello world'],
 			}),

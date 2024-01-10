@@ -1,38 +1,38 @@
 import { Elysia, t } from 'elysia';
-import fs from 'node:fs';
-
-import { bundlerModuleNameResolver, createAbstractBuilder } from 'typescript';
+import fs from 'node:fs/promises';
+import { errorSenderPlugin } from '../../plugins/errorSender';
 
 const basePath = process.env.DOCUMENTS_PATH;
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',
-}).delete(
-	':id',
-	async ({ set, params: { id } }) => {
-		if (!(await Bun.file(basePath + id).exists())) {
-			set.status = 500;
+})
+	.use(errorSenderPlugin)
+	.delete(
+		':id',
+		async ({ errorSender, params: { id } }) => {
+			const file = Bun.file(basePath + id);
 
-			return {
-				error: 'The file does not exists',
-			};
-		}
+			const fileExists = await file.exists();
 
-		try {
-			fs.unlinkSync(basePath + id);
+			if (!fileExists)
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.file_not_found',
+					message: 'The requested file does not exist',
+				}).response;
+
+			await fs.unlink(basePath + id);
 
 			return { message: 'File deleted successfully' };
-		} catch (e) {
-			return e;
-		}
-	},
-	{
-		params: t.Object({
-			id: t.String({
-				description: 'The document ID',
-				examples: ['abc123'],
+		},
+		{
+			params: t.Object({
+				id: t.String({
+					description: 'The document ID',
+					examples: ['abc123'],
+				}),
 			}),
-		}),
-		detail: { summary: 'Remove document by ID', tags: ['v1'] },
-	},
-);
+			detail: { summary: 'Remove document by ID', tags: ['v1'] },
+		},
+	);
