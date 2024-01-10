@@ -16,9 +16,6 @@ export default new Elysia({
 		async ({ errorSender, body }) => {
 			const selectedKey = await createKey();
 
-			// FIXME: Check body type
-			// TODO: Add secret key & send it
-
 			const buffer = Buffer.from(body as ArrayBuffer);
 
 			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
