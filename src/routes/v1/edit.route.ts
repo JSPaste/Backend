@@ -1,21 +1,20 @@
 import fs from 'node:fs/promises';
 import { Elysia, t } from 'elysia';
-
+import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-
-import { errorSenderPlugin } from '../../plugins/errorSender';
 import { ReadDocument } from '../../util/documentReader';
 
 import { basePath } from '../../index';
+import { maxDocLength } from '../../index';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',
 })
 	.use(errorSenderPlugin)
-	.delete(
+	.put(
 		':id',
-		async ({ errorSender, request, params: { id } }) => {
+		async ({ errorSender, request, query, body, params: { id } }) => {
 			if (!DataValidator.isAlphanumeric(id))
 				return errorSender.sendError(400, {
 					type: 'error',
@@ -35,6 +34,17 @@ export default new Elysia({
 				}).response;
 			}
 
+			const buffer = Buffer.from(body as ArrayBuffer);
+
+			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_file_length',
+					message:
+						'The document data its outside of max length or is null',
+				}).response;
+			}
+
 			let doc = await ReadDocument(file);
 
 			if (doc.secret != request.headers.get('secret')) {
@@ -45,11 +55,16 @@ export default new Elysia({
 				}).response;
 			}
 
-			await fs.unlink(basePath + id);
+			doc.rawFileData = buffer;
 
-			return { message: 'File deleted successfully' };
+			await WriteDocument(basePath + id, doc);
+
+			return { message: 'File updated successfully' };
 		},
 		{
+			type: 'arrayBuffer',
+			body: t.Any({ description: 'The file to be updated' }),
+
 			params: t.Object({
 				id: t.String({
 					description: 'The document ID',

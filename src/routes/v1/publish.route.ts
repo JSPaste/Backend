@@ -1,13 +1,12 @@
 import { Elysia, t } from 'elysia';
-import { ErrorSender } from '../../classes/ErrorSender';
 import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
+import { DataValidator } from '../../classes/DataValidator';
 import { DocumentDataStruct } from '../../structures/documentStruct';
 import { WriteDocument } from '../../util/documentWriter';
 
-const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
-
-const maxDocLength = parseInt(process.env.MAX_FILE_LENGHT ?? '0');
+import { basePath } from '../../index';
+import { maxDocLength } from '../../index';
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',
@@ -15,9 +14,7 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ errorSender, request, body }) => {
-			const selectedKey = await createKey();
-
+		async ({ errorSender, request, query, body }) => {
 			const buffer = Buffer.from(body);
 
 			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
@@ -29,12 +26,30 @@ export default new Elysia({
 				}).response;
 			}
 
-			const selectedSecret = createSecret();
+			const selectedKey = await createKey();
+
+			const selectedSecret =
+				request.headers.get('secret') ?? createSecret();
+
+			if (
+				DataValidator.isStringLengthBetweenLimits(
+					selectedSecret,
+					1,
+					200,
+				)
+			) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_secret',
+					message: 'The provided secret is too big or is null',
+				}).response;
+			}
 
 			let newDoc: DocumentDataStruct = {
 				rawFileData: buffer,
 				secret: selectedSecret,
 				deletionTime: BigInt(0),
+				password: request.headers.get('password') ?? query['password'],
 			};
 
 			await WriteDocument(basePath + selectedKey, newDoc);

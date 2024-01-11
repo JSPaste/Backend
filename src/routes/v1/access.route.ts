@@ -4,7 +4,7 @@ import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ReadDocument } from '../../util/documentReader';
 
-const basePath = process.env.DOCUMENTS_PATH ?? 'documents';
+import { basePath } from '../../index';
 
 export default new Elysia({
 	name: 'routes:v1:documents:access',
@@ -12,8 +12,8 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.get(
 		':id',
-		async ({ errorSender, request, query, params: { id } }) =>
-			await HandleReq(errorSender, request, query, id, false),
+		async ({ set, errorSender, request, query, params: { id } }) =>
+			await HandleReq(set, errorSender, request, query, id, false),
 		{
 			params: t.Object({
 				id: t.String({
@@ -40,8 +40,9 @@ export default new Elysia({
 
 	.get(
 		':id/raw',
-		async ({ errorSender, request, query, params: { id } }) =>
-			await HandleReq(errorSender, request, query, id, true),
+		async ({ set, errorSender, request, query, params: { id } }) => {
+			return await HandleReq(set, errorSender, request, query, id, true);
+		},
 		{
 			params: t.Object(
 				{
@@ -67,6 +68,7 @@ export default new Elysia({
 	);
 
 async function HandleReq(
+	set: any,
 	errorSender: any,
 	request: any,
 	query: any,
@@ -106,7 +108,7 @@ async function HandleReq(
 		}).response;
 	}
 
-	console.log(raw);
+	set.headers['Content-Type'] = 'text/html';
 
 	return raw
 		? new Response(doc.rawFileData)

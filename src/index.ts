@@ -1,7 +1,8 @@
 import { MainServer } from './classes/MainServer';
 import fs from 'fs';
 
-const basePath = process.env.DOCUMENTS_PATH ?? 'documents/';
+export const basePath = process.env.DOCUMENTS_PATH ?? 'documents/';
+export const maxDocLength = parseInt(process.env.MAX_FILE_LENGHT ?? '50000');
 
 if (!fs.existsSync(basePath)) fs.mkdirSync(basePath);
 
