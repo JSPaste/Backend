@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
-for i in $(find src/structures -name '*.proto'); do
-    echo "Compiling '${i%%.*}'"
-    npx protoc --proto_path="./src/structures" --ts_out="./src/structures" "${i}"
-done
+find src/structures -name '*.proto' -exec sh -c '
+    echo "Compiling \"${1%.*}\""
+    bunx protoc --proto_path="./src/structures" --ts_out="./src/structures" "$1"
+' sh {} \;
