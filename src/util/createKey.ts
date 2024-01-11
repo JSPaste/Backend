@@ -1,4 +1,4 @@
-export const basePath = process.env['DOCUMENTS_PATH'];
+import { basePath } from "../constants/config";
 
 export const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
 

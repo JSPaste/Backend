@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia';
 import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
+import { DataValidator } from '../../classes/DataValidator';
+import { basePath, maxDocLength } from '../../constants/config';
 import { DocumentDataStruct } from '../../structures/documentStruct';
-
-const basePath = process.env['DOCUMENTS_PATH'] ?? 'documents';
-
-const maxDocLength = parseInt(process.env['MAX_FILE_LENGHT'] ?? '0');
+import { DocumentManager } from '../../classes/DocumentManager';
+import { ErrorSender } from '../../classes/ErrorSender';
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',
@@ -13,12 +13,10 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ errorSender, request }) => {
-			const selectedKey = await createKey();
+		async ({ errorSender, request, query, body }) => {
+			const buffer = Buffer.from(body as ArrayBuffer);
 
-			const buffer = Buffer.from(await request.arrayBuffer());
-
-			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
+			if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength)) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_file_length',
@@ -27,23 +25,33 @@ export default new Elysia({
 				}).response;
 			}
 
-			const selectedSecret = createSecret();
+			const selectedKey = await createKey();
 
-			let newDoc: DocumentDataStruct = {
+			const selectedSecret =
+				request.headers.get('secret') ?? createSecret();
+
+			console.log(selectedSecret);
+			if (!DataValidator.isLengthBetweenLimits(selectedSecret, 1, 200)) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_secret',
+					message: 'The provided secret is too big or is null',
+				}).response;
+			}
+
+			const newDoc: DocumentDataStruct = {
 				rawFileData: buffer,
 				secret: selectedSecret,
 				deletionTime: BigInt(0),
+				password: request.headers.get('password') ?? query['password'],
 			};
 
-			await Bun.write(
-				basePath + selectedKey,
-				Bun.deflateSync(DocumentDataStruct.toBinary(newDoc)),
-			);
+			await DocumentManager.write(basePath + selectedKey, newDoc);
 
 			return { key: selectedKey, secret: selectedSecret };
 		},
 		{
-			parse: ({ request }) => null,
+			type: 'arrayBuffer',
 			body: t.Any({ description: 'The file to be uploaded' }),
 			response: t.Union([
 				t.Object({
@@ -55,7 +63,9 @@ export default new Elysia({
 							'The generated secret to delete the document',
 					}),
 				}),
+				ErrorSender.errorType(),
 			]),
+
 			detail: { summary: 'Publish document', tags: ['v1'] },
 		},
 	);

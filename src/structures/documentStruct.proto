@@ -9,4 +9,6 @@ message DocumentDataStruct {
   string secret = 2;
   int64 deletion_time = 3;
   optional string password = 4;
+
+  reserved 5 to 10;
 }
