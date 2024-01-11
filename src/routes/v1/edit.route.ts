@@ -4,6 +4,7 @@ import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { ReadDocument } from '../../util/documentReader';
+import { WriteDocument } from '../../util/documentWriter';
 
 import { basePath } from '../../index';
 import { maxDocLength } from '../../index';
