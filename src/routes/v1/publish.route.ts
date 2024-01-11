@@ -1,8 +1,11 @@
 import { Elysia, t } from 'elysia';
-import { createKey } from '../../util/createKey';
+import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
-
-const basePath = process.env.DOCUMENTS_PATH;
+import { DataValidator } from '../../classes/DataValidator';
+import { basePath, maxDocLength } from '../../constants/config';
+import { DocumentDataStruct } from '../../structures/documentStruct';
+import { DocumentManager } from '../../classes/DocumentManager';
+import { ErrorSender } from '../../classes/ErrorSender';
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',
@@ -10,29 +13,59 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ body }) => {
+		async ({ errorSender, request, query, body }) => {
+			const buffer = Buffer.from(body as ArrayBuffer);
+
+			if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength)) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_file_length',
+					message:
+						'The document data its outside of max length or is null',
+				}).response;
+			}
+
 			const selectedKey = await createKey();
 
-			// FIXME: Check body type
-			// TODO: Add secret key & send it
+			const selectedSecret =
+				request.headers.get('secret') ?? createSecret();
 
-			await Bun.write(
-				basePath + selectedKey,
-				Bun.deflateSync(Buffer.from(body as ArrayBuffer)),
-			);
+			console.log(selectedSecret);
+			if (!DataValidator.isLengthBetweenLimits(selectedSecret, 1, 200)) {
+				return errorSender.sendError(400, {
+					type: 'error',
+					errorCode: 'jsp.invalid_secret',
+					message: 'The provided secret is too big or is null',
+				}).response;
+			}
 
-			return { key: selectedKey };
+			const newDoc: DocumentDataStruct = {
+				rawFileData: buffer,
+				secret: selectedSecret,
+				deletionTime: BigInt(0),
+				password: request.headers.get('password') ?? query['password'],
+			};
+
+			await DocumentManager.write(basePath + selectedKey, newDoc);
+
+			return { key: selectedKey, secret: selectedSecret };
 		},
 		{
-			parse: ({ request }) => request.arrayBuffer(),
+			type: 'arrayBuffer',
 			body: t.Any({ description: 'The file to be uploaded' }),
 			response: t.Union([
 				t.Object({
 					key: t.String({
 						description: 'The generated key to access the document',
 					}),
+					secret: t.String({
+						description:
+							'The generated secret to delete the document',
+					}),
 				}),
+				ErrorSender.errorType(),
 			]),
+
 			detail: { summary: 'Publish document', tags: ['v1'] },
 		},
 	);

@@ -1,11 +1,14 @@
+//npx protoc --proto_path=".\src\structures" --ts_out=".\src\structures" "documentStruct.proto" 
+
 syntax = "proto3";
 
-message DocumentData {
-  string secret = 1;
-  string password = 2;
-  int64 deletion_time = 3; //Timespan in seconds
+option optimize_for = SPEED;
 
-  reserved 4 to 13;
+message DocumentDataStruct {
+  bytes raw_file_data = 1;
+  string secret = 2;
+  int64 deletion_time = 3;
+  optional string password = 4;
 
-  bytes raw_file_data = 14;
+  reserved 5 to 10;
 }
