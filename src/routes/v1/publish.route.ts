@@ -2,11 +2,10 @@ import { Elysia, t } from 'elysia';
 import { createKey, createSecret } from '../../util/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
+import { basePath, maxDocLength } from '../../constants/config';
 import { DocumentDataStruct } from '../../structures/documentStruct';
-import { WriteDocument } from '../../util/documentWriter';
-
-import { basePath } from '../../index';
-import { maxDocLength } from '../../index';
+import { DocumentManager } from '../../classes/DocumentManager';
+import { ErrorSender } from '../../classes/ErrorSender';
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',
@@ -40,21 +39,20 @@ export default new Elysia({
 				}).response;
 			}
 
-			let newDoc: DocumentDataStruct = {
+			const newDoc: DocumentDataStruct = {
 				rawFileData: buffer,
 				secret: selectedSecret,
 				deletionTime: BigInt(0),
 				password: request.headers.get('password') ?? query['password'],
 			};
 
-			await WriteDocument(basePath + selectedKey, newDoc);
+			await DocumentManager.write(basePath + selectedKey, newDoc);
 
 			return { key: selectedKey, secret: selectedSecret };
 		},
 		{
 			type: 'arrayBuffer',
 			body: t.Any({ description: 'The file to be uploaded' }),
-
 			response: t.Union([
 				t.Object({
 					key: t.String({
@@ -65,7 +63,9 @@ export default new Elysia({
 							'The generated secret to delete the document',
 					}),
 				}),
+				ErrorSender.errorType(),
 			]),
+
 			detail: { summary: 'Publish document', tags: ['v1'] },
 		},
 	);

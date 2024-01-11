@@ -1,13 +1,9 @@
-import fs from 'node:fs/promises';
 import { Elysia, t } from 'elysia';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { ReadDocument } from '../../util/documentReader';
-import { WriteDocument } from '../../util/documentWriter';
-
-import { basePath } from '../../index';
-import { maxDocLength } from '../../index';
+import { basePath, maxDocLength } from '../../constants/config';
+import { DocumentManager } from '../../classes/DocumentManager';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',
@@ -46,7 +42,7 @@ export default new Elysia({
 				}).response;
 			}
 
-			let doc = await ReadDocument(file);
+			const doc = await DocumentManager.read(file);
 
 			if (doc.secret != request.headers.get('secret')) {
 				return errorSender.sendError(401, {
@@ -58,7 +54,7 @@ export default new Elysia({
 
 			doc.rawFileData = buffer;
 
-			await WriteDocument(basePath + id, doc);
+			await DocumentManager.write(basePath + id, doc);
 
 			return { message: 'File updated successfully' };
 		},

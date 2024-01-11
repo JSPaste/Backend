@@ -2,9 +2,8 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
-import { ReadDocument } from '../../util/documentReader';
-
-import { basePath } from '../../index';
+import { basePath } from '../../constants/config';
+import { DocumentManager } from '../../classes/DocumentManager';
 
 export default new Elysia({
 	name: 'routes:v1:documents:access',
@@ -96,7 +95,7 @@ async function HandleReq(
 
 	// FIXME: Proper error handling
 
-	let doc = await ReadDocument(file);
+	const doc = await DocumentManager.read(file);
 
 	if (
 		doc.password != (request.headers.get('password') ?? query['password'])

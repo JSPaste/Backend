@@ -3,11 +3,9 @@ import { Elysia, t } from 'elysia';
 
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-
 import { errorSenderPlugin } from '../../plugins/errorSender';
-import { ReadDocument } from '../../util/documentReader';
-
-import { basePath } from '../../index';
+import { DocumentManager } from '../../classes/DocumentManager';
+import { basePath } from '../../constants/config';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',
@@ -35,7 +33,7 @@ export default new Elysia({
 				}).response;
 			}
 
-			let doc = await ReadDocument(file);
+			const doc = await DocumentManager.read(file);
 
 			if (doc.secret != request.headers.get('secret')) {
 				return errorSender.sendError(401, {
