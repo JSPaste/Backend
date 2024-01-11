@@ -12,43 +12,8 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.get(
 		':id',
-		async ({ errorSender, params: { id } }) => {
-			if (!DataValidator.isAlphanumeric(id))
-				return errorSender.sendError(400, {
-					type: 'error',
-					errorCode: 'jsp.invalid_input',
-					message: 'Invalid ID provided',
-				}).response;
-
-			const file = Bun.file(basePath + id);
-
-			const fileExists = await file.exists();
-
-			if (!fileExists) {
-				return errorSender.sendError(400, {
-					type: 'error',
-					errorCode: 'jsp.file_not_found',
-					message: 'The requested file does not exist',
-				}).response;
-			}
-
-			// FIXME: Proper error handling
-
-			let doc = await ReadDocument(file);
-
-			if (doc.password != null) {
-				return errorSender.sendError(400, {
-					type: 'error',
-					errorCode: 'jsp.file_not_found',
-					message: 'The requested file does not exist',
-				}).response;
-			}
-
-			return {
-				key: id,
-				data: new TextDecoder().decode(doc.rawFileData),
-			};
-		},
+		async ({ errorSender, request, query, params: { id } }) =>
+			await HandleReq(errorSender, request, query, id, false),
 		{
 			params: t.Object({
 				id: t.String({
@@ -75,31 +40,8 @@ export default new Elysia({
 
 	.get(
 		':id/raw',
-		async ({ errorSender, params: { id } }) => {
-			const file = Bun.file(basePath + id);
-
-			const fileExists = await file.exists();
-
-			if (!fileExists) {
-				return errorSender.sendError(400, {
-					type: 'error',
-					errorCode: 'jsp.file_not_found',
-					message: 'The requested file does not exist',
-				});
-			}
-
-			let doc = await ReadDocument(file);
-
-			if (doc.password != null) {
-				return errorSender.sendError(400, {
-					type: 'error',
-					errorCode: 'jsp.file_not_found',
-					message: 'The requested file does not exist',
-				}).response;
-			}
-
-			return new Response(doc.rawFileData);
-		},
+		async ({ errorSender, request, query, params: { id } }) =>
+			await HandleReq(errorSender, request, query, id, true),
 		{
 			params: t.Object(
 				{
@@ -123,3 +65,53 @@ export default new Elysia({
 			},
 		},
 	);
+
+async function HandleReq(
+	errorSender: any,
+	request: any,
+	query: any,
+	id: string,
+	raw: boolean,
+): Promise<any> {
+	if (!DataValidator.isAlphanumeric(id))
+		return errorSender.sendError(400, {
+			type: 'error',
+			errorCode: 'jsp.invalid_input',
+			message: 'Invalid ID provided',
+		}).response;
+
+	const file = Bun.file(basePath + id);
+
+	const fileExists = await file.exists();
+
+	if (!fileExists) {
+		return errorSender.sendError(400, {
+			type: 'error',
+			errorCode: 'jsp.file_not_found',
+			message: 'The requested file does not exist',
+		}).response;
+	}
+
+	// FIXME: Proper error handling
+
+	let doc = await ReadDocument(file);
+
+	if (
+		doc.password != (request.headers.get('password') ?? query['password'])
+	) {
+		return errorSender.sendError(400, {
+			type: 'error',
+			errorCode: 'jsp.file_not_found',
+			message: 'The requested file does not exist',
+		}).response;
+	}
+
+	console.log(raw);
+
+	return raw
+		? new Response(doc.rawFileData)
+		: {
+				key: id,
+				data: new TextDecoder().decode(doc.rawFileData),
+			};
+}
