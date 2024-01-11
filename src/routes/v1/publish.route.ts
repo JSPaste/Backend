@@ -15,9 +15,9 @@ export default new Elysia({
 	.post(
 		'',
 		async ({ errorSender, request, query, body }) => {
-			const buffer = Buffer.from(body);
+			const buffer = Buffer.from(body as ArrayBuffer);
 
-			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
+			if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength)) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_file_length',
@@ -31,13 +31,8 @@ export default new Elysia({
 			const selectedSecret =
 				request.headers.get('secret') ?? createSecret();
 
-			if (
-				DataValidator.isStringLengthBetweenLimits(
-					selectedSecret,
-					1,
-					200,
-				)
-			) {
+			console.log(selectedSecret);
+			if (!DataValidator.isLengthBetweenLimits(selectedSecret, 1, 200)) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_secret',

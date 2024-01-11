@@ -37,7 +37,7 @@ export default new Elysia({
 
 			const buffer = Buffer.from(body as ArrayBuffer);
 
-			if (buffer.length <= 0 || buffer.length >= maxDocLength) {
+			if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength)) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_file_length',

@@ -35,6 +35,10 @@ export class DataValidator {
 		);
 	}
 
+	static isLengthBetweenLimits(value: any, min: number, max: number) {
+		return value.length >= min && value.length <= max;
+	}
+
 	static isStringArrayLengthBetweenLimits(
 		min: number,
 		max: number,
