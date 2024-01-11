@@ -1,13 +1,15 @@
 {
-	"private": true,
+	"$schema": "https://json.schemastore.org/package.json",
 	"name": "jspaste-backend",
+	"private": true,
 	"license": "EUPL-1.2-or-later",
-	"module": "src/index.ts",
 	"type": "module",
+	"module": "src/index.ts",
 	"scripts": {
-		"start": "NODE_ENV=production bun ./src/index.ts",
 		"dev": "NODE_ENV=development bun --hot ./src/index.ts",
-		"lint": "bun prettier --write ."
+		"fix": "bun run prettier",
+		"prettier": "bunx prettier . --write",
+		"start": "NODE_ENV=production bun ./src/index.ts"
 	},
 	"dependencies": {
 		"@elysiajs/cors": "^0.8.0",
@@ -15,13 +17,13 @@
 		"@protobuf-ts/plugin": "^2.9.3",
 		"@protobuf-ts/protoc": "^2.9.3",
 		"@protobuf-ts/runtime": "^2.9.3",
-		"elysia": "^0.8.8"
-	},
-	"peerDependencies": {
-		"typescript": "~5.3.0"
+		"elysia": "^0.8.9"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
-		"prettier": "^3.1.1"
+		"prettier": "^3.1.1",
+		"prettier-plugin-packagejson": "^2.4.9",
+		"prettier-plugin-jsdoc": "^1.3.0",
+		"typescript": "~5.3.3"
 	}
 }
