@@ -5,7 +5,7 @@ import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DocumentManager } from '../../classes/DocumentManager';
-import { basePath } from '../../constants/config';
+import { basePath } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',

@@ -1,4 +1,4 @@
-import { basePath } from "../constants/config";
+import { basePath } from './constants.ts';
 
 export const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
 

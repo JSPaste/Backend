@@ -2,8 +2,8 @@ import { Elysia, t } from 'elysia';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { basePath, maxDocLength } from '../../constants/config';
 import { DocumentManager } from '../../classes/DocumentManager';
+import { basePath, maxDocLength } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove',

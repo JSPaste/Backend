@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia';
-import { createKey, createSecret } from '../../util/createKey';
+import { createKey, createSecret } from '../../utils/createKey';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
-import { basePath, maxDocLength } from '../../constants/config';
 import { DocumentDataStruct } from '../../structures/documentStruct';
 import { DocumentManager } from '../../classes/DocumentManager';
 import { ErrorSender } from '../../classes/ErrorSender';
+import { basePath, maxDocLength } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:publish',

@@ -2,8 +2,8 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
-import { basePath } from '../../constants/config';
 import { DocumentManager } from '../../classes/DocumentManager';
+import { basePath } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:access',
