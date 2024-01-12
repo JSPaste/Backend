@@ -4,11 +4,12 @@
 //
 //npx protoc --proto_path=".\src\structures" --ts_out=".\src\structures" "documentStruct.proto"
 //
-import type { BinaryWriteOptions, UnknownFieldHandler } from "@protobuf-ts/runtime";
-import type { IBinaryWriter } from "@protobuf-ts/runtime";
-import { WireType } from "@protobuf-ts/runtime";
-import type { BinaryReadOptions } from "@protobuf-ts/runtime";
-import type { IBinaryReader } from "@protobuf-ts/runtime";
+import type { BinaryWriteOptions } from '@protobuf-ts/runtime';
+import type { IBinaryWriter } from '@protobuf-ts/runtime';
+import { WireType } from '@protobuf-ts/runtime';
+import type { BinaryReadOptions } from '@protobuf-ts/runtime';
+import type { IBinaryReader } from '@protobuf-ts/runtime';
+import { UnknownFieldHandler } from '@protobuf-ts/runtime';
 import type { PartialMessage } from '@protobuf-ts/runtime';
 import { reflectionMergePartial } from '@protobuf-ts/runtime';
 import { MessageType } from '@protobuf-ts/runtime';
