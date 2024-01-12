@@ -32,9 +32,9 @@ export class ErrorSender {
 			{
 				type: t.String({ description: 'The error type' }),
 				message: t.String({ description: 'The error message' }),
-				errorCode: t.String({ description: 'The error code' }),
+				errorCode: t.String({ description: 'The error code' })
 			},
-			{ description: 'An object representing an error' },
+			{ description: 'An object representing an error' }
 		);
 	}
 

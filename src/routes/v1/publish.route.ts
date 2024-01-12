@@ -8,7 +8,7 @@ import { ErrorSender } from '../../classes/ErrorSender';
 import { basePath, maxDocLength } from '../../utils/constants.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:publish',
+	name: 'routes:v1:documents:publish'
 })
 	.use(errorSenderPlugin)
 	.post(
@@ -20,22 +20,20 @@ export default new Elysia({
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_file_length',
-					message:
-						'The document data its outside of max length or is null',
+					message: 'The document data its outside of max length or is null'
 				}).response;
 			}
 
 			const selectedKey = await createKey();
 
-			const selectedSecret =
-				request.headers.get('secret') ?? createSecret();
+			const selectedSecret = request.headers.get('secret') ?? createSecret();
 
 			console.log(selectedSecret);
 			if (!DataValidator.isLengthBetweenLimits(selectedSecret, 1, 200)) {
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_secret',
-					message: 'The provided secret is too big or is null',
+					message: 'The provided secret is too big or is null'
 				}).response;
 			}
 
@@ -43,7 +41,7 @@ export default new Elysia({
 				rawFileData: buffer,
 				secret: selectedSecret,
 				deletionTime: BigInt(0),
-				password: request.headers.get('password') ?? query['password'],
+				password: request.headers.get('password') ?? query['password']
 			};
 
 			await DocumentManager.write(basePath + selectedKey, newDoc);
@@ -56,16 +54,15 @@ export default new Elysia({
 			response: t.Union([
 				t.Object({
 					key: t.String({
-						description: 'The generated key to access the document',
+						description: 'The generated key to access the document'
 					}),
 					secret: t.String({
-						description:
-							'The generated secret to delete the document',
-					}),
+						description: 'The generated secret to delete the document'
+					})
 				}),
-				ErrorSender.errorType(),
+				ErrorSender.errorType()
 			]),
 
-			detail: { summary: 'Publish document', tags: ['v1'] },
-		},
+			detail: { summary: 'Publish document', tags: ['v1'] }
+		}
 	);
