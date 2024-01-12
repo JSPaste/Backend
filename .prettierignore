@@ -1,2 +1,6 @@
-node_modules/
-pnpm-lock.yaml
+**/documents/
+**/node_modules/
+**/src/structures/
+.prettierrc.json
+LICENSE
+tsconfig.json

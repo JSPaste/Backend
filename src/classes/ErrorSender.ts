@@ -13,10 +13,6 @@ export class ErrorSender {
 		this.context = context;
 	}
 
-	sendError(code: number, err: IError) {
-		return error(code, err);
-	}
-
 	static isError(error?: IError) {
 		return error?.type === 'error';
 	}
@@ -40,5 +36,9 @@ export class ErrorSender {
 			},
 			{ description: 'An object representing an error' },
 		);
+	}
+
+	sendError(code: number, err: IError) {
+		return error(code, err);
 	}
 }
