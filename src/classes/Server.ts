@@ -71,7 +71,7 @@ export class Server {
 
 		for (const apiVersion of apiVersions) {
 			const isLatestVersion = i === apiVersions.length - 1;
-			const glob = new Bun.Glob(`${apiVersion}/**/*.route.ts`);
+			const glob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
 
 			const routes = await Array.fromAsync(glob.scan({ cwd: root }));
 
@@ -86,7 +86,7 @@ export class Server {
 			for (const resolvedRoute of resolvedRoutes) {
 				if (!resolvedRoute) continue;
 
-				this.app.group(`/api/${apiVersion}/documents`, (groupApp: any) =>
+				this.app.group(`/api/v${apiVersion}/documents`, (groupApp: any) =>
 					groupApp.use(resolvedRoute)
 				);
 

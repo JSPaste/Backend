@@ -5,6 +5,6 @@ export interface ServerOptions {
 	/** The port to listen on */
 	port: string | number;
 
-	/** Accessible API versions // TODO: string rlly? */
-	versions: string[];
+	/** Accessible API versions */
+	versions: number[];
 }

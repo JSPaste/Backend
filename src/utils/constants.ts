@@ -5,7 +5,7 @@ export const defaultServerOptions: ServerOptions = {
 	port: process.env['PORT'] ?? 4000,
 
 	// FIXME: Fix correct order when v2 is finished
-	versions: ['v2', 'v1']
+	versions: [2, 1]
 } as const satisfies Required<ServerOptions>;
 
 // TODO: Move to Server as static?
