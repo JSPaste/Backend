@@ -14,7 +14,15 @@ export class Server {
 		this.app = new Elysia();
 
 		// TODO: Specify better CORS headers
-		this.app.use(cors({ methods: ['GET', 'POST', 'DELETE'] }));
+		this.app.use(
+			cors({
+				origin:
+					process.env.NODE_ENV === 'production'
+						? ['jspaste.eu', 'docs.jspaste.eu']
+						: 'localhost',
+				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS']
+			})
+		);
 	}
 
 	public async run(): Promise<void> {
