@@ -9,7 +9,7 @@ export default new Elysia({
 	name: 'routes:v1:documents:remove'
 })
 	.use(errorSenderPlugin)
-	.put(
+	.patch(
 		':id',
 		async ({ errorSender, request, query, body, params: { id } }) => {
 			if (!DataValidator.isAlphanumeric(id))

@@ -20,7 +20,7 @@ export class Server {
 					process.env.NODE_ENV === 'production'
 						? ['jspaste.eu', 'docs.jspaste.eu']
 						: 'localhost',
-				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS']
+				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
 			})
 		);
 	}
