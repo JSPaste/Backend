@@ -54,31 +54,40 @@ export class Server {
 	// FIXME: Sync load
 	private async initAsyncRoutes(): Promise<void> {
 		const root = './src/routes';
+
 		let i = 0;
 
-		for (const apiVersion of this.serverOptions.versions) {
-			const isLatestVersion = i === this.serverOptions.versions.length - 1;
+		const apiVersions = this.serverOptions.versions;
+
+		console.info('Registering routes for', apiVersions.length, 'versions...');
+
+		for (const apiVersion of apiVersions) {
+			const isLatestVersion = i === apiVersions.length - 1;
 			const glob = new Bun.Glob(`${apiVersion}/**/*.route.ts`);
+
 			const routes = await Array.fromAsync(glob.scan({ cwd: root }));
 
-			for (const route of routes) {
-				const importedRoute = await import(join('../routes', route))
+			const routesPromise = routes.map((route) =>
+				import(join('../routes', route))
 					.then((m) => m.default)
-					.catch((err) => console.error('Unable to import route', err));
+					.catch((err) => console.error('Unable to import route', err))
+			);
 
-				if (importedRoute) {
-					this.app.group(`/api/${apiVersion}/documents`, (groupApp: any) =>
-						groupApp.use(importedRoute)
-					);
+			const resolvedRoutes = await Promise.all(routesPromise);
 
-					if (isLatestVersion)
-						this.app.group('/documents', (groupApp: any) =>
-							groupApp.use(importedRoute)
-						);
-				}
+			for (const resolvedRoute of resolvedRoutes) {
+				if (!resolvedRoute) continue;
+
+				this.app.group(`/api/${apiVersion}/documents`, (groupApp: any) =>
+					groupApp.use(resolvedRoute)
+				);
+
+				if (isLatestVersion)
+					this.app.group('/documents', (groupApp: any) => groupApp.use(resolvedRoute));
 			}
 
 			console.info('Registered', routes.length, 'routes for API version', apiVersion);
+
 			i++;
 		}
 	}
