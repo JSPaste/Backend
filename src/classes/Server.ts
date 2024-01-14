@@ -41,7 +41,7 @@ export class Server {
 					servers: [{ url: this.serverOptions.hostname }],
 					info: {
 						title: 'JSPaste documentation',
-						version: this.serverOptions.versions.join(', '),
+						version: this.serverOptions.versions.map(v => `v${v}`).join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
