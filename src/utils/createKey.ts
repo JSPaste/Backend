@@ -1,6 +1,6 @@
 import { basePath } from './constants.ts';
 
-export const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
+export const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'.split('');
 
 export async function makeId(length: number, charsArray = characters): Promise<string> {
 	let result = randomChars(length);
