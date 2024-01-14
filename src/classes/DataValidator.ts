@@ -23,37 +23,19 @@ export class DataValidator {
 		return DataValidator.isValidStringArray(values);
 	}
 
-	static isStringLengthBetweenLimits(
-		value: string,
-		min: number,
-		max: number,
-	) {
-		return (
-			DataValidator.isValidString(value) &&
-			value.length >= min &&
-			value.length <= max
-		);
+	static isStringLengthBetweenLimits(value: string, min: number, max: number) {
+		return DataValidator.isValidString(value) && value.length >= min && value.length <= max;
 	}
 
 	static isLengthBetweenLimits(value: any, min: number, max: number) {
 		return value.length >= min && value.length <= max;
 	}
 
-	static isStringArrayLengthBetweenLimits(
-		min: number,
-		max: number,
-		values: string[],
-	) {
-		return values.every((value) =>
-			DataValidator.isStringLengthBetweenLimits(value, min, max),
-		);
+	static isStringArrayLengthBetweenLimits(min: number, max: number, values: string[]) {
+		return values.every((value) => DataValidator.isStringLengthBetweenLimits(value, min, max));
 	}
 
-	static isStringListLengthBetweenLimits(
-		min: number,
-		max: number,
-		...values: string[]
-	) {
+	static isStringListLengthBetweenLimits(min: number, max: number, ...values: string[]) {
 		return DataValidator.isStringArrayLengthBetweenLimits(min, max, values);
 	}
 }

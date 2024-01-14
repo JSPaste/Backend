@@ -2,21 +2,21 @@ import { Elysia, t } from 'elysia';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { basePath, maxDocLength } from '../../constants/config';
 import { DocumentManager } from '../../classes/DocumentManager';
+import { basePath, maxDocLength } from '../../utils/constants.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:remove',
+	name: 'routes:v1:documents:remove'
 })
 	.use(errorSenderPlugin)
-	.put(
+	.patch(
 		':id',
 		async ({ errorSender, request, query, body, params: { id } }) => {
 			if (!DataValidator.isAlphanumeric(id))
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_input',
-					message: 'Invalid ID provided',
+					message: 'Invalid ID provided'
 				}).response;
 
 			const file = Bun.file(basePath + id);
@@ -27,7 +27,7 @@ export default new Elysia({
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.file_not_found',
-					message: 'The requested file does not exist',
+					message: 'The requested file does not exist'
 				}).response;
 			}
 
@@ -37,8 +37,7 @@ export default new Elysia({
 				return errorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_file_length',
-					message:
-						'The document data its outside of max length or is null',
+					message: 'The document data its outside of max length or is null'
 				}).response;
 			}
 
@@ -48,7 +47,7 @@ export default new Elysia({
 				return errorSender.sendError(401, {
 					type: 'error',
 					errorCode: 'jsp.invalid_secret',
-					message: 'The secret is not correct',
+					message: 'The secret is not correct'
 				}).response;
 			}
 
@@ -65,18 +64,17 @@ export default new Elysia({
 			params: t.Object({
 				id: t.String({
 					description: 'The document ID',
-					examples: ['abc123'],
-				}),
+					examples: ['abc123']
+				})
 			}),
 			response: t.Union([
 				t.Object({
 					message: t.String({
-						description:
-							'A message saying that the deletion was successful',
-					}),
+						description: 'A message saying that the deletion was successful'
+					})
 				}),
-				ErrorSender.errorType(),
+				ErrorSender.errorType()
 			]),
-			detail: { summary: 'Remove document by ID', tags: ['v1'] },
-		},
+			detail: { summary: 'Remove document by ID', tags: ['v1'] }
+		}
 	);

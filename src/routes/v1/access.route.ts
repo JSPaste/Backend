@@ -2,11 +2,11 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
-import { basePath } from '../../constants/config';
 import { DocumentManager } from '../../classes/DocumentManager';
+import { basePath } from '../../utils/constants.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:access',
+	name: 'routes:v1:documents:access'
 })
 	.use(errorSenderPlugin)
 	.get(
@@ -17,24 +17,24 @@ export default new Elysia({
 			params: t.Object({
 				id: t.String({
 					description: 'The document ID',
-					examples: ['abc123'],
-				}),
+					examples: ['abc123']
+				})
 			}),
 			response: t.Union([
 				t.Object({
 					key: t.String({
 						description: 'The key of the document',
-						examples: ['abc123'],
+						examples: ['abc123']
 					}),
 					data: t.String({
 						description: 'The document',
-						examples: ['Hello world'],
-					}),
+						examples: ['Hello world']
+					})
 				}),
-				ErrorSender.errorType(),
+				ErrorSender.errorType()
 			]),
-			detail: { summary: 'Get document by ID', tags: ['v1'] },
-		},
+			detail: { summary: 'Get document by ID', tags: ['v1'] }
+		}
 	)
 
 	.get(
@@ -47,23 +47,23 @@ export default new Elysia({
 				{
 					id: t.String({
 						description: 'The document ID',
-						examples: ['abc123'],
-					}),
+						examples: ['abc123']
+					})
 				},
 				{
 					description: 'The request parameters',
-					examples: [{ id: 'abc123' }],
-				},
+					examples: [{ id: 'abc123' }]
+				}
 			),
 			response: t.Any({
 				description: 'The raw document',
-				examples: ['Hello world'],
+				examples: ['Hello world']
 			}),
 			detail: {
 				summary: 'Get raw document by ID',
-				tags: ['v1'],
-			},
-		},
+				tags: ['v1']
+			}
+		}
 	);
 
 async function HandleReq(
@@ -72,13 +72,13 @@ async function HandleReq(
 	request: any,
 	query: any,
 	id: string,
-	raw: boolean,
+	raw: boolean
 ): Promise<any> {
 	if (!DataValidator.isAlphanumeric(id))
 		return errorSender.sendError(400, {
 			type: 'error',
 			errorCode: 'jsp.invalid_input',
-			message: 'Invalid ID provided',
+			message: 'Invalid ID provided'
 		}).response;
 
 	const file = Bun.file(basePath + id);
@@ -89,7 +89,7 @@ async function HandleReq(
 		return errorSender.sendError(400, {
 			type: 'error',
 			errorCode: 'jsp.file_not_found',
-			message: 'The requested file does not exist',
+			message: 'The requested file does not exist'
 		}).response;
 	}
 
@@ -97,13 +97,11 @@ async function HandleReq(
 
 	const doc = await DocumentManager.read(file);
 
-	if (
-		doc.password != (request.headers.get('password') ?? query['password'])
-	) {
+	if (doc.password != (request.headers.get('password') ?? query['password'])) {
 		return errorSender.sendError(400, {
 			type: 'error',
 			errorCode: 'jsp.file_not_found',
-			message: 'The requested file does not exist',
+			message: 'The requested file does not exist'
 		}).response;
 	}
 
@@ -113,6 +111,6 @@ async function HandleReq(
 		? new Response(doc.rawFileData)
 		: {
 				key: id,
-				data: new TextDecoder().decode(doc.rawFileData),
+				data: new TextDecoder().decode(doc.rawFileData)
 			};
 }

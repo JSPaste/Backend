@@ -1,11 +1,8 @@
-import { basePath } from "../constants/config";
+import { basePath } from './constants.ts';
 
 export const characters = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
 
-export async function makeId(
-	length: number,
-	charsArray = characters,
-): Promise<string> {
+export async function makeId(length: number, charsArray = characters): Promise<string> {
 	let result = randomChars(length);
 
 	const fileExists = await Bun.file(basePath + result).exists();

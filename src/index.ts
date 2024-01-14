@@ -1,5 +1,8 @@
-import { MainServer } from './classes/MainServer';
+import { Server } from './classes/Server.ts';
+import type { ServerOptions } from './interfaces/ServerOptions.ts';
 
-const mainServer = new MainServer();
+const options: Partial<ServerOptions> = {
+	// Override default options on 'defaultServerOptions' here
+};
 
-mainServer.setup();
+new Server(options).run();
