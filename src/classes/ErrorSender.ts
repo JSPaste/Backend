@@ -1,4 +1,4 @@
-import { type Context, error, t } from 'elysia';
+import {  error, t } from 'elysia';
 
 interface IError {
 	type: 'error';
@@ -7,11 +7,6 @@ interface IError {
 }
 
 export class ErrorSender {
-	context: Context;
-
-	constructor(context: Context) {
-		this.context = context;
-	}
 
 	static isError(error?: IError) {
 		return error?.type === 'error';
@@ -38,7 +33,7 @@ export class ErrorSender {
 		);
 	}
 
-	sendError(code: number, err: IError) {
+	static sendError(code: number, err: IError) {
 		return error(code, err);
 	}
 }

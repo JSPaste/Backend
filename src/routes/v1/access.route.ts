@@ -1,6 +1,5 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { DocumentManager } from '../../classes/DocumentManager';
 import { basePath } from '../../utils/constants.ts';
@@ -8,11 +7,10 @@ import { basePath } from '../../utils/constants.ts';
 export default new Elysia({
 	name: 'routes:v1:documents:access'
 })
-	.use(errorSenderPlugin)
 	.get(
 		':id',
-		async ({ set, errorSender, request, query, params: { id } }) =>
-			await HandleReq(set, errorSender, request, query, id, false),
+		async ({ set, request, query, params: { id } }) =>
+			await HandleReq(set, request, query, id, false),
 		{
 			params: t.Object({
 				id: t.String({
@@ -39,8 +37,8 @@ export default new Elysia({
 
 	.get(
 		':id/raw',
-		async ({ set, errorSender, request, query, params: { id } }) => {
-			return await HandleReq(set, errorSender, request, query, id, true);
+		async ({ set, request, query, params: { id } }) => {
+			return await HandleReq(set, request, query, id, true);
 		},
 		{
 			params: t.Object(
@@ -68,14 +66,14 @@ export default new Elysia({
 
 async function HandleReq(
 	set: any,
-	errorSender: any,
+	ErrorSender: any,
 	request: any,
 	query: any,
 	id: string,
 	raw: boolean
 ): Promise<any> {
 	if (!DataValidator.isAlphanumeric(id))
-		return errorSender.sendError(400, {
+		return ErrorSender.sendError(400, {
 			type: 'error',
 			errorCode: 'jsp.invalid_input',
 			message: 'Invalid ID provided'
@@ -86,7 +84,7 @@ async function HandleReq(
 	const fileExists = await file.exists();
 
 	if (!fileExists) {
-		return errorSender.sendError(400, {
+		return ErrorSender.sendError(400, {
 			type: 'error',
 			errorCode: 'jsp.file_not_found',
 			message: 'The requested file does not exist'
@@ -98,7 +96,7 @@ async function HandleReq(
 	const doc = await DocumentManager.read(file);
 
 	if (doc.password != (request.headers.get('password') ?? query['password'])) {
-		return errorSender.sendError(400, {
+		return ErrorSender.sendError(400, {
 			type: 'error',
 			errorCode: 'jsp.file_not_found',
 			message: 'The requested file does not exist'

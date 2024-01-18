@@ -3,19 +3,17 @@ import { Elysia, t } from 'elysia';
 
 import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DocumentManager } from '../../classes/DocumentManager';
 import { basePath } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove'
 })
-	.use(errorSenderPlugin)
 	.delete(
 		':id',
-		async ({ errorSender, request, params: { id } }) => {
+		async ({ request, params: { id } }) => {
 			if (!DataValidator.isAlphanumeric(id))
-				return errorSender.sendError(400, {
+				return ErrorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_input',
 					message: 'Invalid ID provided'
@@ -26,7 +24,7 @@ export default new Elysia({
 			const fileExists = await file.exists();
 
 			if (!fileExists) {
-				return errorSender.sendError(400, {
+				return ErrorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.file_not_found',
 					message: 'The requested file does not exist'
@@ -36,7 +34,7 @@ export default new Elysia({
 			const doc = await DocumentManager.read(file);
 
 			if (doc.secret != request.headers.get('secret')) {
-				return errorSender.sendError(401, {
+				return ErrorSender.sendError(401, {
 					type: 'error',
 					errorCode: 'jsp.invalid_secret',
 					message: 'The secret is not correct'

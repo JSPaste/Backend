@@ -1,6 +1,5 @@
 import { Elysia, t } from 'elysia';
 import { createKey, createSecret } from '../../utils/createKey';
-import { errorSenderPlugin } from '../../plugins/errorSender';
 import { DataValidator } from '../../classes/DataValidator';
 import { DocumentDataStruct } from '../../structures/documentStruct';
 import { DocumentManager } from '../../classes/DocumentManager';
@@ -10,14 +9,13 @@ import { basePath, maxDocLength } from '../../utils/constants.ts';
 export default new Elysia({
 	name: 'routes:v1:documents:publish'
 })
-	.use(errorSenderPlugin)
 	.post(
 		'',
-		async ({ errorSender, request, query, body }) => {
+		async ({ request, query, body }) => {
 			const buffer = Buffer.from(body as ArrayBuffer);
 
 			if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength)) {
-				return errorSender.sendError(400, {
+				return ErrorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_file_length',
 					message: 'The document data its outside of max length or is null'
@@ -30,7 +28,7 @@ export default new Elysia({
 
 			console.log(selectedSecret);
 			if (!DataValidator.isLengthBetweenLimits(selectedSecret, 1, 200)) {
-				return errorSender.sendError(400, {
+				return ErrorSender.sendError(400, {
 					type: 'error',
 					errorCode: 'jsp.invalid_secret',
 					message: 'The provided secret is too big or is null'
