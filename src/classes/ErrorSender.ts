@@ -1,14 +1,13 @@
-import {  error, t } from 'elysia';
+import { error, t } from 'elysia';
 
-interface IError {
+export interface JSPError {
 	type: 'error';
 	message: string;
 	errorCode: string;
 }
 
 export class ErrorSender {
-
-	static isError(error?: IError) {
+	static isJSPError(error?: any) {
 		return error?.type === 'error';
 	}
 
@@ -17,8 +16,8 @@ export class ErrorSender {
 
 		return (
 			err.response &&
-			'type' in (err.response as IError) &&
-			(err.response as IError).type === 'error'
+			'type' in (err.response as JSPError) &&
+			(err.response as JSPError).type === 'error'
 		);
 	}
 
@@ -33,7 +32,7 @@ export class ErrorSender {
 		);
 	}
 
-	static sendError(code: number, err: IError) {
+	static sendError(code: number, err: JSPError) {
 		return error(code, err);
 	}
 }
