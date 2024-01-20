@@ -1,7 +1,8 @@
-import { DocumentManager } from './DocumentManager';
-import { DataValidator } from './DataValidator';
-import { basePath, maxDocLength } from '../utils/constants.ts';
+import { unlink } from 'node:fs/promises';
 import { ErrorSender } from './ErrorSender.ts';
+import { DataValidator } from './DataValidator';
+import { DocumentManager } from './DocumentManager';
+import { basePath, maxDocLength } from '../utils/constants.ts';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 
@@ -138,5 +139,40 @@ export class DocumentHandler {
 		await DocumentManager.write(basePath + selectedKey, newDoc);
 
 		return { key: selectedKey, secret: selectedSecret };
+	}
+
+	static async handleRemove({ id, secret }: { id: string; secret: string }) {
+		if (!DataValidator.isAlphanumeric(id))
+			return ErrorSender.sendError(400, {
+				type: 'error',
+				errorCode: 'jsp.invalid_input',
+				message: 'Invalid ID provided'
+			});
+
+		const file = Bun.file(basePath + id);
+
+		const fileExists = await file.exists();
+
+		if (!fileExists) {
+			return ErrorSender.sendError(400, {
+				type: 'error',
+				errorCode: 'jsp.file_not_found',
+				message: 'The requested file does not exist'
+			});
+		}
+
+		const doc = await DocumentManager.read(file);
+
+		if (doc.secret !== secret)
+			return ErrorSender.sendError(403, {
+				type: 'error',
+				errorCode: 'jsp.invalid_secret',
+				message: 'The secret is not correct'
+			});
+
+		// FIXME: Use bun
+		await unlink(basePath + id);
+
+		return { message: 'File removed successfully' };
 	}
 }

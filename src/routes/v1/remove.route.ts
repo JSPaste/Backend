@@ -1,49 +1,13 @@
-import fs from 'node:fs/promises';
 import { Elysia, t } from 'elysia';
-
-import { DataValidator } from '../../classes/DataValidator';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { DocumentManager } from '../../classes/DocumentManager';
-import { basePath } from '../../utils/constants.ts';
+import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:remove'
 }).delete(
 	':id',
-	async ({ request, params: { id } }) => {
-		if (!DataValidator.isAlphanumeric(id))
-			return ErrorSender.sendError(400, {
-				type: 'error',
-				errorCode: 'jsp.invalid_input',
-				message: 'Invalid ID provided'
-			});
-
-		const file = Bun.file(basePath + id);
-
-		const fileExists = await file.exists();
-
-		if (!fileExists) {
-			return ErrorSender.sendError(400, {
-				type: 'error',
-				errorCode: 'jsp.file_not_found',
-				message: 'The requested file does not exist'
-			});
-		}
-
-		const doc = await DocumentManager.read(file);
-
-		if (doc.secret != request.headers.get('secret')) {
-			return ErrorSender.sendError(403, {
-				type: 'error',
-				errorCode: 'jsp.invalid_secret',
-				message: 'The secret is not correct'
-			});
-		}
-
-		await fs.unlink(basePath + id);
-
-		return { message: 'File removed successfully' };
-	},
+	async ({ request, params: { id } }) =>
+		DocumentHandler.handleRemove({ id, secret: request.headers.get('secret') || '' }),
 	{
 		params: t.Object({
 			id: t.String({
