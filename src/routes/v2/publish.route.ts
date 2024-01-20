@@ -17,14 +17,18 @@ export default new Elysia({
 		body: t.Any({ description: 'The file to be uploaded' }),
 		headers: t.Optional(
 			t.Object({
-				secret: t.String({
-					description: 'The selected secret, if null a new secret will be generated',
-					examples: ['aaaaa-bbbbb-ccccc-ddddd']
-				}),
-				password: t.String({
-					description: 'The document password, can be null',
-					examples: ['aaaaa-bbbbb-ccccc-ddddd']
-				})
+				secret: t.Optional(
+					t.String({
+						description: 'The selected secret, if null a new secret will be generated',
+						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					})
+				),
+				password: t.Optional(
+					t.String({
+						description: 'The document password, can be null',
+						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					})
+				)
 			})
 		),
 		response: {
