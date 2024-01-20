@@ -37,7 +37,8 @@ export default new Elysia({
 				{ description: 'A response object with a message' }
 			),
 			400: ErrorSender.errorType(),
-			403: ErrorSender.errorType()
+			403: ErrorSender.errorType(),
+			404: ErrorSender.errorType()
 		},
 		detail: { summary: 'Edit document by ID', tags: ['v2'] }
 	}

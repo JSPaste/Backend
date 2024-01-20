@@ -33,11 +33,11 @@ export class DocumentHandler {
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.password !== password)
-			return ErrorSender.sendError(404, {
+		if (doc.password && doc.password !== password)
+			return ErrorSender.sendError(403, {
 				type: 'error',
-				errorCode: 'jsp.file_not_found',
-				message: 'The requested file does not exist'
+				errorCode: 'jsp.invalid_password',
+				message: 'This file needs credentials, however no credentials were provided'
 			});
 
 		return {
@@ -67,7 +67,7 @@ export class DocumentHandler {
 		const fileExists = await file.exists();
 
 		if (!fileExists)
-			return ErrorSender.sendError(400, {
+			return ErrorSender.sendError(404, {
 				type: 'error',
 				errorCode: 'jsp.file_not_found',
 				message: 'The requested file does not exist'
@@ -79,16 +79,16 @@ export class DocumentHandler {
 			return ErrorSender.sendError(400, {
 				type: 'error',
 				errorCode: 'jsp.invalid_file_length',
-				message: 'The document data its outside of max length or is null'
+				message: 'The document data its is too big or is empty'
 			});
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.secret !== secret)
+		if (doc.secret && doc.secret !== secret)
 			return ErrorSender.sendError(403, {
 				type: 'error',
 				errorCode: 'jsp.invalid_secret',
-				message: 'The secret is not correct'
+				message: 'Invalid secret provided'
 			});
 
 		doc.rawFileData = buffer;
@@ -109,26 +109,32 @@ export class DocumentHandler {
 	}) {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
-		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength)) {
+		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return ErrorSender.sendError(400, {
 				type: 'error',
 				errorCode: 'jsp.invalid_file_length',
-				message: 'The document data its outside of max length or is null'
+				message: 'The document data its is too big or is empty'
 			});
-		}
 
 		const selectedKey = await createKey();
 
 		const secret = selectedSecret || createSecret();
 
-		if (!DataValidator.isLengthBetweenLimits(secret, 1, 200)) {
+		if (!DataValidator.isLengthBetweenLimits(secret, 1, 254))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_secret',
-				message: 'The provided secret is too big or is null'
+				errorCode: 'jsp.invalid_secret_length',
+				message: 'The provided secret is too big or is empty'
 			});
-		}
 
+		if (!DataValidator.isLengthBetweenLimits(password, 0, 254))
+			return ErrorSender.sendError(400, {
+				type: 'error',
+				errorCode: 'jsp.invalid_password_length',
+				message: 'The provided password is too big'
+			});
+
+		// FIXME: Encrypt password?
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
 			secret: secret,
@@ -153,21 +159,20 @@ export class DocumentHandler {
 
 		const fileExists = await file.exists();
 
-		if (!fileExists) {
-			return ErrorSender.sendError(400, {
+		if (!fileExists)
+			return ErrorSender.sendError(404, {
 				type: 'error',
 				errorCode: 'jsp.file_not_found',
 				message: 'The requested file does not exist'
 			});
-		}
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.secret !== secret)
+		if (doc.secret && doc.secret !== secret)
 			return ErrorSender.sendError(403, {
 				type: 'error',
 				errorCode: 'jsp.invalid_secret',
-				message: 'The secret is not correct'
+				message: 'Invalid secret provided'
 			});
 
 		// FIXME: Use bun
