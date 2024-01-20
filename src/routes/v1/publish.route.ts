@@ -6,11 +6,9 @@ export default new Elysia({
 	name: 'routes:v1:documents:publish'
 }).post(
 	'',
-	async ({ request, query, body }) =>
+	async ({ body }) =>
 		DocumentHandler.handlePublish({
-			body,
-			selectedSecret: request.headers.get('secret') || '',
-			password: request.headers.get('password') || query['password'] || ''
+			body
 		}),
 	{
 		type: 'arrayBuffer',

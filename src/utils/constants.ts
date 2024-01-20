@@ -3,9 +3,7 @@ import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 export const defaultServerOptions: ServerOptions = {
 	hostname: process.env['HOSTNAME'] || 'https://jspaste.eu',
 	port: process.env['PORT'] ?? 4000,
-
-	// FIXME: Fix correct order when v2 is finished
-	versions: [2, 1]
+	versions: [1, 2]
 } as const satisfies Required<ServerOptions>;
 
 // TODO: Move to Server as static?

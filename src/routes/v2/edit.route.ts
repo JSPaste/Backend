@@ -3,7 +3,7 @@ import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:edit'
+	name: 'routes:v2:documents:edit'
 }).patch(
 	':id',
 	async ({ request, body, params: { id } }) =>
@@ -36,6 +36,6 @@ export default new Elysia({
 			400: ErrorSender.errorType(),
 			403: ErrorSender.errorType()
 		},
-		detail: { summary: 'Edit document by ID', tags: ['v1'] }
+		detail: { summary: 'Edit document by ID', tags: ['v2'] }
 	}
 );

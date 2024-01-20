@@ -61,7 +61,7 @@ export class Server {
 
 	private initRoutes(): void {
 		const root = './src/routes';
-		const apiVersions = this.serverOptions.versions;
+		const apiVersions = this.serverOptions.versions.toReversed();
 
 		console.info('Registering routes for', apiVersions.length, 'versions...');
 
