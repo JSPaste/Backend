@@ -66,7 +66,7 @@ export class Server {
 		console.info('Registering routes for', apiVersions.length, 'versions...');
 
 		for (const [i, apiVersion] of apiVersions.entries()) {
-			const isLatestVersion = i === apiVersions.length - 1;
+			const isLatestVersion = i === 0;
 			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
 			const routesArray = Array.from(routesGlob.scanSync({ cwd: root })).map((route) => {
 				try {
@@ -89,7 +89,13 @@ export class Server {
 				}
 			}
 
-			console.info('Registered', routesArray.length, 'routes for API version', apiVersion);
+			console.info(
+				'Registered',
+				routesArray.length,
+				'routes for API version',
+				apiVersion,
+				isLatestVersion ? '(latest)' : ''
+			);
 		}
 	}
 }
