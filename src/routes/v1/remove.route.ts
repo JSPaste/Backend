@@ -42,7 +42,7 @@ export default new Elysia({
 
 		await fs.unlink(basePath + id);
 
-		return { message: 'File deleted successfully' };
+		return { message: 'File removed successfully' };
 	},
 	{
 		params: t.Object({
