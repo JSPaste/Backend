@@ -23,6 +23,7 @@ export default new Elysia({
 
 		const selectedKey = await createKey();
 
+		// FIXME: v2 spec
 		const selectedSecret = request.headers.get('secret') ?? createSecret();
 
 		if (!DataValidator.isLengthBetweenLimits(selectedSecret, 1, 200)) {

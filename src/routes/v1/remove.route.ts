@@ -51,6 +51,12 @@ export default new Elysia({
 				examples: ['abc123']
 			})
 		}),
+		headers: t.Object({
+			secret: t.String({
+				description: 'The document secret',
+				examples: ['aaaaa-bbbbb-ccccc-ddddd']
+			})
+		}),
 		response: {
 			200: t.Object({
 				message: t.String({

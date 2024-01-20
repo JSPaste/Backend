@@ -8,7 +8,7 @@ export default new Elysia({
 	name: 'routes:v1:documents:edit'
 }).patch(
 	':id',
-	async ({ request, query, body, params: { id } }) => {
+	async ({ request, body, params: { id } }) => {
 		if (!DataValidator.isAlphanumeric(id))
 			return ErrorSender.sendError(400, {
 				type: 'error',
@@ -20,13 +20,12 @@ export default new Elysia({
 
 		const fileExists = await file.exists();
 
-		if (!fileExists) {
+		if (!fileExists)
 			return ErrorSender.sendError(400, {
 				type: 'error',
 				errorCode: 'jsp.file_not_found',
 				message: 'The requested file does not exist'
 			});
-		}
 
 		const buffer = Buffer.from(body as ArrayBuffer);
 
@@ -56,23 +55,28 @@ export default new Elysia({
 	},
 	{
 		type: 'arrayBuffer',
-		body: t.Any({ description: 'The file to be updated' }),
-
+		body: t.Any({ description: 'The new file' }),
 		params: t.Object({
 			id: t.String({
 				description: 'The document ID',
 				examples: ['abc123']
 			})
 		}),
+		headers: t.Object({
+			secret: t.String({
+				description: 'The document secret',
+				examples: ['aaaaa-bbbbb-ccccc-ddddd']
+			})
+		}),
 		response: {
 			200: t.Object({
 				message: t.String({
-					description: 'A message saying that the deletion was successful'
+					description: 'A message saying that the update was successful'
 				})
 			}),
 			400: ErrorSender.errorType(),
 			403: ErrorSender.errorType()
 		},
-		detail: { summary: 'Remove document by ID', tags: ['v1'] }
+		detail: { summary: 'Edit document by ID', tags: ['v1'] }
 	}
 );
