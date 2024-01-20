@@ -18,19 +18,24 @@ export default new Elysia({
 					examples: ['abc123']
 				})
 			}),
-			response: t.Union([
-				t.Object({
-					key: t.String({
-						description: 'The key of the document',
-						examples: ['abc123']
-					}),
-					data: t.String({
-						description: 'The document',
-						examples: ['Hello world']
-					})
-				}),
-				ErrorSender.errorType()
-			]),
+			response: {
+				200: t.Object(
+					{
+						key: t.String({
+							description: 'The key of the document',
+							examples: ['abc123']
+						}),
+						data: t.String({
+							description: 'The document',
+							examples: ['Hello world']
+						})
+					},
+					{ description: 'The document object' }
+				),
+				400: ErrorSender.errorType(),
+				404: ErrorSender.errorType()
+			},
+
 			detail: { summary: 'Get document by ID', tags: ['v1'] }
 		}
 	)
@@ -53,10 +58,14 @@ export default new Elysia({
 					examples: [{ id: 'abc123' }]
 				}
 			),
-			response: t.Any({
-				description: 'The raw document',
-				examples: ['Hello world']
-			}),
+			response: {
+				200: t.Any({
+					description: 'The raw document',
+					examples: ['Hello world']
+				}),
+				400: ErrorSender.errorType(),
+				404: ErrorSender.errorType()
+			},
 			detail: {
 				summary: 'Get raw document by ID',
 				tags: ['v1']

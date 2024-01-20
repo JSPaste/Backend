@@ -22,14 +22,17 @@ export class ErrorSender {
 	}
 
 	static errorType() {
-		return t.Object(
-			{
-				type: t.String({ description: 'The error type' }),
-				message: t.String({ description: 'The error message' }),
-				errorCode: t.String({ description: 'The error code' })
-			},
-			{ description: 'An object representing an error' }
-		);
+		return t.Union([
+			t.Object(
+				{
+					type: t.String({ description: 'The error type' }),
+					message: t.String({ description: 'The error message' }),
+					errorCode: t.String({ description: 'The error code' })
+				},
+				{ description: 'An object representing an error' }
+			),
+			t.Any() /* FIXME: this is provisional until Elysia fixes error() */
+		]);
 	}
 
 	static sendError(code: number, err: JSPError) {

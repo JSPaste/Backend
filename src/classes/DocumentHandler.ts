@@ -1,7 +1,7 @@
 import { DocumentManager } from './DocumentManager';
 import { DataValidator } from './DataValidator';
 import { basePath } from '../utils/constants.ts';
-import { ErrorSender, type JSPError } from './ErrorSender.ts';
+import { ErrorSender } from './ErrorSender.ts';
 
 export interface AccessResponse {
 	key: string;
@@ -9,19 +9,13 @@ export interface AccessResponse {
 }
 
 export class DocumentHandler {
-	static async handleAccess({
-		id,
-		password
-	}: {
-		id: string;
-		password?: string;
-	}): Promise<AccessResponse | JSPError> {
+	static async handleAccess({ id, password }: { id: string; password?: string }) {
 		if (!DataValidator.isAlphanumeric(id))
 			return ErrorSender.sendError(400, {
 				type: 'error',
 				errorCode: 'jsp.invalid_input',
 				message: 'Invalid ID provided'
-			}).response;
+			});
 
 		const file = Bun.file(basePath + id);
 
@@ -32,7 +26,7 @@ export class DocumentHandler {
 				type: 'error',
 				errorCode: 'jsp.file_not_found',
 				message: 'The requested file does not exist'
-			}).response;
+			});
 
 		const doc = await DocumentManager.read(file);
 
@@ -41,7 +35,7 @@ export class DocumentHandler {
 				type: 'error',
 				errorCode: 'jsp.file_not_found',
 				message: 'The requested file does not exist'
-			}).response;
+			});
 
 		return {
 			key: id,
