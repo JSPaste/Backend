@@ -35,7 +35,6 @@ export default new Elysia({
 				400: ErrorSender.errorType(),
 				404: ErrorSender.errorType()
 			},
-
 			detail: { summary: 'Get document by ID', tags: ['v1'] }
 		}
 	)

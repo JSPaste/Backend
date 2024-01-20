@@ -22,11 +22,14 @@ export default new Elysia({
 			})
 		}),
 		response: {
-			200: t.Object({
-				message: t.String({
-					description: 'A message saying that the deletion was successful'
-				})
-			}),
+			200: t.Object(
+				{
+					message: t.String({
+						description: 'A message saying that the deletion was successful'
+					})
+				},
+				{ description: 'A response object with a message' }
+			),
 			400: ErrorSender.errorType(),
 			403: ErrorSender.errorType()
 		},

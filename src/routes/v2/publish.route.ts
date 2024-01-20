@@ -28,14 +28,17 @@ export default new Elysia({
 			})
 		),
 		response: {
-			200: t.Object({
-				key: t.String({
-					description: 'The generated key to access the document'
-				}),
-				secret: t.String({
-					description: 'The generated secret to delete the document'
-				})
-			}),
+			200: t.Object(
+				{
+					key: t.String({
+						description: 'The generated key to access the document'
+					}),
+					secret: t.String({
+						description: 'The generated secret to delete the document'
+					})
+				},
+				{ description: 'An object with a key and a secret for the document' }
+			),
 			400: ErrorSender.errorType()
 		},
 		detail: { summary: 'Publish document', tags: ['v2'] }
