@@ -3,12 +3,18 @@ import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:remove'
-}).delete(
+	name: 'routes:v2:documents:edit'
+}).patch(
 	':id',
-	async ({ request, params: { id } }) =>
-		DocumentHandler.handleRemove({ id, secret: request.headers.get('secret') || '' }),
+	async ({ request, body, params: { id } }) =>
+		DocumentHandler.handleEdit({
+			id,
+			newBody: body,
+			secret: request.headers.get('secret') || ''
+		}),
 	{
+		type: 'arrayBuffer',
+		body: t.Any({ description: 'The new file' }),
 		params: t.Object({
 			id: t.String({
 				description: 'The document ID',
@@ -25,7 +31,7 @@ export default new Elysia({
 			200: t.Object(
 				{
 					message: t.String({
-						description: 'A message saying that the deletion was successful'
+						description: 'A message saying that the update was successful'
 					})
 				},
 				{ description: 'A response object with a message' }
@@ -34,6 +40,6 @@ export default new Elysia({
 			403: ErrorSender.errorType(),
 			404: ErrorSender.errorType()
 		},
-		detail: { summary: 'Remove document by ID', tags: ['v1'] }
+		detail: { summary: 'Edit document by ID', tags: ['v2'] }
 	}
 );

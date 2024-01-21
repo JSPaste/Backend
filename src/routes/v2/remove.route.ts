@@ -3,7 +3,7 @@ import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:remove'
+	name: 'routes:v2:documents:remove'
 }).delete(
 	':id',
 	async ({ request, params: { id } }) =>
@@ -34,6 +34,6 @@ export default new Elysia({
 			403: ErrorSender.errorType(),
 			404: ErrorSender.errorType()
 		},
-		detail: { summary: 'Remove document by ID', tags: ['v1'] }
+		detail: { summary: 'Remove document by ID', tags: ['v2'] }
 	}
 );

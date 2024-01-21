@@ -3,13 +3,14 @@ import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler, type AccessResponse } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
-	name: 'routes:v1:documents:access'
+	name: 'routes:v2:documents:access'
 })
 	.get(
 		':id',
-		async ({ params: { id } }) =>
+		async ({ request, params: { id } }) =>
 			DocumentHandler.handleAccess({
-				id
+				id,
+				password: request.headers.get('password') || ''
 			}),
 		{
 			params: t.Object({
@@ -18,6 +19,14 @@ export default new Elysia({
 					examples: ['abc123']
 				})
 			}),
+			headers: t.Optional(
+				t.Object({
+					password: t.String({
+						description: 'The document password if aplicable',
+						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					})
+				})
+			),
 			response: {
 				200: t.Object(
 					{
@@ -35,14 +44,16 @@ export default new Elysia({
 				400: ErrorSender.errorType(),
 				404: ErrorSender.errorType()
 			},
-			detail: { summary: 'Get document by ID', tags: ['v1'] }
+
+			detail: { summary: 'Get document by ID', tags: ['v2'] }
 		}
 	)
 	.get(
 		':id/raw',
-		async ({ params: { id } }) =>
+		async ({ request, params: { id } }) =>
 			DocumentHandler.handleAccess({
-				id
+				id,
+				password: request.headers.get('password') || ''
 			}).then((res) => (ErrorSender.isJSPError(res) ? res : (<AccessResponse>res).data)),
 		{
 			params: t.Object(
@@ -57,6 +68,16 @@ export default new Elysia({
 					examples: [{ id: 'abc123' }]
 				}
 			),
+			headers: t.Optional(
+				t.Object({
+					password: t.Optional(
+						t.String({
+							description: 'The document password if aplicable',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					)
+				})
+			),
 			response: {
 				200: t.Any({
 					description: 'The raw document',
@@ -67,7 +88,7 @@ export default new Elysia({
 			},
 			detail: {
 				summary: 'Get raw document by ID',
-				tags: ['v1']
+				tags: ['v2']
 			}
 		}
 	);
