@@ -25,12 +25,12 @@ export class Server {
 		);
 	}
 
-	public async run(): Promise<void> {
+	public run(): void {
 		this.initDocs();
-		await this.initAsyncRoutes();
+		this.initRoutes();
 
-		this.app.listen(this.serverOptions.port, () =>
-			console.log('Listening on port', this.serverOptions.port)
+		this.app.listen(this.serverOptions.port, (server) =>
+			console.info('Listening on port', server.port)
 		);
 	}
 
@@ -41,7 +41,7 @@ export class Server {
 					servers: [{ url: this.serverOptions.hostname }],
 					info: {
 						title: 'JSPaste documentation',
-						version: this.serverOptions.versions.map(v => `v${v}`).join(', '),
+						version: this.serverOptions.versions.map((v) => `v${v}`).join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
@@ -59,44 +59,43 @@ export class Server {
 		);
 	}
 
-	// FIXME: Sync load
-	private async initAsyncRoutes(): Promise<void> {
+	private initRoutes(): void {
 		const root = './src/routes';
-
-		let i = 0;
-
-		const apiVersions = this.serverOptions.versions;
+		const apiVersions = this.serverOptions.versions.toReversed();
 
 		console.info('Registering routes for', apiVersions.length, 'versions...');
 
-		for (const apiVersion of apiVersions) {
-			const isLatestVersion = i === apiVersions.length - 1;
-			const glob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
+		for (const [i, apiVersion] of apiVersions.entries()) {
+			const isLatestVersion = i === 0;
+			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
+			const routesArray = Array.from(routesGlob.scanSync({ cwd: root })).map((route) => {
+				try {
+					return import.meta.require(join('../routes', route)).default;
+				} catch (err) {
+					console.error('Unable to import route', err);
+					return null;
+				}
+			});
 
-			const routes = await Array.fromAsync(glob.scan({ cwd: root }));
-
-			const routesPromise = routes.map((route) =>
-				import(join('../routes', route))
-					.then((m) => m.default)
-					.catch((err) => console.error('Unable to import route', err))
-			);
-
-			const resolvedRoutes = await Promise.all(routesPromise);
-
-			for (const resolvedRoute of resolvedRoutes) {
+			for (const resolvedRoute of routesArray) {
 				if (!resolvedRoute) continue;
 
-				this.app.group(`/api/v${apiVersion}/documents`, (groupApp: any) =>
-					groupApp.use(resolvedRoute)
+				this.app.group(`/api/v${apiVersion}/documents`, (prefix) =>
+					prefix.use(resolvedRoute)
 				);
 
-				if (isLatestVersion)
-					this.app.group('/documents', (groupApp: any) => groupApp.use(resolvedRoute));
+				if (isLatestVersion) {
+					this.app.group('/documents', (prefix) => prefix.use(resolvedRoute));
+				}
 			}
 
-			console.info('Registered', routes.length, 'routes for API version', apiVersion);
-
-			i++;
+			console.info(
+				'Registered',
+				routesArray.length,
+				'routes for API version',
+				apiVersion,
+				isLatestVersion ? '(latest)' : ''
+			);
 		}
 	}
 }
