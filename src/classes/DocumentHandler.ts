@@ -40,6 +40,17 @@ export class DocumentHandler {
 				message: 'This file needs credentials, however no credentials were provided'
 			});
 
+		if (
+			doc.deletionTime &&
+			doc.deletionTime > 0 &&
+			doc.deletionTime <= getUnixTimespanSecconds()
+		)
+			return ErrorSender.sendError(403, {
+				type: 'error',
+				errorCode: 'jsp.document_expired',
+				message: 'This file has been expired and will be deleted soon'
+			});
+
 		return {
 			key: id,
 			data: new TextDecoder().decode(doc.rawFileData)
@@ -176,8 +187,13 @@ export class DocumentHandler {
 			});
 
 		// FIXME: Use bun
+
 		await unlink(basePath + id);
 
 		return { message: 'File removed successfully' };
 	}
+}
+
+function getUnixTimespanSecconds() {
+	return Math.floor(Date.now() / 1000);
 }
