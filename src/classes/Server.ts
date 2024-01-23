@@ -45,7 +45,7 @@ export class Server {
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
-							name: 'EUPL-1.2-or-later',
+							name: 'EUPL-1.2',
 							url: 'https://raw.githubusercontent.com/JSPaste/JSP-Backend/stable/LICENSE'
 						}
 					}
