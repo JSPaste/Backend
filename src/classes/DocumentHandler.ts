@@ -2,7 +2,7 @@ import { unlink } from 'node:fs/promises';
 import { ErrorSender } from './ErrorSender.ts';
 import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
-import { basePath, maxDocLength } from '../utils/constants.ts';
+import { JSPErrorCode, basePath, maxDocLength } from '../utils/constants.ts';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 
@@ -16,7 +16,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_input',
+				errorCode: JSPErrorCode.invalidInput,
 				message: 'Invalid ID provided'
 			});
 
@@ -27,7 +27,7 @@ export class DocumentHandler {
 		if (!fileExists)
 			return ErrorSender.sendError(404, {
 				type: 'error',
-				errorCode: 'jsp.file_not_found',
+				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
 			});
 
@@ -36,7 +36,7 @@ export class DocumentHandler {
 		if (doc.password && doc.password !== password) {
 			return ErrorSender.sendError(401, {
 				type: 'error',
-				errorCode: 'jsp.invalid_password',
+				errorCode: JSPErrorCode.invalidPassword,
 				message: 'This file needs credentials, however no credentials were provided'
 			});
 		}
@@ -48,7 +48,7 @@ export class DocumentHandler {
 
 			return ErrorSender.sendError(404, {
 				type: 'error',
-				errorCode: 'jsp.document_expired',
+				errorCode: JSPErrorCode.documentExpired,
 				message: 'This file has been expired and will be deleted soon'
 			});
 		}
@@ -71,7 +71,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_input',
+				errorCode: JSPErrorCode.invalidInput,
 				message: 'Invalid ID provided'
 			});
 
@@ -82,7 +82,7 @@ export class DocumentHandler {
 		if (!fileExists)
 			return ErrorSender.sendError(404, {
 				type: 'error',
-				errorCode: 'jsp.file_not_found',
+				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
 			});
 
@@ -91,7 +91,7 @@ export class DocumentHandler {
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_file_length',
+				errorCode: JSPErrorCode.invalidFileLength,
 				message: 'The document data its is too big or is empty'
 			});
 
@@ -100,7 +100,7 @@ export class DocumentHandler {
 		if (doc.secret && doc.secret !== secret)
 			return ErrorSender.sendError(403, {
 				type: 'error',
-				errorCode: 'jsp.invalid_secret',
+				errorCode: JSPErrorCode.invalidSecret,
 				message: 'Invalid secret provided'
 			});
 
@@ -127,7 +127,7 @@ export class DocumentHandler {
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_file_length',
+				errorCode: JSPErrorCode.invalidFileLength,
 				message: 'The document data its is too big or is empty'
 			});
 
@@ -136,14 +136,14 @@ export class DocumentHandler {
 		if (!DataValidator.isLengthBetweenLimits(secret, 1, 254))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_secret_length',
+				errorCode: JSPErrorCode.invalidSecretLength,
 				message: 'The provided secret is too big or is empty'
 			});
 
 		if (!DataValidator.isLengthBetweenLimits(password, 0, 254)) {
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_password_length',
+				errorCode: JSPErrorCode.invalidPasswordLength,
 				message: 'The provided password is too big'
 			});
 		}
@@ -167,7 +167,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return ErrorSender.sendError(400, {
 				type: 'error',
-				errorCode: 'jsp.invalid_input',
+				errorCode: JSPErrorCode.invalidInput,
 				message: 'Invalid ID provided'
 			});
 
@@ -178,7 +178,7 @@ export class DocumentHandler {
 		if (!fileExists)
 			return ErrorSender.sendError(404, {
 				type: 'error',
-				errorCode: 'jsp.file_not_found',
+				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
 			});
 
@@ -187,7 +187,7 @@ export class DocumentHandler {
 		if (doc.secret && doc.secret !== secret)
 			return ErrorSender.sendError(403, {
 				type: 'error',
-				errorCode: 'jsp.invalid_secret',
+				errorCode: JSPErrorCode.invalidSecret,
 				message: 'Invalid secret provided'
 			});
 
