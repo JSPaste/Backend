@@ -1,9 +1,10 @@
 import { error, t } from 'elysia';
+import { JSPErrorCode } from '../utils/constants';
 
 export interface JSPError {
 	type: 'error';
 	message: string;
-	errorCode: string;
+	errorCode: JSPErrorCode;
 }
 
 export class ErrorSender {
