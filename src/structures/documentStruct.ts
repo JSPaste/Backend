@@ -26,9 +26,9 @@ export interface DocumentDataStruct {
      */
     secret: string;
     /**
-     * @generated from protobuf field: int64 deletion_time = 3;
+     * @generated from protobuf field: optional int64 deletion_time = 3;
      */
-    deletionTime: bigint;
+    deletionTime?: bigint;
     /**
      * @generated from protobuf field: optional string password = 4;
      */
@@ -40,7 +40,7 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
         super("DocumentDataStruct", [
             { no: 1, name: "raw_file_data", kind: "scalar", T: 12 /*ScalarType.BYTES*/ },
             { no: 2, name: "secret", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "deletion_time", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "deletion_time", kind: "scalar", opt: true, T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
             { no: 4, name: "password", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
@@ -48,7 +48,6 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.rawFileData = new Uint8Array(0);
         message.secret = "";
-        message.deletionTime = 0n;
         if (value !== undefined)
             reflectionMergePartial<DocumentDataStruct>(this, message, value);
         return message;
@@ -64,7 +63,7 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
                 case /* string secret */ 2:
                     message.secret = reader.string();
                     break;
-                case /* int64 deletion_time */ 3:
+                case /* optional int64 deletion_time */ 3:
                     message.deletionTime = reader.int64().toBigInt();
                     break;
                 case /* optional string password */ 4:
@@ -88,8 +87,8 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
         /* string secret = 2; */
         if (message.secret !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.secret);
-        /* int64 deletion_time = 3; */
-        if (message.deletionTime !== 0n)
+        /* optional int64 deletion_time = 3; */
+        if (message.deletionTime !== undefined)
             writer.tag(3, WireType.Varint).int64(message.deletionTime);
         /* optional string password = 4; */
         if (message.password !== undefined)

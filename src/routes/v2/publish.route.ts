@@ -10,6 +10,7 @@ export default new Elysia({
 		DocumentHandler.handlePublish({
 			body,
 			selectedSecret: request.headers.get('secret') || '',
+			liveTime: parseInt(request.headers.get('livetime') ?? '0') || 0,
 			password: request.headers.get('password') || query['password'] || ''
 		}),
 	{
