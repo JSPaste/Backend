@@ -34,7 +34,7 @@ export class DocumentHandler {
 		const doc = await DocumentManager.read(file);
 
 		if (doc.password && doc.password !== password) {
-			return ErrorSender.sendError(403, {
+			return ErrorSender.sendError(401, {
 				type: 'error',
 				errorCode: 'jsp.invalid_password',
 				message: 'This file needs credentials, however no credentials were provided'
