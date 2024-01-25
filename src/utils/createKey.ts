@@ -20,7 +20,7 @@ export function createSecret(chunkLength: number = 5, chunks: number = 4): strin
 	return Array.from({ length: chunks }, () => randomChars(chunkLength)).join('-');
 }
 
-function randomChars(length: number, chars = characters) {
+function randomChars(length: number, chars = characters): string {
 	let result = '';
 	while (length--) result += chars[Math.floor(Math.random() * chars.length)];
 	return result;
