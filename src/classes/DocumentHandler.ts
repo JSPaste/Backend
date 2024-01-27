@@ -150,14 +150,17 @@ export class DocumentHandler {
 			});
 		}
 
-		// FIXME: Encrypt password?
+		// Make the document permanent if the value exceeds 5 years
+		if (lifetime ?? 0 > 157_784_760) lifetime = 0;
+
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
 			secret: secret,
 			expireTimestamp:
-				(lifetime ?? defaultDocumentLifetime) > 0
-					? BigInt(Date.now() + (lifetime ?? defaultDocumentLifetime))
+				(lifetime ?? defaultDocumentLifetime * 1000) > 0
+					? BigInt(Date.now() + (lifetime ?? defaultDocumentLifetime * 1000))
 					: undefined,
+			// FIXME: Encrypt password?
 			password: password
 		};
 
