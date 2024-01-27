@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env sh
 . "$(dirname "$0")/_/husky.sh"
 
-bunx lint-staged || ~/.bun/bin/bunx lint-staged
+if [ -f ~/.bun/bin/bunx ]; then
+  ~/.bun/bin/bunx lint-staged
+else
+  bunx lint-staged
+fi
