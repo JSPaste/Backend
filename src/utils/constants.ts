@@ -1,7 +1,7 @@
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 
 export const defaultServerOptions: ServerOptions = {
-	hostname: process.env['HOSTNAME'] || 'https://jspaste.eu',
+	docsHostname: process.env['HOSTNAME'] || 'https://jspaste.eu',
 	port: process.env['PORT'] ?? 4000,
 	versions: [1, 2]
 } as const satisfies Required<ServerOptions>;
