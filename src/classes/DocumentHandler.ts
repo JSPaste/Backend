@@ -2,7 +2,7 @@ import { unlink } from 'node:fs/promises';
 import { ErrorSender } from './ErrorSender.ts';
 import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
-import { JSPErrorCode, basePath, maxDocLength } from '../utils/constants.ts';
+import { basePath, JSPErrorCode, maxDocLength } from '../utils/constants.ts';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 

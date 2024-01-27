@@ -18,5 +18,5 @@ export enum JSPErrorCode {
 	invalidFileLength = 'jsp.invalid_file_length',
 	invalidSecret = 'jsp.invalid_secret',
 	invalidSecretLength = 'jsp.invalid_secret_length',
-	invalidPasswordLength = 'jsp.invalid_password_length',
+	invalidPasswordLength = 'jsp.invalid_password_length'
 }

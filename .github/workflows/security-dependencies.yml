@@ -1,0 +1,26 @@
+# TODO: Experimental feature
+name: 'CI -> Security-Dependencies'
+on: [pull_request]
+
+permissions:
+    contents: read
+
+jobs:
+    dependency-review:
+        name: 'Dependency analysis'
+        runs-on: ubuntu-latest
+        steps:
+            - name: 'Harden Runner'
+              uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+              with:
+                  egress-policy: audit
+
+            - name: 'Checkout'
+              uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+              with:
+                  persist-credentials: false
+
+            - name: 'Dependency Review'
+              uses: actions/dependency-review-action@4cd9eb2d23752464a87e00499c30d256a59a01b4 # v4
+              with:
+                  fail-on-severity: moderate

@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { DocumentHandler, type AccessResponse } from '../../classes/DocumentHandler.ts';
+import { type AccessResponse, DocumentHandler } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
 	name: 'routes:v2:documents:access'
