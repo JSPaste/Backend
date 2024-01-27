@@ -4,7 +4,12 @@ import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
-import { JSPErrorCode, basePath, maxDocLength } from '../utils/constants.ts';
+import {
+	JSPErrorCode,
+	basePath,
+	defaultDocumentLifetime,
+	maxDocLength
+} from '../utils/constants.ts';
 
 export interface AccessResponse {
 	key: string;
@@ -40,7 +45,7 @@ export class DocumentHandler {
 				message: 'This file needs credentials, however no credentials were provided'
 			});
 
-		if (doc.deletionTime && doc.deletionTime > 0 && doc.deletionTime <= Date.now()) {
+		if (doc.expireTimestamp && doc.expireTimestamp > 0 && doc.expireTimestamp <= Date.now()) {
 			await unlink(basePath + id).catch(() => null);
 
 			return ErrorSender.sendError(404, {
@@ -111,12 +116,12 @@ export class DocumentHandler {
 	static async handlePublish({
 		body,
 		selectedSecret,
-		liveTime,
+		lifetime,
 		password
 	}: {
 		body: any;
 		selectedSecret?: string;
-		liveTime: number;
+		lifetime?: number;
 		password?: string;
 	}) {
 		const buffer = Buffer.from(body as ArrayBuffer);
@@ -149,7 +154,10 @@ export class DocumentHandler {
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
 			secret: secret,
-			deletionTime: BigInt(liveTime > 0 ? Date.now() + liveTime : 0),
+			expireTimestamp:
+				(lifetime ?? defaultDocumentLifetime) > 0
+					? BigInt(Date.now() + (lifetime ?? defaultDocumentLifetime))
+					: undefined,
 			password: password
 		};
 

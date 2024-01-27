@@ -30,7 +30,7 @@ export class Server {
 		this.initRoutes();
 
 		this.app.listen(this.serverOptions.port, (server) =>
-			console.info('Listening on port', server.port)
+			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
 		);
 	}
 

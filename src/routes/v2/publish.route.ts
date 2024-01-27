@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
+import { defaultDocumentLifetime } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v2:documents:publish'
@@ -10,7 +11,9 @@ export default new Elysia({
 		DocumentHandler.handlePublish({
 			body,
 			selectedSecret: request.headers.get('secret') || '',
-			liveTime: parseInt(request.headers.get('livetime') ?? '0') || 0,
+			lifetime: parseInt(
+				request.headers.get('lifetime') || defaultDocumentLifetime.toString()
+			),
 			password: request.headers.get('password') || query['password'] || ''
 		}),
 	{
@@ -28,6 +31,12 @@ export default new Elysia({
 					t.String({
 						description: 'The document password, can be null',
 						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					})
+				),
+				lifetime: t.Optional(
+					t.Number({
+						description: `Number in seconds that the document will exist before it is automatically deleted. Set to 0 to make the document permanent. If nothing is set, the default period is: ${defaultDocumentLifetime}`,
+						examples: [60, 0]
 					})
 				)
 			})
