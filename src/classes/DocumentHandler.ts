@@ -2,9 +2,9 @@ import { unlink } from 'node:fs/promises';
 import { ErrorSender } from './ErrorSender.ts';
 import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
-import { JSPErrorCode, basePath, maxDocLength } from '../utils/constants.ts';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
+import { JSPErrorCode, basePath, maxDocLength } from '../utils/constants.ts';
 
 export interface AccessResponse {
 	key: string;
@@ -33,23 +33,20 @@ export class DocumentHandler {
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.password && doc.password !== password) {
+		if (doc.password && doc.password !== password)
 			return ErrorSender.sendError(401, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidPassword,
 				message: 'This file needs credentials, however no credentials were provided'
 			});
-		}
 
 		if (doc.deletionTime && doc.deletionTime > 0 && doc.deletionTime <= Date.now()) {
-			try {
-				await unlink(basePath + id);
-			} catch {}
+			await unlink(basePath + id).catch(() => null);
 
 			return ErrorSender.sendError(404, {
 				type: 'error',
-				errorCode: JSPErrorCode.documentExpired,
-				message: 'This file has been expired and will be deleted soon'
+				errorCode: JSPErrorCode.fileNotFound,
+				message: 'The requested file does not exist'
 			});
 		}
 

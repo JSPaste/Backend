@@ -14,9 +14,8 @@ export enum JSPErrorCode {
 	invalidInput = 'jsp.invalid_input',
 	fileNotFound = 'jsp.file_not_found',
 	invalidPassword = 'jsp.invalid_password',
-	documentExpired = 'jsp.document_expired',
 	invalidFileLength = 'jsp.invalid_file_length',
 	invalidSecret = 'jsp.invalid_secret',
 	invalidSecretLength = 'jsp.invalid_secret_length',
-	invalidPasswordLength = 'jsp.invalid_password_length',
+	invalidPasswordLength = 'jsp.invalid_password_length'
 }
