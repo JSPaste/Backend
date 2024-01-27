@@ -21,10 +21,12 @@ export default new Elysia({
 			}),
 			headers: t.Optional(
 				t.Object({
-					password: t.String({
-						description: 'The document password if aplicable',
-						examples: ['aaaaa-bbbbb-ccccc-ddddd']
-					})
+					password: t.Optional(
+						t.String({
+							description: 'The document password if aplicable',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					)
 				})
 			),
 			response: {

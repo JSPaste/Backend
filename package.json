@@ -21,7 +21,7 @@
 		"elysia": "^0.8.14"
 	},
 	"devDependencies": {
-		"@types/bun": "latest",
+		"@types/bun": "^1.0.4",
 		"husky": "^9.0.6",
 		"is-ci": "^3.0.1",
 		"lint-staged": "^15.2.0",

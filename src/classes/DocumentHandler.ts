@@ -2,9 +2,14 @@ import { unlink } from 'node:fs/promises';
 import { ErrorSender } from './ErrorSender.ts';
 import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
-import { basePath, JSPErrorCode, maxDocLength } from '../utils/constants.ts';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
+import {
+	JSPErrorCode,
+	basePath,
+	defaultDocumentLifetime,
+	maxDocLength
+} from '../utils/constants.ts';
 
 export interface AccessResponse {
 	key: string;
@@ -33,23 +38,20 @@ export class DocumentHandler {
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.password && doc.password !== password) {
+		if (doc.password && doc.password !== password)
 			return ErrorSender.sendError(401, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidPassword,
 				message: 'This file needs credentials, however no credentials were provided'
 			});
-		}
 
-		if (doc.deletionTime && doc.deletionTime > 0 && doc.deletionTime <= Date.now()) {
-			try {
-				await unlink(basePath + id);
-			} catch {}
+		if (doc.expireTimestamp && doc.expireTimestamp > 0 && doc.expireTimestamp <= Date.now()) {
+			await unlink(basePath + id).catch(() => null);
 
 			return ErrorSender.sendError(404, {
 				type: 'error',
-				errorCode: JSPErrorCode.documentExpired,
-				message: 'This file has been expired and will be deleted soon'
+				errorCode: JSPErrorCode.fileNotFound,
+				message: 'The requested file does not exist'
 			});
 		}
 
@@ -114,12 +116,12 @@ export class DocumentHandler {
 	static async handlePublish({
 		body,
 		selectedSecret,
-		liveTime,
+		lifetime,
 		password
 	}: {
 		body: any;
 		selectedSecret?: string;
-		liveTime: number;
+		lifetime?: number;
 		password?: string;
 	}) {
 		const buffer = Buffer.from(body as ArrayBuffer);
@@ -148,11 +150,17 @@ export class DocumentHandler {
 			});
 		}
 
-		// FIXME: Encrypt password?
+		// Make the document permanent if the value exceeds 5 years
+		if (lifetime ?? 0 > 157_784_760) lifetime = 0;
+
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
 			secret: secret,
-			deletionTime: BigInt(liveTime > 0 ? Date.now() + liveTime : 0),
+			expireTimestamp:
+				(lifetime ?? defaultDocumentLifetime * 1000) > 0
+					? BigInt(Date.now() + (lifetime ?? defaultDocumentLifetime * 1000))
+					: undefined,
+			// FIXME: Encrypt password?
 			password: password
 		};
 

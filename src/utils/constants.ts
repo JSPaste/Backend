@@ -9,12 +9,14 @@ export const defaultServerOptions: ServerOptions = {
 // TODO: Move to Server as static?
 export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
 export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
+export const defaultDocumentLifetime = parseInt(
+	process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400'
+);
 
 export enum JSPErrorCode {
 	invalidInput = 'jsp.invalid_input',
 	fileNotFound = 'jsp.file_not_found',
 	invalidPassword = 'jsp.invalid_password',
-	documentExpired = 'jsp.document_expired',
 	invalidFileLength = 'jsp.invalid_file_length',
 	invalidSecret = 'jsp.invalid_secret',
 	invalidSecretLength = 'jsp.invalid_secret_length',
