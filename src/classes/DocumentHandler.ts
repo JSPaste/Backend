@@ -124,7 +124,7 @@ export class DocumentHandler {
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.documentInvalidLength,
-				message: 'The document data its length is invalid'
+				message: 'The document data length is invalid'
 			});
 
 		const doc = await DocumentManager.read(file);
