@@ -8,11 +8,11 @@ export default new Elysia({
 })
 	.use(errorSenderPlugin)
 	.patch(
-		':id',
-		async ({ errorSender, request, body, params: { id } }) =>
+		':key',
+		async ({ errorSender, request, body, params: { key } }) =>
 			DocumentHandler.handleEdit({
 				errorSender,
-				id,
+				key,
 				newBody: body,
 				secret: request.headers.get('secret') || ''
 			}),
@@ -20,8 +20,8 @@ export default new Elysia({
 			type: 'arrayBuffer',
 			body: t.Any({ description: 'The new file' }),
 			params: t.Object({
-				id: t.String({
-					description: 'The document ID',
+				key: t.String({
+					description: 'The document key',
 					examples: ['abc123']
 				})
 			}),
@@ -44,6 +44,6 @@ export default new Elysia({
 				403: ErrorSender.errorType(),
 				404: ErrorSender.errorType()
 			},
-			detail: { summary: 'Edit document by ID', tags: ['v2'] }
+			detail: { summary: 'Edit document', tags: ['v2'] }
 		}
 	);

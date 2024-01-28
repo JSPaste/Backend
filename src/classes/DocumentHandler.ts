@@ -14,42 +14,43 @@ import {
 import { ErrorSender } from './ErrorSender.ts';
 
 export class DocumentHandler {
-	static async handleAccess({
-		errorSender,
-		id,
-		password
-	}: {
-		errorSender: ErrorSender;
-		id: string;
-		password?: string;
-	}) {
-		if (!DataValidator.isAlphanumeric(id))
+	static async handleAccess(
+		{
+			errorSender,
+			key,
+			password
+		}: {
+			errorSender: ErrorSender;
+			key: string;
+			password?: string;
+		},
+		version: APIVersions
+	) {
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
-				message: 'The provided document ID is not alphanumeric'
+				message: 'The provided document key is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
-		if (!fileExists)
-			return errorSender.sendError(404, {
-				type: 'error',
-				errorCode: JSPErrorCode.documentNotFound,
-				message: 'The requested file does not exist'
-			});
+		const doc = fileExists && (await DocumentManager.read(file));
 
-		const doc = await DocumentManager.read(file);
-
-		if (doc.expireTimestamp && doc.expireTimestamp > 0 && doc.expireTimestamp <= Date.now()) {
-			await unlink(basePath + id).catch(() => null);
+		if (
+			!doc ||
+			(doc.expirationTimestamp &&
+				doc.expirationTimestamp > 0 &&
+				doc.expirationTimestamp <= Date.now())
+		) {
+			if (fileExists) await unlink(basePath + key).catch(() => null);
 
 			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.documentNotFound,
-				message: 'The requested file does not exist'
+				message: 'The requested document does not exist'
 			});
 		}
 
@@ -69,45 +70,58 @@ export class DocumentHandler {
 
 		const data = new TextDecoder().decode(doc.rawFileData);
 
-		return {
-			key: id,
-			data
-		};
+		switch (version) {
+			case APIVersions.v1:
+				return {
+					key,
+					data
+				};
+			case APIVersions.v2:
+				return {
+					key,
+					data,
+					url: viewDocumentPath + key,
+					expirationTimestamp: Number(doc.expirationTimestamp)
+				};
+		}
 	}
 
-	static async handleRawAccess({
-		errorSender,
-		id,
-		password
-	}: {
-		errorSender: ErrorSender;
-		id: string;
-		password?: string;
-	}) {
-		return DocumentHandler.handleAccess({ errorSender, id, password }).then((res) =>
-			ErrorSender.isJSPError(res) ? res : res.data
+	static async handleRawAccess(
+		{
+			errorSender,
+			key,
+			password
+		}: {
+			errorSender: ErrorSender;
+			key: string;
+			password?: string;
+		},
+		version: APIVersions
+	) {
+		return DocumentHandler.handleAccess({ errorSender, key: key, password }, version).then(
+			(res) => (ErrorSender.isJSPError(res) ? res : res.data)
 		);
 	}
 
 	static async handleEdit({
 		errorSender,
-		id,
+		key,
 		newBody,
 		secret
 	}: {
 		errorSender: ErrorSender;
-		id: string;
+		key: string;
 		newBody: any;
 		secret?: string;
 	}) {
-		if (!DataValidator.isAlphanumeric(id))
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
@@ -115,7 +129,7 @@ export class DocumentHandler {
 			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.documentNotFound,
-				message: 'The requested file does not exist'
+				message: 'The requested document does not exist'
 			});
 
 		const buffer = Buffer.from(newBody as ArrayBuffer);
@@ -138,20 +152,20 @@ export class DocumentHandler {
 
 		doc.rawFileData = buffer;
 
-		await DocumentManager.write(basePath + id, doc);
+		await DocumentManager.write(basePath + key, doc);
 
 		return { message: 'File updated successfully' };
 	}
 
-	static async handleExists({ errorSender, id }: { errorSender: ErrorSender; id: string }) {
-		if (!DataValidator.isAlphanumeric(id))
+	static async handleExists({ errorSender, key }: { errorSender: ErrorSender; key: string }) {
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
@@ -202,7 +216,7 @@ export class DocumentHandler {
 		// Make the document permanent if the value exceeds 5 years
 		if ((lifetime ?? 0) > 157_784_760) lifetime = 0;
 
-		const expireTimestamp =
+		const expirationTimestamp =
 			(lifetime ?? defaultDocumentLifetime) * 1000 > 0
 				? Date.now() + (lifetime ?? defaultDocumentLifetime) * 1000
 				: undefined;
@@ -210,8 +224,8 @@ export class DocumentHandler {
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
 			secret,
-			expireTimestamp:
-				typeof expireTimestamp === 'number' ? BigInt(expireTimestamp) : undefined,
+			expirationTimestamp:
+				typeof expirationTimestamp === 'number' ? BigInt(expirationTimestamp) : undefined,
 			password
 		};
 
@@ -227,28 +241,28 @@ export class DocumentHandler {
 					key: selectedKey,
 					secret,
 					url: viewDocumentPath + selectedKey,
-					expireTimestamp
+					expirationTimestamp
 				};
 		}
 	}
 
 	static async handleRemove({
 		errorSender,
-		id,
+		key,
 		secret
 	}: {
 		errorSender: ErrorSender;
-		id: string;
+		key: string;
 		secret: string;
 	}) {
-		if (!DataValidator.isAlphanumeric(id))
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
@@ -256,7 +270,7 @@ export class DocumentHandler {
 			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.documentNotFound,
-				message: 'The requested file does not exist'
+				message: 'The requested document does not exist'
 			});
 
 		const doc = await DocumentManager.read(file);
@@ -269,7 +283,7 @@ export class DocumentHandler {
 			});
 
 		// FIXME: Use bun
-		await unlink(basePath + id);
+		await unlink(basePath + key);
 
 		return { message: 'File removed successfully' };
 	}

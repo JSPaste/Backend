@@ -7,7 +7,7 @@ option optimize_for = SPEED;
 message DocumentDataStruct {
   bytes raw_file_data = 1;
   string secret = 2;
-  optional uint64 expire_timestamp = 3;
+  optional uint64 expiration_timestamp = 3;
   optional string password = 4;
 
   reserved 5 to 10;

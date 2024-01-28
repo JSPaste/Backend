@@ -26,9 +26,9 @@ export interface DocumentDataStruct {
      */
     secret: string;
     /**
-     * @generated from protobuf field: optional uint64 expire_timestamp = 3;
+     * @generated from protobuf field: optional uint64 expiration_timestamp = 3;
      */
-    expireTimestamp?: bigint;
+    expirationTimestamp?: bigint;
     /**
      * @generated from protobuf field: optional string password = 4;
      */
@@ -40,7 +40,7 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
         super("DocumentDataStruct", [
             { no: 1, name: "raw_file_data", kind: "scalar", T: 12 /*ScalarType.BYTES*/ },
             { no: 2, name: "secret", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "expire_timestamp", kind: "scalar", opt: true, T: 4 /*ScalarType.UINT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "expiration_timestamp", kind: "scalar", opt: true, T: 4 /*ScalarType.UINT64*/, L: 0 /*LongType.BIGINT*/ },
             { no: 4, name: "password", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
@@ -63,8 +63,8 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
                 case /* string secret */ 2:
                     message.secret = reader.string();
                     break;
-                case /* optional uint64 expire_timestamp */ 3:
-                    message.expireTimestamp = reader.uint64().toBigInt();
+                case /* optional uint64 expiration_timestamp */ 3:
+                    message.expirationTimestamp = reader.uint64().toBigInt();
                     break;
                 case /* optional string password */ 4:
                     message.password = reader.string();
@@ -87,9 +87,9 @@ class DocumentDataStruct$Type extends MessageType<DocumentDataStruct> {
         /* string secret = 2; */
         if (message.secret !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.secret);
-        /* optional uint64 expire_timestamp = 3; */
-        if (message.expireTimestamp !== undefined)
-            writer.tag(3, WireType.Varint).uint64(message.expireTimestamp);
+        /* optional uint64 expiration_timestamp = 3; */
+        if (message.expirationTimestamp !== undefined)
+            writer.tag(3, WireType.Varint).uint64(message.expirationTimestamp);
         /* optional string password = 4; */
         if (message.password !== undefined)
             writer.tag(4, WireType.LengthDelimited).string(message.password);
