@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
+import { APIVersions } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:access'
@@ -10,7 +11,7 @@ export default new Elysia({
 	.get(
 		':id',
 		async ({ errorSender, params: { id } }) =>
-			DocumentHandler.handleAccess({ errorSender, id }),
+			DocumentHandler.handleAccess({ errorSender, key: id }, APIVersions.v1),
 		{
 			params: t.Object({
 				id: t.String({
@@ -41,7 +42,7 @@ export default new Elysia({
 	.get(
 		':id/raw',
 		async ({ errorSender, params: { id } }) =>
-			DocumentHandler.handleRawAccess({ errorSender, id }),
+			DocumentHandler.handleRawAccess({ errorSender, id }, APIVersions.v1),
 		{
 			params: t.Object(
 				{

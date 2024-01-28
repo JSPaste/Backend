@@ -1,9 +1,10 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { defaultServerOptions } from '../utils/constants.ts';
+import { JSPErrorCode, defaultServerOptions } from '../utils/constants.ts';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';
+import { errorSenderPlugin } from '../plugins/errorSender.ts';
 
 export class Server {
 	private app: Elysia;
@@ -14,15 +15,59 @@ export class Server {
 		this.app = new Elysia();
 
 		// TODO: Specify better CORS headers
-		this.app.use(
-			cors({
-				origin:
-					process.env.NODE_ENV === 'production'
-						? ['jspaste.eu', 'docs.jspaste.eu']
-						: 'localhost',
-				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
-			})
-		);
+		this.app
+			.use(
+				cors({
+					origin:
+						process.env.NODE_ENV === 'production'
+							? ['jspaste.eu', 'docs.jspaste.eu']
+							: 'localhost',
+					methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
+				})
+			)
+			.use(errorSenderPlugin)
+			.onError(({ errorSender, set, code, error }) => {
+				switch (code) {
+					case 'NOT_FOUND':
+						// for some reason, error sender is not available on this code.
+						set.status = 404;
+						return 'Not found, please try again later of check our documentation.';
+
+					case 'VALIDATION':
+						return errorSender.sendError(400, {
+							type: 'error',
+							errorCode: JSPErrorCode.validation,
+							message: 'Validation failed, please check our documentation',
+							hint: process.env.NODE_ENV === 'production' ? error?.message : error
+						});
+
+					case 'INTERNAL_SERVER_ERROR':
+						return errorSender.sendError(500, {
+							type: 'error',
+							errorCode: JSPErrorCode.internalServerError,
+							message:
+								'Internal server error. Something went wrong, please try again later',
+							hint: process.env.NODE_ENV === 'production' ? error?.message : error
+						});
+
+					case 'PARSE':
+						return errorSender.sendError(400, {
+							type: 'error',
+							errorCode: JSPErrorCode.parseFailed,
+							message: 'Failed to parse the request, please try again later',
+							hint: process.env.NODE_ENV === 'production' ? error?.message : error
+						});
+
+					default:
+						console.error(error);
+
+						return errorSender.sendError(400, {
+							type: 'error',
+							errorCode: JSPErrorCode.unknown,
+							message: 'Unknown error, please try again later'
+						});
+				}
+			});
 	}
 
 	public run(): void {

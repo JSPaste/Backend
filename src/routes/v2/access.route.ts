@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
+import { APIVersions } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v2:documents:access'
@@ -10,11 +11,14 @@ export default new Elysia({
 	.get(
 		':id',
 		async ({ errorSender, request, query: { p }, params: { id } }) =>
-			DocumentHandler.handleAccess({
-				errorSender,
-				id,
-				password: request.headers.get('password') || p || ''
-			}),
+			DocumentHandler.handleAccess(
+				{
+					errorSender,
+					key: id,
+					password: request.headers.get('password') || p || ''
+				},
+				APIVersions.v2
+			),
 		{
 			params: t.Object({
 				id: t.String({
@@ -27,7 +31,7 @@ export default new Elysia({
 					password: t.Optional(
 						t.String({
 							description: 'The document password if aplicable',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+							examples: ['abc123']
 						})
 					)
 				})
@@ -53,25 +57,43 @@ export default new Elysia({
 						data: t.String({
 							description: 'The document',
 							examples: ['Hello world']
-						})
+						}),
+						url: t.Optional(
+							t.String({
+								description: 'The URL for viewing the document on the web',
+								examples: ['https://jspaste.eu/abc123']
+							})
+						),
+						expirationTimestamp: t.Optional(
+							t.Number({
+								description:
+									'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
+								examples: [60, 0]
+							})
+						)
 					},
-					{ description: 'The document object' }
+					{
+						description:
+							'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
+					}
 				),
 				400: ErrorSender.errorType(),
 				404: ErrorSender.errorType()
 			},
-
 			detail: { summary: 'Get document by ID', tags: ['v2'] }
 		}
 	)
 	.get(
 		':id/raw',
 		async ({ errorSender, request, query: { p }, params: { id } }) =>
-			DocumentHandler.handleRawAccess({
-				errorSender,
-				id,
-				password: request.headers.get('password') || p || ''
-			}),
+			DocumentHandler.handleRawAccess(
+				{
+					errorSender,
+					id,
+					password: request.headers.get('password') || p || ''
+				},
+				APIVersions.v2
+			),
 		{
 			params: t.Object(
 				{

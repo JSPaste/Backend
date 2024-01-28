@@ -25,7 +25,9 @@ export default new Elysia({
 			),
 		{
 			type: 'arrayBuffer',
-			body: t.Any({ description: 'The file to be uploaded' }),
+			body: t.Any({
+				description: 'The file to be uploaded'
+			}),
 			headers: t.Optional(
 				t.Object({
 					secret: t.Optional(
@@ -38,7 +40,7 @@ export default new Elysia({
 					password: t.Optional(
 						t.String({
 							description: 'The document password, can be null',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+							examples: ['abc123']
 						})
 					),
 					lifetime: t.Optional(
@@ -53,17 +55,20 @@ export default new Elysia({
 				200: t.Object(
 					{
 						key: t.String({
-							description: 'The generated key to access the document'
+							description: 'The generated key to access the document',
+							examples: ['abc123']
 						}),
 						secret: t.String({
-							description: 'The generated secret to delete the document'
+							description: 'The generated secret to delete the document',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						}),
 						url: t.Optional(
 							t.String({
-								description: 'The URL for viewing the document on the web'
+								description: 'The URL for viewing the document on the web',
+								examples: ['https://jspaste.eu/abc123']
 							})
 						),
-						expireTimestamp: t.Optional(
+						expirationTimestamp: t.Optional(
 							t.Number({
 								description:
 									'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
@@ -71,7 +76,10 @@ export default new Elysia({
 							})
 						)
 					},
-					{ description: 'An object with a key and a secret for the document' }
+					{
+						description:
+							'An object with a key, a secret, the display URL and an expiration timestamp for the document'
+					}
 				),
 				400: ErrorSender.errorType()
 			},
