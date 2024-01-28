@@ -30,7 +30,7 @@ export class Server {
 		this.initRoutes();
 
 		this.app.listen(this.serverOptions.port, (server) =>
-			console.info('Listening on port', server.port)
+			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
 		);
 	}
 
@@ -38,7 +38,7 @@ export class Server {
 		this.app.use(
 			swagger({
 				documentation: {
-					servers: [{ url: this.serverOptions.hostname }],
+					servers: [{ url: this.serverOptions.docsHostname }],
 					info: {
 						title: 'JSPaste documentation',
 						version: this.serverOptions.versions.map((v) => `v${v}`).join(', '),

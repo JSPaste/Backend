@@ -1,16 +1,16 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { DocumentHandler, type AccessResponse } from '../../classes/DocumentHandler.ts';
+import { type AccessResponse, DocumentHandler } from '../../classes/DocumentHandler.ts';
+import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 
 export default new Elysia({
 	name: 'routes:v1:documents:access'
 })
+	.use(errorSenderPlugin)
 	.get(
 		':id',
-		async ({ params: { id } }) =>
-			DocumentHandler.handleAccess({
-				id
-			}),
+		async ({ errorSender, params: { id } }) =>
+			DocumentHandler.handleAccess({ errorSender, id }),
 		{
 			params: t.Object({
 				id: t.String({
@@ -40,10 +40,10 @@ export default new Elysia({
 	)
 	.get(
 		':id/raw',
-		async ({ params: { id } }) =>
-			DocumentHandler.handleAccess({
-				id
-			}).then((res) => (ErrorSender.isJSPError(res) ? res : (<AccessResponse>res).data)),
+		async ({ errorSender, params: { id } }) =>
+			DocumentHandler.handleAccess({ errorSender, id }).then((res) =>
+				ErrorSender.isJSPError(res) ? res : (<AccessResponse>res).data
+			),
 		{
 			params: t.Object(
 				{
