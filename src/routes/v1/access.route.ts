@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
-import { type AccessResponse, DocumentHandler } from '../../classes/DocumentHandler.ts';
+import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 
 export default new Elysia({
@@ -41,9 +41,7 @@ export default new Elysia({
 	.get(
 		':id/raw',
 		async ({ errorSender, params: { id } }) =>
-			DocumentHandler.handleAccess({ errorSender, id }).then((res) =>
-				ErrorSender.isJSPError(res) ? res : (<AccessResponse>res).data
-			),
+			DocumentHandler.handleRawAccess({ errorSender, id }),
 		{
 			params: t.Object(
 				{
@@ -58,7 +56,7 @@ export default new Elysia({
 				}
 			),
 			response: {
-				200: t.Any({
+				200: t.String({
 					description: 'The raw document',
 					examples: ['Hello world']
 				}),

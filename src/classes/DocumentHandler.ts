@@ -4,17 +4,14 @@ import { DocumentManager } from './DocumentManager';
 import { createKey, createSecret } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 import {
+	APIVersions,
 	JSPErrorCode,
 	basePath,
 	defaultDocumentLifetime,
-	maxDocLength
+	maxDocLength,
+	viewDocumentPath
 } from '../utils/constants.ts';
-import type { ErrorSender } from './ErrorSender.ts';
-
-export interface AccessResponse {
-	key: string;
-	data: string;
-}
+import { ErrorSender } from './ErrorSender.ts';
 
 export class DocumentHandler {
 	static async handleAccess({
@@ -30,7 +27,7 @@ export class DocumentHandler {
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidInput,
-				message: 'Invalid ID provided'
+				message: 'The provided document ID is not alphanumeric'
 			});
 
 		const file = Bun.file(basePath + id);
@@ -40,17 +37,24 @@ export class DocumentHandler {
 		if (!fileExists)
 			return errorSender.sendError(404, {
 				type: 'error',
-				errorCode: JSPErrorCode.fileNotFound,
+				errorCode: JSPErrorCode.documentNotFound,
 				message: 'The requested file does not exist'
 			});
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.password && doc.password !== password)
+		if (doc.password && !password)
 			return errorSender.sendError(401, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidPassword,
-				message: 'This file needs credentials, however no credentials were provided'
+				errorCode: JSPErrorCode.documentPasswordNeeded,
+				message: 'Invalid credentials provided for the document.'
+			});
+
+		if (doc.password && doc.password !== password)
+			return errorSender.sendError(403, {
+				type: 'error',
+				errorCode: JSPErrorCode.documentInvalidPassword,
+				message: 'Invalid credentials provided for the document.'
 			});
 
 		if (doc.expireTimestamp && doc.expireTimestamp > 0 && doc.expireTimestamp <= Date.now()) {
@@ -58,15 +62,31 @@ export class DocumentHandler {
 
 			return errorSender.sendError(404, {
 				type: 'error',
-				errorCode: JSPErrorCode.fileNotFound,
+				errorCode: JSPErrorCode.documentNotFound,
 				message: 'The requested file does not exist'
 			});
 		}
 
+		const data = new TextDecoder().decode(doc.rawFileData);
+
 		return {
 			key: id,
-			data: new TextDecoder().decode(doc.rawFileData)
+			data
 		};
+	}
+
+	static async handleRawAccess({
+		errorSender,
+		id,
+		password
+	}: {
+		errorSender: ErrorSender;
+		id: string;
+		password?: string;
+	}) {
+		return DocumentHandler.handleAccess({ errorSender, id, password }).then((res) =>
+			ErrorSender.isJSPError(res) ? res : res.data
+		);
 	}
 
 	static async handleEdit({
@@ -84,7 +104,7 @@ export class DocumentHandler {
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidInput,
-				message: 'Invalid ID provided'
+				message: 'The provided document ID is not alphanumeric'
 			});
 
 		const file = Bun.file(basePath + id);
@@ -94,7 +114,7 @@ export class DocumentHandler {
 		if (!fileExists)
 			return errorSender.sendError(404, {
 				type: 'error',
-				errorCode: JSPErrorCode.fileNotFound,
+				errorCode: JSPErrorCode.documentNotFound,
 				message: 'The requested file does not exist'
 			});
 
@@ -103,8 +123,8 @@ export class DocumentHandler {
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidFileLength,
-				message: 'The document data its is too big or is empty'
+				errorCode: JSPErrorCode.documentInvalidLength,
+				message: 'The document data its length is invalid'
 			});
 
 		const doc = await DocumentManager.read(file);
@@ -112,7 +132,7 @@ export class DocumentHandler {
 		if (doc.secret && doc.secret !== secret)
 			return errorSender.sendError(403, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidSecret,
+				errorCode: JSPErrorCode.documentInvalidSecret,
 				message: 'Invalid secret provided'
 			});
 
@@ -123,64 +143,93 @@ export class DocumentHandler {
 		return { message: 'File updated successfully' };
 	}
 
-	static async handlePublish({
-		errorSender,
-		body,
-		selectedSecret,
-		lifetime,
-		password
-	}: {
-		errorSender: ErrorSender;
-		body: any;
-		selectedSecret?: string;
-		lifetime?: number;
-		password?: string;
-	}) {
+	static async handleExists({ errorSender, id }: { errorSender: ErrorSender; id: string }) {
+		if (!DataValidator.isAlphanumeric(id))
+			return errorSender.sendError(400, {
+				type: 'error',
+				errorCode: JSPErrorCode.invalidInput,
+				message: 'The provided document ID is not alphanumeric'
+			});
+
+		const file = Bun.file(basePath + id);
+
+		const fileExists = await file.exists();
+
+		return fileExists;
+	}
+
+	static async handlePublish(
+		{
+			errorSender,
+			body,
+			selectedSecret,
+			lifetime,
+			password
+		}: {
+			errorSender: ErrorSender;
+			body: any;
+			selectedSecret?: string;
+			lifetime?: number;
+			password?: string;
+		},
+		version: APIVersions
+	) {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidFileLength,
-				message: 'The document data its is too big or is empty'
+				errorCode: JSPErrorCode.documentInvalidLength,
+				message: 'The document data length is invalid'
 			});
 
 		const secret = selectedSecret || createSecret();
 
-		if (!DataValidator.isLengthBetweenLimits(secret, 1, 254))
+		if (!DataValidator.isStringLengthBetweenLimits(secret ?? '', 1, 254))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidSecretLength,
-				message: 'The provided secret is too big or is empty'
+				errorCode: JSPErrorCode.documentInvalidSecretLength,
+				message: 'The provided secret length is invalid'
 			});
 
-		if (!DataValidator.isLengthBetweenLimits(password, 0, 254)) {
+		if (password && !DataValidator.isStringLengthBetweenLimits(password, 0, 254))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidPasswordLength,
-				message: 'The provided password is too big'
+				errorCode: JSPErrorCode.documentInvalidPasswordLength,
+				message: 'The provided password length is invalid'
 			});
-		}
 
 		// Make the document permanent if the value exceeds 5 years
 		if (lifetime ?? 0 > 157_784_760) lifetime = 0;
 
+		const expireTimestamp =
+			(lifetime ?? defaultDocumentLifetime * 1000) > 0
+				? Date.now() + (lifetime ?? defaultDocumentLifetime * 1000)
+				: undefined;
+
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
-			secret: secret,
+			secret,
 			expireTimestamp:
-				(lifetime ?? defaultDocumentLifetime * 1000) > 0
-					? BigInt(Date.now() + (lifetime ?? defaultDocumentLifetime * 1000))
-					: undefined,
-			// FIXME: Encrypt password?
-			password: password
+				typeof expireTimestamp === 'number' ? BigInt(expireTimestamp) : undefined,
+			password
 		};
 
 		const selectedKey = await createKey();
 
 		await DocumentManager.write(basePath + selectedKey, newDoc);
 
-		return { key: selectedKey, secret: secret };
+		switch (version) {
+			case APIVersions.v1:
+				return { key: selectedKey, secret };
+			case APIVersions.v2:
+				return {
+					key: selectedKey,
+					secret,
+					url: viewDocumentPath + selectedKey,
+					expireTimestamp
+				};
+		}
 	}
 
 	static async handleRemove({
@@ -196,7 +245,7 @@ export class DocumentHandler {
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidInput,
-				message: 'Invalid ID provided'
+				message: 'The provided document ID is not alphanumeric'
 			});
 
 		const file = Bun.file(basePath + id);
@@ -206,7 +255,7 @@ export class DocumentHandler {
 		if (!fileExists)
 			return errorSender.sendError(404, {
 				type: 'error',
-				errorCode: JSPErrorCode.fileNotFound,
+				errorCode: JSPErrorCode.documentNotFound,
 				message: 'The requested file does not exist'
 			});
 
@@ -215,12 +264,11 @@ export class DocumentHandler {
 		if (doc.secret && doc.secret !== secret)
 			return errorSender.sendError(403, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidSecret,
+				errorCode: JSPErrorCode.documentInvalidSecret,
 				message: 'Invalid secret provided'
 			});
 
 		// FIXME: Use bun
-
 		await unlink(basePath + id);
 
 		return { message: 'File removed successfully' };

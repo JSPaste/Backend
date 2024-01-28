@@ -14,18 +14,8 @@ export class ErrorSender {
 		this.context = context;
 	}
 
-	static isJSPError(error?: any) {
-		return error?.type === 'error';
-	}
-
-	static isElysiaError(err?: any): boolean {
-		if (!err) return false;
-
-		return (
-			err.response &&
-			'type' in (err.response as JSPError) &&
-			(err.response as JSPError).type === 'error'
-		);
+	static isJSPError(err?: any): err is JSPError {
+		return (err as JSPError).type === 'error';
 	}
 
 	static errorType() {
