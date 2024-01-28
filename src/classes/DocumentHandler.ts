@@ -43,20 +43,6 @@ export class DocumentHandler {
 
 		const doc = await DocumentManager.read(file);
 
-		if (doc.password && !password)
-			return errorSender.sendError(401, {
-				type: 'error',
-				errorCode: JSPErrorCode.documentPasswordNeeded,
-				message: 'Invalid credentials provided for the document.'
-			});
-
-		if (doc.password && doc.password !== password)
-			return errorSender.sendError(403, {
-				type: 'error',
-				errorCode: JSPErrorCode.documentInvalidPassword,
-				message: 'Invalid credentials provided for the document.'
-			});
-
 		if (doc.expireTimestamp && doc.expireTimestamp > 0 && doc.expireTimestamp <= Date.now()) {
 			await unlink(basePath + id).catch(() => null);
 
@@ -66,6 +52,20 @@ export class DocumentHandler {
 				message: 'The requested file does not exist'
 			});
 		}
+
+		if (doc.password && !password)
+			return errorSender.sendError(401, {
+				type: 'error',
+				errorCode: JSPErrorCode.documentPasswordNeeded,
+				message: 'This document requires credentials, however none were provided.'
+			});
+
+		if (doc.password && doc.password !== password)
+			return errorSender.sendError(403, {
+				type: 'error',
+				errorCode: JSPErrorCode.documentInvalidPassword,
+				message: 'Invalid credentials provided for the document.'
+			});
 
 		const data = new TextDecoder().decode(doc.rawFileData);
 
