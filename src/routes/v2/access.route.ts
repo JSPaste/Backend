@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
-import { type AccessResponse, DocumentHandler } from '../../classes/DocumentHandler.ts';
+import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 
 export default new Elysia({
 	name: 'routes:v2:documents:access'
@@ -9,11 +9,11 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.get(
 		':id',
-		async ({ errorSender, request, params: { id } }) =>
+		async ({ errorSender, request, query: { p }, params: { id } }) =>
 			DocumentHandler.handleAccess({
 				errorSender,
 				id,
-				password: request.headers.get('password') || ''
+				password: request.headers.get('password') || p || ''
 			}),
 		{
 			params: t.Object({
@@ -27,6 +27,17 @@ export default new Elysia({
 					password: t.Optional(
 						t.String({
 							description: 'The document password if aplicable',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					)
+				})
+			),
+			query: t.Optional(
+				t.Object({
+					p: t.Optional(
+						t.String({
+							description:
+								'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
 							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					)
@@ -55,12 +66,12 @@ export default new Elysia({
 	)
 	.get(
 		':id/raw',
-		async ({ errorSender, request, params: { id } }) =>
-			DocumentHandler.handleAccess({
+		async ({ errorSender, request, query: { p }, params: { id } }) =>
+			DocumentHandler.handleRawAccess({
 				errorSender,
 				id,
-				password: request.headers.get('password') || ''
-			}).then((res) => (ErrorSender.isJSPError(res) ? res : (<AccessResponse>res).data)),
+				password: request.headers.get('password') || p || ''
+			}),
 		{
 			params: t.Object(
 				{
@@ -84,8 +95,19 @@ export default new Elysia({
 					)
 				})
 			),
+			query: t.Optional(
+				t.Object({
+					p: t.Optional(
+						t.String({
+							description:
+								'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					)
+				})
+			),
 			response: {
-				200: t.Any({
+				200: t.String({
 					description: 'The raw document',
 					examples: ['Hello world']
 				}),

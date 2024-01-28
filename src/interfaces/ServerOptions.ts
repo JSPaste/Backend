@@ -1,3 +1,5 @@
+import type { APIVersions } from '../utils/constants';
+
 export interface ServerOptions {
 	/** The hostname for swagger // TODO: hostname? maybe other things?? */
 	docsHostname: string;
@@ -6,5 +8,5 @@ export interface ServerOptions {
 	port: string | number;
 
 	/** Accessible API versions */
-	versions: number[];
+	versions: APIVersions[];
 }
