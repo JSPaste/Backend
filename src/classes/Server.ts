@@ -80,7 +80,7 @@ export class Server {
 			for (const resolvedRoute of routesArray) {
 				if (!resolvedRoute) continue;
 
-				this.app.group(`/api/v${apiVersion}/documents`, (prefix) =>
+				this.app.group(`/api/v${apiVersion as number}/documents`, (prefix) =>
 					prefix.use(resolvedRoute)
 				);
 

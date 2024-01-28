@@ -20,12 +20,12 @@ export const defaultDocumentLifetime = parseInt(
 export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
 
 export enum JSPErrorCode {
-	invalidInput = 'jsp.invalid_input',
-	documentNotFound = 'jsp.document_not_found',
-	documentPasswordNeeded = 'jsp.document_needs_password',
-	documentInvalidPasswordLength = 'jsp.document_invalid_password_length',
-	documentInvalidPassword = 'jsp.document_invalid_password',
-	documentInvalidLength = 'jsp.document_invalid_document_length',
-	documentInvalidSecret = 'jsp.document_invalid_secret',
-	documentInvalidSecretLength = 'jsp.document_invalid_secret_length'
+	inputInvalid = 'jsp.input.invalid',
+	documentNotFound = 'jsp.document.not_found',
+	documentPasswordNeeded = 'jsp.document.needs_password',
+	documentInvalidPasswordLength = 'jsp.document.invalid_password_length',
+	documentInvalidPassword = 'jsp.document.invalid_password',
+	documentInvalidLength = 'jsp.document.invalid_length',
+	documentInvalidSecret = 'jsp.document.invalid_secret',
+	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
 }

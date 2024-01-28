@@ -26,7 +26,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidInput,
+				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
@@ -103,7 +103,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidInput,
+				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
@@ -147,7 +147,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidInput,
+				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
@@ -244,7 +244,7 @@ export class DocumentHandler {
 		if (!DataValidator.isAlphanumeric(id))
 			return errorSender.sendError(400, {
 				type: 'error',
-				errorCode: JSPErrorCode.invalidInput,
+				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
