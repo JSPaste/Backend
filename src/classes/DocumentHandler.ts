@@ -203,8 +203,8 @@ export class DocumentHandler {
 		if ((lifetime ?? 0) > 157_784_760) lifetime = 0;
 
 		const expireTimestamp =
-			(lifetime ?? defaultDocumentLifetime * 1000) > 0
-				? Date.now() + (lifetime ?? defaultDocumentLifetime * 1000)
+			(lifetime ?? defaultDocumentLifetime) * 1000 > 0
+				? Date.now() + (lifetime ?? defaultDocumentLifetime) * 1000
 				: undefined;
 
 		const newDoc: DocumentDataStruct = {

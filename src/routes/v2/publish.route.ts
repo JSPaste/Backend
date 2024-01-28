@@ -42,7 +42,7 @@ export default new Elysia({
 						})
 					),
 					lifetime: t.Optional(
-						t.Number({
+						t.Numeric({
 							description: `Number in seconds that the document will exist before it is automatically deleted. Set to 0 to make the document permanent. If nothing is set, the default period is: ${defaultDocumentLifetime}`,
 							examples: [60, 0]
 						})
