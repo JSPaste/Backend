@@ -38,7 +38,7 @@ export class Server {
 		this.app.use(
 			swagger({
 				documentation: {
-					servers: [{ url: this.serverOptions.hostname }],
+					servers: [{ url: this.serverOptions.docsHostname }],
 					info: {
 						title: 'JSPaste documentation',
 						version: this.serverOptions.versions.map((v) => `v${v}`).join(', '),

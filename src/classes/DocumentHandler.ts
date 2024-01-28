@@ -1,5 +1,4 @@
 import { unlink } from 'node:fs/promises';
-import { ErrorSender } from './ErrorSender.ts';
 import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
 import { createKey, createSecret } from '../utils/createKey.ts';
@@ -10,6 +9,7 @@ import {
 	defaultDocumentLifetime,
 	maxDocLength
 } from '../utils/constants.ts';
+import type { ErrorSender } from './ErrorSender.ts';
 
 export interface AccessResponse {
 	key: string;
@@ -17,9 +17,17 @@ export interface AccessResponse {
 }
 
 export class DocumentHandler {
-	static async handleAccess({ id, password }: { id: string; password?: string }) {
+	static async handleAccess({
+		errorSender,
+		id,
+		password
+	}: {
+		errorSender: ErrorSender;
+		id: string;
+		password?: string;
+	}) {
 		if (!DataValidator.isAlphanumeric(id))
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidInput,
 				message: 'Invalid ID provided'
@@ -30,7 +38,7 @@ export class DocumentHandler {
 		const fileExists = await file.exists();
 
 		if (!fileExists)
-			return ErrorSender.sendError(404, {
+			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
@@ -39,7 +47,7 @@ export class DocumentHandler {
 		const doc = await DocumentManager.read(file);
 
 		if (doc.password && doc.password !== password)
-			return ErrorSender.sendError(401, {
+			return errorSender.sendError(401, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidPassword,
 				message: 'This file needs credentials, however no credentials were provided'
@@ -48,7 +56,7 @@ export class DocumentHandler {
 		if (doc.expireTimestamp && doc.expireTimestamp > 0 && doc.expireTimestamp <= Date.now()) {
 			await unlink(basePath + id).catch(() => null);
 
-			return ErrorSender.sendError(404, {
+			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
@@ -62,16 +70,18 @@ export class DocumentHandler {
 	}
 
 	static async handleEdit({
+		errorSender,
 		id,
 		newBody,
 		secret
 	}: {
+		errorSender: ErrorSender;
 		id: string;
 		newBody: any;
 		secret?: string;
 	}) {
 		if (!DataValidator.isAlphanumeric(id))
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidInput,
 				message: 'Invalid ID provided'
@@ -82,7 +92,7 @@ export class DocumentHandler {
 		const fileExists = await file.exists();
 
 		if (!fileExists)
-			return ErrorSender.sendError(404, {
+			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
@@ -91,7 +101,7 @@ export class DocumentHandler {
 		const buffer = Buffer.from(newBody as ArrayBuffer);
 
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidFileLength,
 				message: 'The document data its is too big or is empty'
@@ -100,7 +110,7 @@ export class DocumentHandler {
 		const doc = await DocumentManager.read(file);
 
 		if (doc.secret && doc.secret !== secret)
-			return ErrorSender.sendError(403, {
+			return errorSender.sendError(403, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidSecret,
 				message: 'Invalid secret provided'
@@ -114,11 +124,13 @@ export class DocumentHandler {
 	}
 
 	static async handlePublish({
+		errorSender,
 		body,
 		selectedSecret,
 		lifetime,
 		password
 	}: {
+		errorSender: ErrorSender;
 		body: any;
 		selectedSecret?: string;
 		lifetime?: number;
@@ -127,7 +139,7 @@ export class DocumentHandler {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidFileLength,
 				message: 'The document data its is too big or is empty'
@@ -136,14 +148,14 @@ export class DocumentHandler {
 		const secret = selectedSecret || createSecret();
 
 		if (!DataValidator.isLengthBetweenLimits(secret, 1, 254))
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidSecretLength,
 				message: 'The provided secret is too big or is empty'
 			});
 
 		if (!DataValidator.isLengthBetweenLimits(password, 0, 254)) {
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidPasswordLength,
 				message: 'The provided password is too big'
@@ -171,9 +183,17 @@ export class DocumentHandler {
 		return { key: selectedKey, secret: secret };
 	}
 
-	static async handleRemove({ id, secret }: { id: string; secret: string }) {
+	static async handleRemove({
+		errorSender,
+		id,
+		secret
+	}: {
+		errorSender: ErrorSender;
+		id: string;
+		secret: string;
+	}) {
 		if (!DataValidator.isAlphanumeric(id))
-			return ErrorSender.sendError(400, {
+			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidInput,
 				message: 'Invalid ID provided'
@@ -184,7 +204,7 @@ export class DocumentHandler {
 		const fileExists = await file.exists();
 
 		if (!fileExists)
-			return ErrorSender.sendError(404, {
+			return errorSender.sendError(404, {
 				type: 'error',
 				errorCode: JSPErrorCode.fileNotFound,
 				message: 'The requested file does not exist'
@@ -193,7 +213,7 @@ export class DocumentHandler {
 		const doc = await DocumentManager.read(file);
 
 		if (doc.secret && doc.secret !== secret)
-			return ErrorSender.sendError(403, {
+			return errorSender.sendError(403, {
 				type: 'error',
 				errorCode: JSPErrorCode.invalidSecret,
 				message: 'Invalid secret provided'
