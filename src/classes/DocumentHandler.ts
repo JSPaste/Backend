@@ -200,7 +200,7 @@ export class DocumentHandler {
 			});
 
 		// Make the document permanent if the value exceeds 5 years
-		if (lifetime ?? 0 > 157_784_760) lifetime = 0;
+		if ((lifetime ?? 0) > 157_784_760) lifetime = 0;
 
 		const expireTimestamp =
 			(lifetime ?? defaultDocumentLifetime * 1000) > 0
