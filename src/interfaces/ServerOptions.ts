@@ -1,6 +1,6 @@
 export interface ServerOptions {
 	/** The hostname for swagger // TODO: hostname? maybe other things?? */
-	hostname: string;
+	docsHostname: string;
 
 	/** The port to listen on */
 	port: string | number;
