@@ -8,17 +8,17 @@ export default new Elysia({
 })
 	.use(errorSenderPlugin)
 	.delete(
-		':id',
-		async ({ errorSender, request, params: { id } }) =>
+		':key',
+		async ({ errorSender, request, params: { key } }) =>
 			DocumentHandler.handleRemove({
 				errorSender,
-				id,
+				key,
 				secret: request.headers.get('secret') || ''
 			}),
 		{
 			params: t.Object({
-				id: t.String({
-					description: 'The document ID',
+				key: t.String({
+					description: 'The document key',
 					examples: ['abc123']
 				})
 			}),
@@ -41,6 +41,6 @@ export default new Elysia({
 				403: ErrorSender.errorType(),
 				404: ErrorSender.errorType()
 			},
-			detail: { summary: 'Remove document by ID', tags: ['v1'] }
+			detail: { summary: 'Remove document', tags: ['v1'] }
 		}
 	);

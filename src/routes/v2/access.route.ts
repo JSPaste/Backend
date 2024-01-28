@@ -9,20 +9,20 @@ export default new Elysia({
 })
 	.use(errorSenderPlugin)
 	.get(
-		':id',
-		async ({ errorSender, request, query: { p }, params: { id } }) =>
+		':key',
+		async ({ errorSender, request, query: { p }, params: { key } }) =>
 			DocumentHandler.handleAccess(
 				{
 					errorSender,
-					key: id,
+					key,
 					password: request.headers.get('password') || p || ''
 				},
 				APIVersions.v2
 			),
 		{
 			params: t.Object({
-				id: t.String({
-					description: 'The document ID',
+				key: t.String({
+					description: 'The document key',
 					examples: ['abc123']
 				})
 			}),
@@ -80,16 +80,16 @@ export default new Elysia({
 				400: ErrorSender.errorType(),
 				404: ErrorSender.errorType()
 			},
-			detail: { summary: 'Get document by ID', tags: ['v2'] }
+			detail: { summary: 'Get document', tags: ['v2'] }
 		}
 	)
 	.get(
-		':id/raw',
-		async ({ errorSender, request, query: { p }, params: { id } }) =>
+		':key/raw',
+		async ({ errorSender, request, query: { p }, params: { key } }) =>
 			DocumentHandler.handleRawAccess(
 				{
 					errorSender,
-					id,
+					key,
 					password: request.headers.get('password') || p || ''
 				},
 				APIVersions.v2
@@ -97,14 +97,14 @@ export default new Elysia({
 		{
 			params: t.Object(
 				{
-					id: t.String({
-						description: 'The document ID',
+					key: t.String({
+						description: 'The document key',
 						examples: ['abc123']
 					})
 				},
 				{
 					description: 'The request parameters',
-					examples: [{ id: 'abc123' }]
+					examples: [{ key: 'abc123' }]
 				}
 			),
 			headers: t.Optional(
@@ -137,7 +137,7 @@ export default new Elysia({
 				404: ErrorSender.errorType()
 			},
 			detail: {
-				summary: 'Get raw document by ID',
+				summary: 'Get raw document',
 				tags: ['v2']
 			}
 		}

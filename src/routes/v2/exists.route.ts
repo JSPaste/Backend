@@ -8,13 +8,13 @@ export default new Elysia({
 })
 	.use(errorSenderPlugin)
 	.get(
-		':id/exists',
-		async ({ errorSender, params: { id } }) =>
-			DocumentHandler.handleExists({ errorSender, id }),
+		':key/exists',
+		async ({ errorSender, params: { key } }) =>
+			DocumentHandler.handleExists({ errorSender, key: key }),
 		{
 			params: t.Object({
-				id: t.String({
-					description: 'The document ID',
+				key: t.String({
+					description: 'The document key',
 					examples: ['abc123']
 				})
 			}),
@@ -23,6 +23,6 @@ export default new Elysia({
 				400: ErrorSender.errorType()
 			},
 
-			detail: { summary: 'Check document by ID', tags: ['v2'] }
+			detail: { summary: 'Check document', tags: ['v2'] }
 		}
 	);

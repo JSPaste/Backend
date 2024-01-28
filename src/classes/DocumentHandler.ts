@@ -79,39 +79,39 @@ export class DocumentHandler {
 	static async handleRawAccess(
 		{
 			errorSender,
-			id,
+			key,
 			password
 		}: {
 			errorSender: ErrorSender;
-			id: string;
+			key: string;
 			password?: string;
 		},
 		version: APIVersions
 	) {
-		return DocumentHandler.handleAccess({ errorSender, key: id, password }, version).then(
+		return DocumentHandler.handleAccess({ errorSender, key: key, password }, version).then(
 			(res) => (ErrorSender.isJSPError(res) ? res : res.data)
 		);
 	}
 
 	static async handleEdit({
 		errorSender,
-		id,
+		key,
 		newBody,
 		secret
 	}: {
 		errorSender: ErrorSender;
-		id: string;
+		key: string;
 		newBody: any;
 		secret?: string;
 	}) {
-		if (!DataValidator.isAlphanumeric(id))
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
@@ -142,20 +142,20 @@ export class DocumentHandler {
 
 		doc.rawFileData = buffer;
 
-		await DocumentManager.write(basePath + id, doc);
+		await DocumentManager.write(basePath + key, doc);
 
 		return { message: 'File updated successfully' };
 	}
 
-	static async handleExists({ errorSender, id }: { errorSender: ErrorSender; id: string }) {
-		if (!DataValidator.isAlphanumeric(id))
+	static async handleExists({ errorSender, key }: { errorSender: ErrorSender; key: string }) {
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
@@ -238,21 +238,21 @@ export class DocumentHandler {
 
 	static async handleRemove({
 		errorSender,
-		id,
+		key,
 		secret
 	}: {
 		errorSender: ErrorSender;
-		id: string;
+		key: string;
 		secret: string;
 	}) {
-		if (!DataValidator.isAlphanumeric(id))
+		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
 				message: 'The provided document ID is not alphanumeric'
 			});
 
-		const file = Bun.file(basePath + id);
+		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
@@ -273,7 +273,7 @@ export class DocumentHandler {
 			});
 
 		// FIXME: Use bun
-		await unlink(basePath + id);
+		await unlink(basePath + key);
 
 		return { message: 'File removed successfully' };
 	}
