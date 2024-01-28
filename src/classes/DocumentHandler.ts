@@ -70,10 +70,20 @@ export class DocumentHandler {
 
 		const data = new TextDecoder().decode(doc.rawFileData);
 
-		return {
-			key,
-			data
-		};
+		switch (version) {
+			case APIVersions.v1:
+				return {
+					key,
+					data
+				};
+			case APIVersions.v2:
+				return {
+					key,
+					data,
+					url: viewDocumentPath + key,
+					expirationTimestamp: Number(doc.expirationTimestamp)
+				};
+		}
 	}
 
 	static async handleRawAccess(
