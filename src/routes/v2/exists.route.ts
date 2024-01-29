@@ -4,7 +4,7 @@ import { DocumentHandler } from '../../classes/DocumentHandler.ts';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 
 export default new Elysia({
-	name: 'routes:v2:documents:exits'
+	name: 'routes:v2:documents:exists'
 })
 	.use(errorSenderPlugin)
 	.get(
