@@ -29,8 +29,6 @@ export class Server {
 			.onError(({ errorSender, path, set, code, error }) => {
 				switch (code) {
 					case 'NOT_FOUND':
-						console.log(path);
-
 						if (path === '/404') return 'Not found';
 
 						// Redirect to the frontend 404 page

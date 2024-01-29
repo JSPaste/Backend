@@ -34,11 +34,11 @@ export default new Elysia({
 			response: {
 				200: t.Object(
 					{
-						message: t.String({
-							description: 'A message saying that the update was successful'
+						edited: t.Boolean({
+							description: 'A boolean indicating if the edit was successful'
 						})
 					},
-					{ description: 'A response object with a message' }
+					{ description: 'A response object with a boolean' }
 				),
 				400: ErrorSender.errorType(),
 				403: ErrorSender.errorType(),

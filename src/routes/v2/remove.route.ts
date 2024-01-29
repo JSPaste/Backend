@@ -31,11 +31,11 @@ export default new Elysia({
 			response: {
 				200: t.Object(
 					{
-						message: t.String({
-							description: 'A message saying that the deletion was successful'
+						removed: t.Boolean({
+							description: 'A boolean indicating if the deletion was successful'
 						})
 					},
-					{ description: 'A response object with a message' }
+					{ description: 'A response object with a boolean' }
 				),
 				400: ErrorSender.errorType(),
 				403: ErrorSender.errorType(),
