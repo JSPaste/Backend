@@ -26,12 +26,17 @@ export class Server {
 				})
 			)
 			.use(errorSenderPlugin)
-			.onError(({ errorSender, set, code, error }) => {
+			.onError(({ errorSender, path, set, code, error }) => {
 				switch (code) {
 					case 'NOT_FOUND':
-						// for some reason, error sender is not available on this code.
-						set.status = 404;
-						return 'Not found, please try again later of check our documentation.';
+						console.log(path);
+
+						if (path === '/404') return 'Not found';
+
+						// Redirect to the frontend 404 page
+						set.redirect = '/404';
+
+						return;
 
 					case 'VALIDATION':
 						return errorSender.sendError(400, {

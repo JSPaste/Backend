@@ -229,18 +229,18 @@ export class DocumentHandler {
 			password
 		};
 
-		const selectedKey = await createKey();
+		const key = await createKey();
 
-		await DocumentManager.write(basePath + selectedKey, newDoc);
+		await DocumentManager.write(basePath + key, newDoc);
 
 		switch (version) {
 			case APIVersions.v1:
-				return { key: selectedKey, secret };
+				return { key, secret };
 			case APIVersions.v2:
 				return {
-					key: selectedKey,
+					key,
 					secret,
-					url: viewDocumentPath + selectedKey,
+					url: viewDocumentPath + key,
 					expirationTimestamp
 				};
 		}
