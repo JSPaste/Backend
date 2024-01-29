@@ -152,9 +152,11 @@ export class DocumentHandler {
 
 		doc.rawFileData = buffer;
 
-		await DocumentManager.write(basePath + key, doc);
+		const edited = await DocumentManager.write(basePath + key, doc)
+			.then(() => true)
+			.catch(() => false);
 
-		return { message: 'File updated successfully' };
+		return { edited };
 	}
 
 	static async handleExists({ errorSender, key }: { errorSender: ErrorSender; key: string }) {
@@ -216,32 +218,36 @@ export class DocumentHandler {
 		// Make the document permanent if the value exceeds 5 years
 		if ((lifetime ?? 0) > 157_784_760) lifetime = 0;
 
-		const expirationTimestamp =
+		const parsedExpirationTimestamp =
 			(lifetime ?? defaultDocumentLifetime) * 1000 > 0
 				? Date.now() + (lifetime ?? defaultDocumentLifetime) * 1000
+				: undefined;
+
+		const expirationTimestamp =
+			typeof parsedExpirationTimestamp === 'number'
+				? BigInt(parsedExpirationTimestamp)
 				: undefined;
 
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
 			secret,
-			expirationTimestamp:
-				typeof expirationTimestamp === 'number' ? BigInt(expirationTimestamp) : undefined,
+			expirationTimestamp,
 			password
 		};
 
-		const selectedKey = await createKey();
+		const key = await createKey();
 
-		await DocumentManager.write(basePath + selectedKey, newDoc);
+		await DocumentManager.write(basePath + key, newDoc);
 
 		switch (version) {
 			case APIVersions.v1:
-				return { key: selectedKey, secret };
+				return { key, secret };
 			case APIVersions.v2:
 				return {
-					key: selectedKey,
+					key,
 					secret,
-					url: viewDocumentPath + selectedKey,
-					expirationTimestamp
+					url: viewDocumentPath + key,
+					expirationTimestamp: parsedExpirationTimestamp
 				};
 		}
 	}
@@ -283,8 +289,10 @@ export class DocumentHandler {
 			});
 
 		// FIXME: Use bun
-		await unlink(basePath + key);
+		const removed = await unlink(basePath + key)
+			.then(() => true)
+			.catch(() => false);
 
-		return { message: 'File removed successfully' };
+		return { removed };
 	}
 }
