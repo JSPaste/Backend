@@ -46,7 +46,7 @@ export default new Elysia({
 		{
 			params: t.Object(
 				{
-					key: t.String({
+					key: t.Any({
 						description: 'The document key',
 						examples: ['abc123']
 					})

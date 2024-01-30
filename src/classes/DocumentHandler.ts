@@ -26,6 +26,61 @@ export class DocumentHandler {
 		},
 		version: APIVersions
 	) {
+		return DocumentHandler.handleAccessCore({ errorSender, key: key, password }, version).then(
+			(res) => {
+				if (ErrorSender.isJSPError(res)) {
+					return res;
+				}
+
+				const data = new TextDecoder().decode(res.rawFileData);
+
+				switch (version) {
+					case APIVersions.v1:
+						return {
+							key,
+							data
+						};
+					case APIVersions.v2:
+						return {
+							key,
+							data,
+							url: viewDocumentPath + key,
+							expirationTimestamp: Number(res.expirationTimestamp)
+						};
+				}
+			}
+		);
+	}
+
+	static async handleRawAccess(
+		{
+			errorSender,
+			key,
+			password
+		}: {
+			errorSender: ErrorSender;
+			key: string;
+			password?: string;
+		},
+		version: APIVersions
+	) {
+		return DocumentHandler.handleAccessCore({ errorSender, key: key, password }, version).then(
+			(res) => (ErrorSender.isJSPError(res) ? res : new Response(res.rawFileData))
+		);
+	}
+
+	static async handleAccessCore(
+		{
+			errorSender,
+			key,
+			password
+		}: {
+			errorSender: ErrorSender;
+			key: string;
+			password?: string;
+		},
+		version: APIVersions
+	) {
 		if (!DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, {
 				type: 'error',
@@ -68,39 +123,7 @@ export class DocumentHandler {
 				message: 'Invalid credentials provided for the document.'
 			});
 
-		const data = new TextDecoder().decode(doc.rawFileData);
-
-		switch (version) {
-			case APIVersions.v1:
-				return {
-					key,
-					data
-				};
-			case APIVersions.v2:
-				return {
-					key,
-					data,
-					url: viewDocumentPath + key,
-					expirationTimestamp: Number(doc.expirationTimestamp)
-				};
-		}
-	}
-
-	static async handleRawAccess(
-		{
-			errorSender,
-			key,
-			password
-		}: {
-			errorSender: ErrorSender;
-			key: string;
-			password?: string;
-		},
-		version: APIVersions
-	) {
-		return DocumentHandler.handleAccess({ errorSender, key: key, password }, version).then(
-			(res) => (ErrorSender.isJSPError(res) ? res : res.data)
-		);
+		return doc;
 	}
 
 	static async handleEdit({
