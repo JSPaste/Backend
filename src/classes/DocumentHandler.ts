@@ -224,32 +224,27 @@ export class DocumentHandler {
 
 		const secret = selectedSecret || createSecret();
 
-		if (!DataValidator.isStringLengthBetweenLimits(secret ?? '', 1, 254))
+		if (!DataValidator.isStringLengthBetweenLimits(secret ?? '', 1, 255))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.documentInvalidSecretLength,
 				message: 'The provided secret length is invalid'
 			});
 
-		if (password && !DataValidator.isStringLengthBetweenLimits(password, 0, 254))
+		if (password && !DataValidator.isStringLengthBetweenLimits(password, 0, 255))
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.documentInvalidPasswordLength,
 				message: 'The provided password length is invalid'
 			});
 
-		// Make the document permanent if the value exceeds 5 years
-		if ((lifetime ?? 0) > 157_784_760) lifetime = 0;
+		lifetime = lifetime ?? defaultDocumentLifetime;
 
-		const parsedExpirationTimestamp =
-			(lifetime ?? defaultDocumentLifetime) * 1000 > 0
-				? Date.now() + (lifetime ?? defaultDocumentLifetime) * 1000
-				: undefined;
+		// Make the document permanent if the value exceeds 5 years
+		if (lifetime > 157_784_760) lifetime = 0;
 
 		const expirationTimestamp =
-			typeof parsedExpirationTimestamp === 'number'
-				? BigInt(parsedExpirationTimestamp)
-				: undefined;
+			lifetime * 1000 > 0 ? BigInt(Date.now() + lifetime * 1000) : BigInt(0);
 
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
@@ -270,7 +265,7 @@ export class DocumentHandler {
 					key,
 					secret,
 					url: viewDocumentPath + key,
-					expirationTimestamp: parsedExpirationTimestamp
+					expirationTimestamp: expirationTimestamp
 				};
 		}
 	}
