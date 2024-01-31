@@ -102,7 +102,9 @@ export class DocumentHandler {
 							key,
 							data,
 							url: viewDocumentPath + key,
-							expirationTimestamp: Number(res.expirationTimestamp)
+							expirationTimestamp: res.expirationTimestamp
+								? Number(res.expirationTimestamp)
+								: undefined
 						};
 				}
 			}
