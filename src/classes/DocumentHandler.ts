@@ -14,78 +14,23 @@ import {
 import { ErrorSender } from './ErrorSender.ts';
 
 export class DocumentHandler {
-	static async handleAccess(
-		{
-			errorSender,
-			key,
-			password
-		}: {
-			errorSender: ErrorSender;
-			key: string;
-			password?: string;
-		},
-		version: APIVersions
-	) {
-		return DocumentHandler.handleAccessCore({ errorSender, key: key, password }, version).then(
-			(res) => {
-				if (ErrorSender.isJSPError(res)) {
-					return res;
-				}
-
-				const data = new TextDecoder().decode(res.rawFileData);
-
-				switch (version) {
-					case APIVersions.v1:
-						return {
-							key,
-							data
-						};
-					case APIVersions.v2:
-						return {
-							key,
-							data,
-							url: viewDocumentPath + key,
-							expirationTimestamp: Number(res.expirationTimestamp)
-						};
-				}
-			}
-		);
-	}
-
-	static async handleRawAccess(
-		{
-			errorSender,
-			key,
-			password
-		}: {
-			errorSender: ErrorSender;
-			key: string;
-			password?: string;
-		},
-		version: APIVersions
-	) {
-		return DocumentHandler.handleAccessCore({ errorSender, key: key, password }, version).then(
-			(res) => (ErrorSender.isJSPError(res) ? res : new Response(res.rawFileData))
-		);
-	}
-
-	static async handleAccessCore(
-		{
-			errorSender,
-			key,
-			password
-		}: {
-			errorSender: ErrorSender;
-			key: string;
-			password?: string;
-		},
-		version: APIVersions
-	) {
-		if (!DataValidator.isAlphanumeric(key))
+	private static async handleGetDocument({
+		errorSender,
+		key,
+		password
+	}: {
+		errorSender: ErrorSender;
+		key: string;
+		password?: string;
+	}) {
+		if (
+			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
+			!DataValidator.isAlphanumeric(key)
+		)
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
-				message: 'The provided document key is not alphanumeric'
+				message: 'The provided document key is not alphanumeric or has an invalid length'
 			});
 
 		const file = Bun.file(basePath + key);
@@ -126,6 +71,58 @@ export class DocumentHandler {
 		return doc;
 	}
 
+	static async handleAccess(
+		{
+			errorSender,
+			key,
+			password
+		}: {
+			errorSender: ErrorSender;
+			key: string;
+			password?: string;
+		},
+		version: APIVersions
+	) {
+		return DocumentHandler.handleGetDocument({ errorSender, key: key, password }).then(
+			(res) => {
+				if (ErrorSender.isJSPError(res)) {
+					return res;
+				}
+
+				const data = new TextDecoder().decode(res.rawFileData);
+
+				switch (version) {
+					case APIVersions.v1:
+						return {
+							key,
+							data
+						};
+					case APIVersions.v2:
+						return {
+							key,
+							data,
+							url: viewDocumentPath + key,
+							expirationTimestamp: Number(res.expirationTimestamp)
+						};
+				}
+			}
+		);
+	}
+
+	static async handleRawAccess({
+		errorSender,
+		key,
+		password
+	}: {
+		errorSender: ErrorSender;
+		key: string;
+		password?: string;
+	}) {
+		return DocumentHandler.handleGetDocument({ errorSender, key: key, password }).then((res) =>
+			ErrorSender.isJSPError(res) ? res : new Response(res.rawFileData)
+		);
+	}
+
 	static async handleEdit({
 		errorSender,
 		key,
@@ -137,11 +134,14 @@ export class DocumentHandler {
 		newBody: any;
 		secret?: string;
 	}) {
-		if (!DataValidator.isAlphanumeric(key))
+		if (
+			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
+			!DataValidator.isAlphanumeric(key)
+		)
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
-				message: 'The provided document ID is not alphanumeric'
+				message: 'The provided document key is not alphanumeric or has an invalid length'
 			});
 
 		const file = Bun.file(basePath + key);
@@ -183,11 +183,14 @@ export class DocumentHandler {
 	}
 
 	static async handleExists({ errorSender, key }: { errorSender: ErrorSender; key: string }) {
-		if (!DataValidator.isAlphanumeric(key))
+		if (
+			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
+			!DataValidator.isAlphanumeric(key)
+		)
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
-				message: 'The provided document ID is not alphanumeric'
+				message: 'The provided document key is not alphanumeric or has an invalid length'
 			});
 
 		const file = Bun.file(basePath + key);
@@ -279,11 +282,14 @@ export class DocumentHandler {
 		key: string;
 		secret: string;
 	}) {
-		if (!DataValidator.isAlphanumeric(key))
+		if (
+			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
+			!DataValidator.isAlphanumeric(key)
+		)
 			return errorSender.sendError(400, {
 				type: 'error',
 				errorCode: JSPErrorCode.inputInvalid,
-				message: 'The provided document ID is not alphanumeric'
+				message: 'The provided document key is not alphanumeric or has an invalid length'
 			});
 
 		const file = Bun.file(basePath + key);
