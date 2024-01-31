@@ -86,14 +86,11 @@ export default new Elysia({
 	.get(
 		':key/raw',
 		async ({ errorSender, request, query: { p }, params: { key } }) =>
-			DocumentHandler.handleRawAccess(
-				{
-					errorSender,
-					key,
-					password: request.headers.get('password') || p || ''
-				},
-				APIVersions.v2
-			),
+			DocumentHandler.handleRawAccess({
+				errorSender,
+				key,
+				password: request.headers.get('password') || p || ''
+			}),
 		{
 			params: t.Object(
 				{
