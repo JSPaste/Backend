@@ -246,8 +246,9 @@ export class DocumentHandler {
 		// Make the document permanent if the value exceeds 5 years
 		if (lifetime > 157_784_760) lifetime = 0;
 
-		const expirationTimestamp =
-			lifetime * 1000 > 0 ? BigInt(Date.now() + lifetime * 1000) : BigInt(0);
+		const msLifetime = lifetime * 1000;
+
+		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
 
 		const newDoc: DocumentDataStruct = {
 			rawFileData: buffer,
@@ -268,7 +269,7 @@ export class DocumentHandler {
 					key,
 					secret,
 					url: viewDocumentPath + key,
-					expirationTimestamp: expirationTimestamp
+					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 		}
 	}
