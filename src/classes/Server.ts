@@ -36,6 +36,7 @@ export class Server {
 
 						return;
 
+					// FIXME: Add proper hint debugging messages (JSPErrorMessage)
 					case 'VALIDATION':
 						return errorSender.sendError(400, {
 							type: 'error',

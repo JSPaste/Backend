@@ -11,15 +11,15 @@ export interface JSPError {
 export class ErrorSender {
 	context: Context;
 
-	constructor(context: Context) {
+	public constructor(context: Context) {
 		this.context = context;
 	}
 
-	static isJSPError(err?: any): err is JSPError {
-		return (err as JSPError).type === 'error';
+	public static isJSPError(err?: any): err is JSPError {
+		return (err as JSPError)?.type === 'error';
 	}
 
-	static errorType() {
+	public static errorType() {
 		return t.Object(
 			{
 				type: t.String({ description: 'The error type' }),
@@ -31,9 +31,8 @@ export class ErrorSender {
 		);
 	}
 
-	sendError(code: number, err: JSPError) {
+	public sendError(code: number, err: JSPError): JSPError {
 		this.context.set.status = code;
-
 		return err;
 	}
 }
