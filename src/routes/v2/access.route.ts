@@ -85,8 +85,10 @@ export default new Elysia({
 	)
 	.get(
 		':key/raw',
-		async ({ errorSender, request, query: { p }, params: { key } }) =>
-			DocumentHandler.handleAccess(
+		async ({ errorSender, set, request, query: { p }, params: { key } }) => {
+			set.headers['Content-Type'] = 'text/plain';
+
+			return DocumentHandler.handleAccess(
 				{
 					errorSender,
 					key,
@@ -94,7 +96,8 @@ export default new Elysia({
 					raw: true
 				},
 				ServerVersion.v2
-			),
+			);
+		},
 		{
 			params: t.Object(
 				{

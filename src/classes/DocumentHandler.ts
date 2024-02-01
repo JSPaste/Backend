@@ -193,7 +193,7 @@ export class DocumentHandler {
 		const fileExists = await file.exists();
 		const doc = fileExists && (await DocumentManager.read(file));
 
-		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp <= Date.now())) {
+		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp < Date.now())) {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
 			if (fileExists) await unlink(basePath + key).catch(() => null);
 
