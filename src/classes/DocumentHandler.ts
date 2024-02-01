@@ -1,76 +1,20 @@
 import { unlink } from 'node:fs/promises';
 import { DataValidator } from './DataValidator';
 import { DocumentManager } from './DocumentManager';
-import { createKey, createSecret } from '../utils/createKey.ts';
+import { createKey } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 import {
 	APIVersions,
-	JSPErrorCode,
 	basePath,
 	defaultDocumentLifetime,
+	JSPErrorCode,
 	maxDocLength,
 	viewDocumentPath
 } from '../utils/constants.ts';
 import { ErrorSender } from './ErrorSender.ts';
+import { createSecret } from '../utils/createSecret.ts';
 
 export class DocumentHandler {
-	private static async handleGetDocument({
-		errorSender,
-		key,
-		password
-	}: {
-		errorSender: ErrorSender;
-		key: string;
-		password?: string;
-	}) {
-		if (
-			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
-			!DataValidator.isAlphanumeric(key)
-		)
-			return errorSender.sendError(400, {
-				type: 'error',
-				errorCode: JSPErrorCode.inputInvalid,
-				message: 'The provided document key is not alphanumeric or has an invalid length'
-			});
-
-		const file = Bun.file(basePath + key);
-
-		const fileExists = await file.exists();
-
-		const doc = fileExists && (await DocumentManager.read(file));
-
-		if (
-			!doc ||
-			(doc.expirationTimestamp &&
-				doc.expirationTimestamp > 0 &&
-				doc.expirationTimestamp <= Date.now())
-		) {
-			if (fileExists) await unlink(basePath + key).catch(() => null);
-
-			return errorSender.sendError(404, {
-				type: 'error',
-				errorCode: JSPErrorCode.documentNotFound,
-				message: 'The requested document does not exist'
-			});
-		}
-
-		if (doc.password && !password)
-			return errorSender.sendError(401, {
-				type: 'error',
-				errorCode: JSPErrorCode.documentPasswordNeeded,
-				message: 'This document requires credentials, however none were provided.'
-			});
-
-		if (doc.password && doc.password !== password)
-			return errorSender.sendError(403, {
-				type: 'error',
-				errorCode: JSPErrorCode.documentInvalidPassword,
-				message: 'Invalid credentials provided for the document.'
-			});
-
-		return doc;
-	}
-
 	static async handleAccess(
 		{
 			errorSender,
@@ -321,5 +265,62 @@ export class DocumentHandler {
 			.catch(() => false);
 
 		return { removed };
+	}
+
+	private static async handleGetDocument({
+		errorSender,
+		key,
+		password
+	}: {
+		errorSender: ErrorSender;
+		key: string;
+		password?: string;
+	}) {
+		if (
+			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
+			!DataValidator.isAlphanumeric(key)
+		)
+			return errorSender.sendError(400, {
+				type: 'error',
+				errorCode: JSPErrorCode.inputInvalid,
+				message: 'The provided document key is not alphanumeric or has an invalid length'
+			});
+
+		const file = Bun.file(basePath + key);
+
+		const fileExists = await file.exists();
+
+		const doc = fileExists && (await DocumentManager.read(file));
+
+		if (
+			!doc ||
+			(doc.expirationTimestamp &&
+				doc.expirationTimestamp > 0 &&
+				doc.expirationTimestamp <= Date.now())
+		) {
+			if (fileExists) await unlink(basePath + key).catch(() => null);
+
+			return errorSender.sendError(404, {
+				type: 'error',
+				errorCode: JSPErrorCode.documentNotFound,
+				message: 'The requested document does not exist'
+			});
+		}
+
+		if (doc.password && !password)
+			return errorSender.sendError(401, {
+				type: 'error',
+				errorCode: JSPErrorCode.documentPasswordNeeded,
+				message: 'This document requires credentials, however none were provided.'
+			});
+
+		if (doc.password && doc.password !== password)
+			return errorSender.sendError(403, {
+				type: 'error',
+				errorCode: JSPErrorCode.documentInvalidPassword,
+				message: 'Invalid credentials provided for the document.'
+			});
+
+		return doc;
 	}
 }

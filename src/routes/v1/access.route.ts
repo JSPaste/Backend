@@ -42,7 +42,7 @@ export default new Elysia({
 	.get(
 		':key/raw',
 		async ({ errorSender, params: { key } }) =>
-			DocumentHandler.handleRawAccess({ errorSender, key: key }, APIVersions.v1),
+			DocumentHandler.handleRawAccess({ errorSender, key: key }),
 		{
 			params: t.Object(
 				{

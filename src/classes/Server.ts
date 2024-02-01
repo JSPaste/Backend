@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { JSPErrorCode, defaultServerOptions } from '../utils/constants.ts';
+import { defaultServerOptions, JSPErrorCode } from '../utils/constants.ts';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';

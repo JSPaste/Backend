@@ -1,4 +1,4 @@
-import { t, type Context } from 'elysia';
+import { type Context, t } from 'elysia';
 import { JSPErrorCode } from '../utils/constants';
 
 export interface JSPError {

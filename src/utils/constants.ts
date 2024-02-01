@@ -18,6 +18,7 @@ export const defaultDocumentLifetime = parseInt(
 	process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400'
 );
 export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
+export const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+_';
 
 export enum JSPErrorCode {
 	unknown = 'jsp.unknown',
@@ -34,3 +35,18 @@ export enum JSPErrorCode {
 	documentInvalidSecret = 'jsp.document.invalid_secret',
 	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
 }
+
+// https://github.com/microsoft/TypeScript/issues/43505
+export type NumericRange<
+	START extends number,
+	END extends number,
+	ARR extends unknown[] = [],
+	ACC extends number = never
+> = ARR['length'] extends END
+	? ACC | START | END
+	: NumericRange<
+			START,
+			END,
+			[...ARR, 1],
+			ARR[START] extends undefined ? ACC : ACC | ARR['length']
+		>;
