@@ -171,7 +171,7 @@ export class DocumentHandler {
 				message: 'The document data length is invalid'
 			});
 
-		const secret = selectedSecret || createSecret();
+		const secret = selectedSecret ?? createSecret();
 
 		if (!DataValidator.isStringLengthBetweenLimits(secret ?? '', 1, 255))
 			return errorSender.sendError(400, {

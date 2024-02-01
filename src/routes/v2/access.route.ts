@@ -15,7 +15,7 @@ export default new Elysia({
 				{
 					errorSender,
 					key,
-					password: request.headers.get('password') || p || ''
+					password: request.headers.get('password') ?? p ?? ''
 				},
 				APIVersions.v2
 			),
@@ -89,7 +89,7 @@ export default new Elysia({
 			DocumentHandler.handleRawAccess({
 				errorSender,
 				key,
-				password: request.headers.get('password') || p || ''
+				password: request.headers.get('password') ?? p ?? ''
 			}),
 		{
 			params: t.Object(

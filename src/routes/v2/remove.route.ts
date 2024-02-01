@@ -13,7 +13,7 @@ export default new Elysia({
 			DocumentHandler.handleRemove({
 				errorSender,
 				key,
-				secret: request.headers.get('secret') || ''
+				secret: request.headers.get('secret') ?? ''
 			}),
 		{
 			params: t.Object({

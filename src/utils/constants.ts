@@ -6,18 +6,18 @@ export enum APIVersions {
 }
 
 export const defaultServerOptions: ServerOptions = {
-	docsHostname: process.env['HOSTNAME'] || 'https://jspaste.eu',
+	docsHostname: process.env['HOSTNAME'] ?? 'https://jspaste.eu',
 	port: process.env['PORT'] ?? 4000,
 	versions: [APIVersions.v1, APIVersions.v2]
 } as const satisfies Required<ServerOptions>;
 
 // TODO: Move to Server as static?
-export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
-export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
+export const basePath = process.env['DOCUMENTS_PATH'] ?? 'documents/';
+export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] ?? '2000000');
 export const defaultDocumentLifetime = parseInt(
-	process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400'
+	process.env['DEFAULT_DOCUMENT_LIFETIME'] ?? '86400'
 );
-export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
+export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] ?? 'https://jspaste.eu/';
 export const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+_';
 
 export enum JSPErrorCode {
