@@ -14,7 +14,7 @@ export default new Elysia({
 				errorSender,
 				key,
 				newBody: body,
-				secret: request.headers.get('secret') ?? ''
+				secret: request.headers.get('secret') || ''
 			}),
 		{
 			type: 'arrayBuffer',

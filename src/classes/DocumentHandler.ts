@@ -151,9 +151,9 @@ export class DocumentHandler {
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_length']);
 
-		const secret = selectedSecret ?? (await createSecret());
+		const secret = selectedSecret || (await createSecret());
 
-		if (!DataValidator.isStringLengthBetweenLimits(secret ?? '', 1, 255))
+		if (!DataValidator.isStringLengthBetweenLimits(secret || '', 1, 255))
 			return errorSender.sendError(
 				400,
 				JSPErrorMessage['jsp.document.invalid_secret_length']

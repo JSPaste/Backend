@@ -15,11 +15,11 @@ export default new Elysia({
 				{
 					errorSender,
 					body,
-					selectedSecret: request.headers.get('secret') ?? '',
+					selectedSecret: request.headers.get('secret') || '',
 					lifetime: parseInt(
-						request.headers.get('lifetime') ?? defaultDocumentLifetime.toString()
+						request.headers.get('lifetime') || defaultDocumentLifetime.toString()
 					),
-					password: request.headers.get('password') ?? query['password'] ?? ''
+					password: request.headers.get('password') || query['password'] || ''
 				},
 				APIVersions.v2
 			),
