@@ -59,36 +59,29 @@ interface HandleGetDocument {
 }
 
 export class DocumentHandler {
-	public static async handleAccess(
-		{ errorSender, key, password }: HandleAccess,
-		version: APIVersions
-	) {
-		return DocumentHandler.handleGetDocument({ errorSender, key: key, password }).then(
-			(res) => {
-				if (ErrorSender.isJSPError(res)) {
-					return res;
-				}
-
-				const data = new TextDecoder().decode(res.rawFileData);
-
-				switch (version) {
-					case APIVersions.v1:
-						return {
-							key,
-							data
-						};
-					case APIVersions.v2:
-						return {
-							key,
-							data,
-							url: viewDocumentPath + key,
-							expirationTimestamp: res.expirationTimestamp
-								? Number(res.expirationTimestamp)
-								: undefined
-						};
-				}
+	public static async handleAccess({ errorSender, key, password }: HandleAccess, version: APIVersions) {
+		return DocumentHandler.handleGetDocument({ errorSender, key: key, password }).then((res) => {
+			if (ErrorSender.isJSPError(res)) {
+				return res;
 			}
-		);
+
+			const data = new TextDecoder().decode(res.rawFileData);
+
+			switch (version) {
+				case APIVersions.v1:
+					return {
+						key,
+						data
+					};
+				case APIVersions.v2:
+					return {
+						key,
+						data,
+						url: viewDocumentPath + key,
+						expirationTimestamp: res.expirationTimestamp ? Number(res.expirationTimestamp) : undefined
+					};
+			}
+		});
 	}
 
 	public static async handleRawAccess({ errorSender, key, password }: HandleRawAccess) {
@@ -98,18 +91,14 @@ export class DocumentHandler {
 	}
 
 	public static async handleEdit({ errorSender, key, newBody, secret }: HandleEdit) {
-		if (
-			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
-			!DataValidator.isAlphanumeric(key)
-		)
+		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
-		if (!fileExists)
-			return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
+		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
 
 		const buffer = Buffer.from(newBody as ArrayBuffer);
 
@@ -131,10 +120,7 @@ export class DocumentHandler {
 	}
 
 	public static async handleExists({ errorSender, key }: HandleExists) {
-		if (
-			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
-			!DataValidator.isAlphanumeric(key)
-		)
+		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
@@ -154,16 +140,10 @@ export class DocumentHandler {
 		const secret = selectedSecret || (await createSecret());
 
 		if (!DataValidator.isStringLengthBetweenLimits(secret || '', 1, 255))
-			return errorSender.sendError(
-				400,
-				JSPErrorMessage['jsp.document.invalid_secret_length']
-			);
+			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_secret_length']);
 
 		if (password && !DataValidator.isStringLengthBetweenLimits(password, 0, 255))
-			return errorSender.sendError(
-				400,
-				JSPErrorMessage['jsp.document.invalid_password_length']
-			);
+			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_password_length']);
 
 		lifetime = lifetime ?? defaultDocumentLifetime;
 
@@ -199,18 +179,14 @@ export class DocumentHandler {
 	}
 
 	public static async handleRemove({ errorSender, key, secret }: HandleRemove) {
-		if (
-			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
-			!DataValidator.isAlphanumeric(key)
-		)
+		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
 
 		const fileExists = await file.exists();
 
-		if (!fileExists)
-			return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
+		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
 
 		const doc = await DocumentManager.read(file);
 
@@ -226,10 +202,7 @@ export class DocumentHandler {
 	}
 
 	private static async handleGetDocument({ errorSender, key, password }: HandleGetDocument) {
-		if (
-			!DataValidator.isStringLengthBetweenLimits(key, 1, 255) ||
-			!DataValidator.isAlphanumeric(key)
-		)
+		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
@@ -238,12 +211,7 @@ export class DocumentHandler {
 
 		const doc = fileExists && (await DocumentManager.read(file));
 
-		if (
-			!doc ||
-			(doc.expirationTimestamp &&
-				doc.expirationTimestamp > 0 &&
-				doc.expirationTimestamp <= Date.now())
-		) {
+		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp <= Date.now())) {
 			if (fileExists) await unlink(basePath + key).catch(() => null);
 
 			return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);

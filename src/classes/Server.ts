@@ -18,10 +18,7 @@ export class Server {
 		this.app
 			.use(
 				cors({
-					origin:
-						process.env.NODE_ENV === 'production'
-							? ['jspaste.eu', 'docs.jspaste.eu']
-							: 'localhost',
+					origin: process.env.NODE_ENV === 'production' ? ['jspaste.eu', 'docs.jspaste.eu'] : 'localhost',
 					methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
 				})
 			)
@@ -49,8 +46,7 @@ export class Server {
 						return errorSender.sendError(500, {
 							type: 'error',
 							errorCode: JSPErrorCode.internalServerError,
-							message:
-								'Internal server error. Something went wrong, please try again later',
+							message: 'Internal server error. Something went wrong, please try again later',
 							hint: process.env.NODE_ENV === 'production' ? error?.message : error
 						});
 
@@ -129,9 +125,7 @@ export class Server {
 			for (const resolvedRoute of routesArray) {
 				if (!resolvedRoute) continue;
 
-				this.app.group(`/api/v${apiVersion as number}/documents`, (prefix) =>
-					prefix.use(resolvedRoute)
-				);
+				this.app.group(`/api/v${apiVersion as number}/documents`, (prefix) => prefix.use(resolvedRoute));
 
 				if (isLatestVersion) {
 					this.app.group('/documents', (prefix) => prefix.use(resolvedRoute));

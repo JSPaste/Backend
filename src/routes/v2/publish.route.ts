@@ -16,9 +16,7 @@ export default new Elysia({
 					errorSender,
 					body,
 					selectedSecret: request.headers.get('secret') || '',
-					lifetime: parseInt(
-						request.headers.get('lifetime') || defaultDocumentLifetime.toString()
-					),
+					lifetime: parseInt(request.headers.get('lifetime') || defaultDocumentLifetime.toString()),
 					password: request.headers.get('password') || query['password'] || ''
 				},
 				APIVersions.v2
@@ -32,8 +30,7 @@ export default new Elysia({
 				t.Object({
 					secret: t.Optional(
 						t.String({
-							description:
-								'The selected secret, if null a new secret will be generated',
+							description: 'The selected secret, if null a new secret will be generated',
 							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					),

@@ -15,9 +15,7 @@ export const defaultServerOptions: ServerOptions = {
 // TODO: Move to Server as static?
 export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
 export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
-export const defaultDocumentLifetime = parseInt(
-	process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400'
-);
+export const defaultDocumentLifetime = parseInt(process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400');
 export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
 export const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+_';
 
@@ -113,9 +111,4 @@ export type NumericRange<
 	ACC extends number = never
 > = ARR['length'] extends END
 	? ACC | START | END
-	: NumericRange<
-			START,
-			END,
-			[...ARR, 1],
-			ARR[START] extends undefined ? ACC : ACC | ARR['length']
-		>;
+	: NumericRange<START, END, [...ARR, 1], ARR[START] extends undefined ? ACC : ACC | ARR['length']>;
