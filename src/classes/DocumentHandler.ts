@@ -43,7 +43,7 @@ export class DocumentHandler {
 			!doc ||
 			(doc.expirationTimestamp &&
 				doc.expirationTimestamp > 0 &&
-				doc.expirationTimestamp <= Date.now())
+				doc.expirationTimestamp < Date.now())
 		) {
 			if (fileExists) await unlink(basePath + key).catch(() => null);
 
