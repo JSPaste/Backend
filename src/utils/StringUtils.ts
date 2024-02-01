@@ -1,7 +1,7 @@
-import { basePath, characters, type NumericRange } from './constants.ts';
+import { basePath, characters, type Range } from './constants.ts';
 
 export class StringUtils {
-	public static random(length: number, base: NumericRange<2, 64> = 62): string {
+	public static random(length: number, base: Range<2, 64> = 62): string {
 		const baseSet = characters.slice(0, base);
 		let string = '';
 
@@ -9,7 +9,7 @@ export class StringUtils {
 		return string;
 	}
 
-	public static async createKey(length: NumericRange<6, 16> = 10): Promise<string> {
+	public static async createKey(length: Range<6, 16> = 10): Promise<string> {
 		const key = StringUtils.random(length, 64);
 		const exists = await Bun.file(basePath + key).exists();
 

@@ -3,11 +3,11 @@ import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { DocumentManager } from './DocumentManager';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 import {
-	APIVersions,
 	basePath,
 	defaultDocumentLifetime,
 	JSPErrorMessage,
 	maxDocLength,
+	ServerVersion,
 	viewDocumentPath
 } from '../utils/constants.ts';
 import { ErrorSender } from './ErrorSender.ts';
@@ -53,7 +53,10 @@ interface HandleGetDocument {
 }
 
 export class DocumentHandler {
-	public static async handleAccess({ errorSender, key, password, raw = false }: HandleAccess, version: APIVersions) {
+	public static async handleAccess(
+		{ errorSender, key, password, raw = false }: HandleAccess,
+		version: ServerVersion
+	) {
 		const res = await DocumentHandler.handleGetDocument({ errorSender, key: key, password });
 		if (ErrorSender.isJSPError(res)) return res;
 
@@ -62,10 +65,10 @@ export class DocumentHandler {
 		if (raw) return data;
 
 		switch (version) {
-			case APIVersions.v1:
+			case ServerVersion.v1:
 				return { key, data };
 
-			case APIVersions.v2:
+			case ServerVersion.v2:
 				return {
 					key,
 					data,
@@ -112,7 +115,7 @@ export class DocumentHandler {
 
 	public static async handlePublish(
 		{ errorSender, body, selectedSecret, lifetime, password }: HandlePublish,
-		version: APIVersions
+		version: ServerVersion
 	) {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
@@ -147,10 +150,10 @@ export class DocumentHandler {
 		await DocumentManager.write(basePath + key, newDoc);
 
 		switch (version) {
-			case APIVersions.v1:
+			case ServerVersion.v1:
 				return { key, secret };
 
-			case APIVersions.v2:
+			case ServerVersion.v2:
 				return {
 					key,
 					secret,
@@ -174,8 +177,8 @@ export class DocumentHandler {
 		if (doc.secret && doc.secret !== secret)
 			return errorSender.sendError(403, JSPErrorMessage['jsp.document.invalid_secret']);
 
-		// FIXME: Use bun
 		return {
+			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
 			removed: await unlink(basePath + key)
 				.then(() => true)
 				.catch(() => false)
@@ -191,6 +194,7 @@ export class DocumentHandler {
 		const doc = fileExists && (await DocumentManager.read(file));
 
 		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp <= Date.now())) {
+			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
 			if (fileExists) await unlink(basePath + key).catch(() => null);
 
 			return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);

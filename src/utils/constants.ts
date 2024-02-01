@@ -2,29 +2,29 @@ import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import type { ZlibCompressionOptions } from 'bun';
 import type { JSPError } from '../classes/ErrorSender.ts';
 
-export enum APIVersions {
+// interface Bun.env
+declare module 'bun' {
+	interface Env {
+		PORT: number;
+		DOCS: {
+			ENABLED: boolean;
+			PATH: string;
+			PLAYGROUND: {
+				HTTPS: boolean;
+				DOMAIN: string;
+				PORT: number;
+			};
+		};
+		GZIP: {
+			LEVEL: Range<0, 9>;
+		};
+	}
+}
+
+export enum ServerVersion {
 	v1 = 1,
 	v2 = 2
 }
-
-export const defaultServerOptions: ServerOptions = {
-	docsHostname: process.env['HOSTNAME'] || 'http://localhost:4000',
-	port: process.env['PORT'] || 4000,
-	versions: [APIVersions.v1, APIVersions.v2]
-} as const satisfies Required<ServerOptions>;
-
-// TODO: Check performance of this change
-export const defaultZlibOptions: ZlibCompressionOptions = {
-	level: 9, // 6
-	memLevel: 9 // 8
-} as const satisfies ZlibCompressionOptions;
-
-// TODO: Move to Server as static?
-export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
-export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
-export const defaultDocumentLifetime = parseInt(process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400');
-export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
-export const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+_';
 
 export enum JSPErrorCode {
 	unknown = 'jsp.unknown',
@@ -41,6 +41,35 @@ export enum JSPErrorCode {
 	documentInvalidSecret = 'jsp.document.invalid_secret',
 	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
 }
+
+export const serverConfig: ServerOptions = {
+	port: Bun.env.PORT || 4000,
+	versions: [ServerVersion.v1, ServerVersion.v2],
+	docs: {
+		enabled: Bun.env.DOCS?.ENABLED || true,
+		path: Bun.env.DOCS?.PATH || '/docs',
+		playground: {
+			domain:
+				Bun.env.DOCS?.PLAYGROUND?.DOMAIN === undefined
+					? 'https://jspaste.eu'
+					: (Bun.env.DOCS?.PLAYGROUND?.HTTPS ? 'https://' : 'http://').concat(
+							Bun.env.DOCS?.PLAYGROUND?.DOMAIN
+						),
+			port: Bun.env.DOCS?.PLAYGROUND?.PORT || 443
+		}
+	}
+} as const satisfies Required<ServerOptions>;
+
+export const zlibConfig: ZlibCompressionOptions = {
+	level: Bun.env.GZIP?.LEVEL || 6
+} as const;
+
+// FIXME(inetol): Migrate to new config system
+export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
+export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
+export const defaultDocumentLifetime = parseInt(process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400');
+export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
+export const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+_';
 
 export const JSPErrorMessage: Record<JSPErrorCode, JSPError> = {
 	[JSPErrorCode.unknown]: {
@@ -111,11 +140,11 @@ export const JSPErrorMessage: Record<JSPErrorCode, JSPError> = {
 };
 
 // https://github.com/microsoft/TypeScript/issues/43505
-export type NumericRange<
+export type Range<
 	START extends number,
 	END extends number,
 	ARR extends unknown[] = [],
 	ACC extends number = never
 > = ARR['length'] extends END
 	? ACC | START | END
-	: NumericRange<START, END, [...ARR, 1], ARR[START] extends undefined ? ACC : ACC | ARR['length']>;
+	: Range<START, END, [...ARR, 1], ARR[START] extends undefined ? ACC : ACC | ARR['length']>;

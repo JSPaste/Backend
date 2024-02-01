@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
-import { APIVersions, defaultDocumentLifetime } from '../../utils/constants.ts';
+import { defaultDocumentLifetime, ServerVersion } from '../../utils/constants.ts';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 
 export default new Elysia({
@@ -19,7 +19,7 @@ export default new Elysia({
 					lifetime: parseInt(request.headers.get('lifetime') || defaultDocumentLifetime.toString()),
 					password: request.headers.get('password') || query['password'] || ''
 				},
-				APIVersions.v2
+				ServerVersion.v2
 			),
 		{
 			type: 'arrayBuffer',

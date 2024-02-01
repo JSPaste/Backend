@@ -1,35 +1,40 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { defaultServerOptions, JSPErrorCode } from '../utils/constants.ts';
+import { JSPErrorCode, serverConfig } from '../utils/constants.ts';
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
 
 export class Server {
-	private app: Elysia;
-	private readonly serverOptions: ServerOptions;
+	private readonly app: Elysia;
+	private readonly serverConfig: ServerOptions;
 
 	public constructor(options: Partial<ServerOptions> = {}) {
-		this.serverOptions = { ...defaultServerOptions, ...options };
-		this.app = this.initElysia();
+		this.serverConfig = { ...serverConfig, ...options };
+		this.app = this.initApplication();
+	}
+
+	public get getApplication(): Elysia {
+		return this.app;
 	}
 
 	public run(): void {
-		this.initDocs();
+		if (this.serverConfig.docs.enabled) this.initDocs();
 		this.initRoutes();
 
-		this.app.listen(this.serverOptions.port, (server) =>
+		this.app.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
 		);
 	}
 
-	private initElysia(): Elysia {
+	private initApplication(): Elysia {
 		const app = new Elysia();
 
 		app.use(
 			cors({
-				origin: process.env.NODE_ENV === 'production' ? ['jspaste.eu', 'docs.jspaste.eu'] : 'localhost',
+				// TODO(inetol): Custom origin
+				// origin: '*',
 				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
 			})
 		);
@@ -87,10 +92,12 @@ export class Server {
 		this.app.use(
 			swagger({
 				documentation: {
-					servers: [{ url: this.serverOptions.docsHostname }],
+					servers: [
+						{ url: `${this.serverConfig.docs.playground.domain}:${this.serverConfig.docs.playground.port}` }
+					],
 					info: {
 						title: 'JSPaste documentation',
-						version: this.serverOptions.versions.map((v) => `v${v}`).join(', '),
+						version: this.serverConfig.versions.map((v) => `v${v}`).join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
@@ -102,22 +109,22 @@ export class Server {
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
-				path: '/docs',
-				exclude: ['/docs', '/docs/json', /^\/documents/]
+				path: this.serverConfig.docs.path,
+				exclude: [this.serverConfig.docs.path, `${this.serverConfig.docs.path}/json`, /^\/documents/]
 			})
 		);
 	}
 
 	private initRoutes(): void {
-		const root = './src/routes';
-		const apiVersions = this.serverOptions.versions.toReversed();
+		const routes = './src/routes';
+		const apiVersions = this.serverConfig.versions.toReversed();
 
 		console.info('Registering routes for', apiVersions.length, 'versions...');
 
 		for (const [i, apiVersion] of apiVersions.entries()) {
 			const isLatestVersion = i === 0;
 			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
-			const routesArray = Array.from(routesGlob.scanSync({ cwd: root })).map((route) => {
+			const routesArray = Array.from(routesGlob.scanSync({ cwd: routes })).map((route) => {
 				try {
 					return import.meta.require(join('../routes', route)).default;
 				} catch (err) {

@@ -1,12 +1,14 @@
-import type { APIVersions } from '../utils/constants';
+import type { ServerVersion } from '../utils/constants';
 
 export interface ServerOptions {
-	/** The hostname for swagger */
-	docsHostname: string;
-
-	/** The port to listen on */
-	port: string | number;
-
-	/** Accessible API versions */
-	versions: APIVersions[];
+	port: number;
+	versions: ServerVersion[];
+	docs: {
+		enabled: boolean;
+		path: string;
+		playground: {
+			domain: string;
+			port: number;
+		};
+	};
 }

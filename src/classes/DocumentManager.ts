@@ -1,6 +1,6 @@
 import type { BunFile } from 'bun';
 import { DocumentDataStruct } from '../structures/documentStruct';
-import { defaultZlibOptions } from '../utils/constants.ts';
+import { zlibConfig } from '../utils/constants.ts';
 
 export class DocumentManager {
 	public static async read(file: BunFile): Promise<DocumentDataStruct> {
@@ -8,6 +8,6 @@ export class DocumentManager {
 	}
 
 	public static async write(filePath: string, document: DocumentDataStruct): Promise<void> {
-		await Bun.write(filePath, Bun.gzipSync(DocumentDataStruct.toBinary(document), defaultZlibOptions));
+		await Bun.write(filePath, Bun.gzipSync(DocumentDataStruct.toBinary(document), zlibConfig));
 	}
 }
