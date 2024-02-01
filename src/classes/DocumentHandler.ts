@@ -56,7 +56,6 @@ interface HandleGetDocument {
 export class DocumentHandler {
 	public static async handleAccess({ errorSender, key, password, raw = false }: HandleAccess, version: APIVersions) {
 		const res = await DocumentHandler.handleGetDocument({ errorSender, key: key, password });
-
 		if (ErrorSender.isJSPError(res)) return res;
 
 		const data = new TextDecoder().decode(res.rawFileData);
@@ -121,7 +120,7 @@ export class DocumentHandler {
 		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_length']);
 
-		const secret = selectedSecret || createSecret();
+		const secret = selectedSecret || (await createSecret());
 
 		if (!DataValidator.isStringLengthBetweenLimits(secret || '', 1, 255))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_secret_length']);
