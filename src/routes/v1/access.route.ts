@@ -41,8 +41,11 @@ export default new Elysia({
 	)
 	.get(
 		':key/raw',
-		async ({ errorSender, params: { key } }) =>
-			DocumentHandler.handleRawAccess({ errorSender, key: key }, APIVersions.v1),
+		async ({ errorSender, set, params: { key } }) => {
+			set.headers['Content-Type'] = 'text/plain';
+
+			return DocumentHandler.handleRawAccess({ errorSender, key: key });
+		},
 		{
 			params: t.Object(
 				{
