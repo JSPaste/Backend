@@ -18,12 +18,7 @@ interface HandleAccess {
 	errorSender: ErrorSender;
 	key: string;
 	password?: string;
-}
-
-interface HandleRawAccess {
-	errorSender: ErrorSender;
-	key: string;
-	password?: string;
+	raw?: boolean;
 }
 
 interface HandleEdit {
@@ -59,35 +54,26 @@ interface HandleGetDocument {
 }
 
 export class DocumentHandler {
-	public static async handleAccess({ errorSender, key, password }: HandleAccess, version: APIVersions) {
-		return DocumentHandler.handleGetDocument({ errorSender, key: key, password }).then((res) => {
-			if (ErrorSender.isJSPError(res)) {
-				return res;
-			}
+	public static async handleAccess({ errorSender, key, password, raw = false }: HandleAccess, version: APIVersions) {
+		const res = await DocumentHandler.handleGetDocument({ errorSender, key: key, password });
+		if (ErrorSender.isJSPError(res)) return res;
 
-			const data = new TextDecoder().decode(res.rawFileData);
+		const data = new TextDecoder().decode(res.rawFileData);
 
-			switch (version) {
-				case APIVersions.v1:
-					return {
-						key,
-						data
-					};
-				case APIVersions.v2:
-					return {
-						key,
-						data,
-						url: viewDocumentPath + key,
-						expirationTimestamp: res.expirationTimestamp ? Number(res.expirationTimestamp) : undefined
-					};
-			}
-		});
-	}
+		if (raw) return data;
 
-	public static async handleRawAccess({ errorSender, key, password }: HandleRawAccess) {
-		return DocumentHandler.handleGetDocument({ errorSender, key: key, password }).then((res) =>
-			ErrorSender.isJSPError(res) ? res : new Response(res.rawFileData)
-		);
+		switch (version) {
+			case APIVersions.v1:
+				return { key, data };
+
+			case APIVersions.v2:
+				return {
+					key,
+					data,
+					url: viewDocumentPath + key,
+					expirationTimestamp: res.expirationTimestamp ? Number(res.expirationTimestamp) : undefined
+				};
+		}
 	}
 
 	public static async handleEdit({ errorSender, key, newBody, secret }: HandleEdit) {
@@ -95,7 +81,6 @@ export class DocumentHandler {
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
-
 		const fileExists = await file.exists();
 
 		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
@@ -112,20 +97,18 @@ export class DocumentHandler {
 
 		doc.rawFileData = buffer;
 
-		const edited = await DocumentManager.write(basePath + key, doc)
-			.then(() => true)
-			.catch(() => false);
-
-		return { edited };
+		return {
+			edited: await DocumentManager.write(basePath + key, doc)
+				.then(() => true)
+				.catch(() => false)
+		};
 	}
 
 	public static async handleExists({ errorSender, key }: HandleExists) {
 		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
-		const file = Bun.file(basePath + key);
-
-		return await file.exists();
+		return await Bun.file(basePath + key).exists();
 	}
 
 	public static async handlePublish(
@@ -151,7 +134,6 @@ export class DocumentHandler {
 		if (lifetime > 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
-
 		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
 
 		const newDoc: DocumentDataStruct = {
@@ -168,6 +150,7 @@ export class DocumentHandler {
 		switch (version) {
 			case APIVersions.v1:
 				return { key, secret };
+
 			case APIVersions.v2:
 				return {
 					key,
@@ -183,7 +166,6 @@ export class DocumentHandler {
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
-
 		const fileExists = await file.exists();
 
 		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
@@ -194,11 +176,11 @@ export class DocumentHandler {
 			return errorSender.sendError(403, JSPErrorMessage['jsp.document.invalid_secret']);
 
 		// FIXME: Use bun
-		const removed = await unlink(basePath + key)
-			.then(() => true)
-			.catch(() => false);
-
-		return { removed };
+		return {
+			removed: await unlink(basePath + key)
+				.then(() => true)
+				.catch(() => false)
+		};
 	}
 
 	private static async handleGetDocument({ errorSender, key, password }: HandleGetDocument) {
@@ -206,9 +188,7 @@ export class DocumentHandler {
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
-
 		const fileExists = await file.exists();
-
 		const doc = fileExists && (await DocumentManager.read(file));
 
 		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp <= Date.now())) {

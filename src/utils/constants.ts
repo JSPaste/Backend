@@ -1,4 +1,5 @@
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
+import type { ZlibCompressionOptions } from 'bun';
 import type { JSPError } from '../classes/ErrorSender.ts';
 
 export enum APIVersions {
@@ -7,10 +8,16 @@ export enum APIVersions {
 }
 
 export const defaultServerOptions: ServerOptions = {
-	docsHostname: process.env['HOSTNAME'] || 'https://jspaste.eu',
+	docsHostname: process.env['HOSTNAME'] || 'http://localhost:4000',
 	port: process.env['PORT'] || 4000,
 	versions: [APIVersions.v1, APIVersions.v2]
 } as const satisfies Required<ServerOptions>;
+
+// TODO: Check performance of this change
+export const defaultZlibOptions: ZlibCompressionOptions = {
+	level: 9, // 6
+	memLevel: 9 // 8
+} as const satisfies ZlibCompressionOptions;
 
 // TODO: Move to Server as static?
 export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';

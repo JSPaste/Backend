@@ -12,62 +12,7 @@ export class Server {
 
 	public constructor(options: Partial<ServerOptions> = {}) {
 		this.serverOptions = { ...defaultServerOptions, ...options };
-		this.app = new Elysia();
-
-		// TODO: Specify better CORS headers
-		this.app
-			.use(
-				cors({
-					origin: process.env.NODE_ENV === 'production' ? ['jspaste.eu', 'docs.jspaste.eu'] : 'localhost',
-					methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
-				})
-			)
-			.use(errorSenderPlugin)
-			.onError(({ errorSender, path, set, code, error }) => {
-				switch (code) {
-					case 'NOT_FOUND':
-						if (path === '/404') return 'Not found';
-
-						// Redirect to the frontend 404 page
-						set.redirect = '/404';
-
-						return;
-
-					// FIXME: Add proper hint debugging messages (JSPErrorMessage)
-					case 'VALIDATION':
-						return errorSender.sendError(400, {
-							type: 'error',
-							errorCode: JSPErrorCode.validation,
-							message: 'Validation failed, please check our documentation',
-							hint: process.env.NODE_ENV === 'production' ? error?.message : error
-						});
-
-					case 'INTERNAL_SERVER_ERROR':
-						return errorSender.sendError(500, {
-							type: 'error',
-							errorCode: JSPErrorCode.internalServerError,
-							message: 'Internal server error. Something went wrong, please try again later',
-							hint: process.env.NODE_ENV === 'production' ? error?.message : error
-						});
-
-					case 'PARSE':
-						return errorSender.sendError(400, {
-							type: 'error',
-							errorCode: JSPErrorCode.parseFailed,
-							message: 'Failed to parse the request, please try again later',
-							hint: process.env.NODE_ENV === 'production' ? error?.message : error
-						});
-
-					default:
-						console.error(error);
-
-						return errorSender.sendError(400, {
-							type: 'error',
-							errorCode: JSPErrorCode.unknown,
-							message: 'Unknown error, please try again later'
-						});
-				}
-			});
+		this.app = this.initElysia();
 	}
 
 	public run(): void {
@@ -77,6 +22,65 @@ export class Server {
 		this.app.listen(this.serverOptions.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
 		);
+	}
+
+	private initElysia(): Elysia {
+		const app = new Elysia();
+
+		app.use(
+			cors({
+				origin: process.env.NODE_ENV === 'production' ? ['jspaste.eu', 'docs.jspaste.eu'] : 'localhost',
+				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
+			})
+		);
+
+		app.use(errorSenderPlugin).onError(({ errorSender, path, set, code, error }) => {
+			switch (code) {
+				case 'NOT_FOUND':
+					if (path === '/404') return 'Not found';
+
+					// Redirect to the frontend 404 page
+					set.redirect = '/404';
+
+					return;
+
+				// FIXME: Add proper hint debugging messages (JSPErrorMessage)
+				case 'VALIDATION':
+					return errorSender.sendError(400, {
+						type: 'error',
+						errorCode: JSPErrorCode.validation,
+						message: 'Validation failed, please check our documentation',
+						hint: process.env.NODE_ENV === 'production' ? error?.message : error
+					});
+
+				case 'INTERNAL_SERVER_ERROR':
+					return errorSender.sendError(500, {
+						type: 'error',
+						errorCode: JSPErrorCode.internalServerError,
+						message: 'Internal server error. Something went wrong, please try again later',
+						hint: process.env.NODE_ENV === 'production' ? error?.message : error
+					});
+
+				case 'PARSE':
+					return errorSender.sendError(400, {
+						type: 'error',
+						errorCode: JSPErrorCode.parseFailed,
+						message: 'Failed to parse the request, please try again later',
+						hint: process.env.NODE_ENV === 'production' ? error?.message : error
+					});
+
+				default:
+					console.error(error);
+
+					return errorSender.sendError(400, {
+						type: 'error',
+						errorCode: JSPErrorCode.unknown,
+						message: 'Unknown error, please try again later'
+					});
+			}
+		});
+
+		return app;
 	}
 
 	private initDocs(): void {
