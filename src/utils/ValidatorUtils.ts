@@ -24,7 +24,7 @@ export class ValidatorUtils {
 	}
 
 	public static isAlphanumeric(value: string): boolean {
-		return ValidatorUtils.isValidString(value) && /^[\w+]+$/.test(value);
+		return ValidatorUtils.isValidString(value) && /^[\w-]+$/.test(value);
 	}
 
 	public static isLengthBetweenLimits(value: any, min: number, max: number): boolean {
