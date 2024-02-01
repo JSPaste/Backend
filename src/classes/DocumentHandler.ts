@@ -1,7 +1,6 @@
 import { unlink } from 'node:fs/promises';
-import { DataValidator } from './DataValidator';
+import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { DocumentManager } from './DocumentManager';
-import { createKey } from '../utils/createKey.ts';
 import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 import {
 	APIVersions,
@@ -12,7 +11,7 @@ import {
 	viewDocumentPath
 } from '../utils/constants.ts';
 import { ErrorSender } from './ErrorSender.ts';
-import { createSecret } from '../utils/createSecret.ts';
+import { StringUtils } from '../utils/StringUtils.ts';
 
 interface HandleAccess {
 	errorSender: ErrorSender;
@@ -77,7 +76,7 @@ export class DocumentHandler {
 	}
 
 	public static async handleEdit({ errorSender, key, newBody, secret }: HandleEdit) {
-		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
+		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
@@ -87,7 +86,7 @@ export class DocumentHandler {
 
 		const buffer = Buffer.from(newBody as ArrayBuffer);
 
-		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
+		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_length']);
 
 		const doc = await DocumentManager.read(file);
@@ -105,7 +104,7 @@ export class DocumentHandler {
 	}
 
 	public static async handleExists({ errorSender, key }: HandleExists) {
-		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
+		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		return await Bun.file(basePath + key).exists();
@@ -117,15 +116,15 @@ export class DocumentHandler {
 	) {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
-		if (!DataValidator.isLengthBetweenLimits(buffer, 1, maxDocLength))
+		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, maxDocLength))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_length']);
 
-		const secret = selectedSecret || (await createSecret());
+		const secret = selectedSecret || StringUtils.createSecret();
 
-		if (!DataValidator.isStringLengthBetweenLimits(secret || '', 1, 255))
+		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_secret_length']);
 
-		if (password && !DataValidator.isStringLengthBetweenLimits(password, 0, 255))
+		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_password_length']);
 
 		lifetime = lifetime ?? defaultDocumentLifetime;
@@ -143,7 +142,7 @@ export class DocumentHandler {
 			password
 		};
 
-		const key = await createKey();
+		const key = await StringUtils.createKey();
 
 		await DocumentManager.write(basePath + key, newDoc);
 
@@ -162,7 +161,7 @@ export class DocumentHandler {
 	}
 
 	public static async handleRemove({ errorSender, key, secret }: HandleRemove) {
-		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
+		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);
@@ -184,7 +183,7 @@ export class DocumentHandler {
 	}
 
 	private static async handleGetDocument({ errorSender, key, password }: HandleGetDocument) {
-		if (!DataValidator.isStringLengthBetweenLimits(key, 1, 255) || !DataValidator.isAlphanumeric(key))
+		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
 
 		const file = Bun.file(basePath + key);

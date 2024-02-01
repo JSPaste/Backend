@@ -1,10 +1,10 @@
-export class DataValidator {
+export class ValidatorUtils {
 	public static isValidNumber(value: number): boolean {
 		return Number.isFinite(value);
 	}
 
 	public static isValidInteger(value: number): boolean {
-		return DataValidator.isValidNumber(value) && Number.isInteger(value);
+		return ValidatorUtils.isValidNumber(value) && Number.isInteger(value);
 	}
 
 	public static isValidString(value: string): boolean {
@@ -16,15 +16,15 @@ export class DataValidator {
 	}
 
 	public static isValidStringArray(values: string[]): boolean {
-		return DataValidator.isValidArray(values, DataValidator.isValidString);
+		return ValidatorUtils.isValidArray(values, ValidatorUtils.isValidString);
 	}
 
 	public static isValidStringList(...values: string[]): boolean {
-		return DataValidator.isValidStringArray(values);
+		return ValidatorUtils.isValidStringArray(values);
 	}
 
 	public static isAlphanumeric(value: string): boolean {
-		return DataValidator.isValidString(value) && /^[\w+]+$/.test(value);
+		return ValidatorUtils.isValidString(value) && /^[\w+]+$/.test(value);
 	}
 
 	public static isLengthBetweenLimits(value: any, min: number, max: number): boolean {
@@ -32,16 +32,16 @@ export class DataValidator {
 	}
 
 	public static isStringLengthBetweenLimits(value: string, min: number, max: number): boolean {
-		return DataValidator.isValidString(value) && value.length >= min && value.length <= max;
+		return ValidatorUtils.isValidString(value) && value.length >= min && value.length <= max;
 	}
 
 	public static isStringArrayLengthBetweenLimits(min: number, max: number, values: string[]): boolean {
-		return DataValidator.isValidArray(values, (value) =>
-			DataValidator.isStringLengthBetweenLimits(value, min, max)
+		return ValidatorUtils.isValidArray(values, (value) =>
+			ValidatorUtils.isStringLengthBetweenLimits(value, min, max)
 		);
 	}
 
 	public static isStringListLengthBetweenLimits(min: number, max: number, ...values: string[]): boolean {
-		return DataValidator.isStringArrayLengthBetweenLimits(min, max, values);
+		return ValidatorUtils.isStringArrayLengthBetweenLimits(min, max, values);
 	}
 }
