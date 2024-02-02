@@ -9,7 +9,7 @@ export class StringUtils {
 		return string;
 	}
 
-	public static async createKey(length: Range<6, 16> = 10): Promise<string> {
+	public static async createKey(length: Range<6, 16> = 8): Promise<string> {
 		const key = StringUtils.random(length, 64);
 		const exists = await Bun.file(basePath + key).exists();
 

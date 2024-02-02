@@ -60,9 +60,9 @@ export class DocumentHandler {
 		const res = await DocumentHandler.handleGetDocument({ errorSender, key: key, password });
 		if (ErrorSender.isJSPError(res)) return res;
 
-		const data = new TextDecoder().decode(res.rawFileData);
+		if (raw) return new Response(res.rawFileData);
 
-		if (raw) return data;
+		const data = new TextDecoder().decode(res.rawFileData);
 
 		switch (version) {
 			case ServerVersion.v1:
