@@ -23,6 +23,13 @@ export class ValidatorUtils {
 		return ValidatorUtils.isValidStringArray(values);
 	}
 
+	public static isValidDomain(value: string): boolean {
+		return (
+			ValidatorUtils.isValidString(value) &&
+			/\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b/.test(value)
+		);
+	}
+
 	public static isAlphanumeric(value: string): boolean {
 		return ValidatorUtils.isValidString(value) && /^[\w-]+$/.test(value);
 	}

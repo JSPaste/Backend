@@ -1,10 +1,10 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import { JSPErrorCode, serverConfig } from '../utils/constants.ts';
-import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
+import cors from '@elysiajs/cors';
 
 export class Server {
 	private readonly app: Elysia;
@@ -33,8 +33,7 @@ export class Server {
 
 		app.use(
 			cors({
-				// TODO(inetol): Custom origin
-				// origin: '*',
+				origin: true,
 				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
 			})
 		);

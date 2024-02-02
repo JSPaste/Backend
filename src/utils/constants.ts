@@ -1,23 +1,18 @@
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import type { ZlibCompressionOptions } from 'bun';
 import type { JSPError } from '../classes/ErrorSender.ts';
+import { ValidatorUtils } from './ValidatorUtils.ts';
 
 // interface Bun.env
 declare module 'bun' {
 	interface Env {
 		PORT: number;
-		DOCS: {
-			ENABLED: boolean;
-			PATH: string;
-			PLAYGROUND: {
-				HTTPS: boolean;
-				DOMAIN: string;
-				PORT: number;
-			};
-		};
-		GZIP: {
-			LEVEL: Range<0, 9>;
-		};
+		DOCS_ENABLED: string;
+		DOCS_PATH: string;
+		DOCS_PLAYGROUND_HTTPS: string;
+		DOCS_PLAYGROUND_DOMAIN: string;
+		DOCS_PLAYGROUND_PORT: number;
+		ZLIB_LEVEL: Range<0, 9>;
 	}
 }
 
@@ -46,22 +41,21 @@ export const serverConfig: ServerOptions = {
 	port: Bun.env.PORT || 4000,
 	versions: [ServerVersion.v1, ServerVersion.v2],
 	docs: {
-		enabled: Bun.env.DOCS?.ENABLED || true,
-		path: Bun.env.DOCS?.PATH || '/docs',
+		enabled: Bun.env.DOCS_ENABLED === 'true' || true,
+		path: Bun.env.DOCS_PATH || '/docs',
 		playground: {
-			domain:
-				Bun.env.DOCS?.PLAYGROUND?.DOMAIN === undefined
-					? 'https://jspaste.eu'
-					: (Bun.env.DOCS?.PLAYGROUND?.HTTPS ? 'https://' : 'http://').concat(
-							Bun.env.DOCS?.PLAYGROUND?.DOMAIN
-						),
-			port: Bun.env.DOCS?.PLAYGROUND?.PORT || 443
+			domain: ValidatorUtils.isValidDomain(Bun.env.DOCS_PLAYGROUND_DOMAIN)
+				? 'https://jspaste.eu'
+				: (Bun.env.DOCS_PLAYGROUND_HTTPS === 'true' ? 'https://' : 'http://').concat(
+						Bun.env.DOCS_PLAYGROUND_DOMAIN
+					),
+			port: Bun.env.DOCS_PLAYGROUND_PORT || 443
 		}
 	}
 } as const satisfies Required<ServerOptions>;
 
 export const zlibConfig: ZlibCompressionOptions = {
-	level: Bun.env.GZIP?.LEVEL || 6
+	level: Bun.env.ZLIB_LEVEL || 6
 } as const;
 
 // FIXME(inetol): Migrate to new config system

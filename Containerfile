@@ -12,7 +12,7 @@ WORKDIR /home/nonroot/
 
 COPY --from=builder /build/. ./
 
-ENV DOCS.ENABLED=false
+ENV DOCS_ENABLED=false
 
 LABEL org.opencontainers.image.url="https://jspaste.eu"
 LABEL org.opencontainers.image.source="https://github.com/jspaste/backend"
