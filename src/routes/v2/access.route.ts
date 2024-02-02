@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
-import { APIVersions } from '../../utils/constants.ts';
+import { ServerVersion } from '../../utils/constants.ts';
 
 export default new Elysia({
 	name: 'routes:v2:documents:access'
@@ -17,7 +17,7 @@ export default new Elysia({
 					key,
 					password: request.headers.get('password') || p || ''
 				},
-				APIVersions.v2
+				ServerVersion.v2
 			),
 		{
 			params: t.Object({
@@ -88,11 +88,15 @@ export default new Elysia({
 		async ({ errorSender, set, request, query: { p }, params: { key } }) => {
 			set.headers['Content-Type'] = 'text/plain';
 
-			return DocumentHandler.handleRawAccess({
-				errorSender,
-				key,
-				password: request.headers.get('password') || p || ''
-			});
+			return DocumentHandler.handleAccess(
+				{
+					errorSender,
+					key,
+					password: request.headers.get('password') || p || '',
+					raw: true
+				},
+				ServerVersion.v2
+			);
 		},
 		{
 			params: t.Object(

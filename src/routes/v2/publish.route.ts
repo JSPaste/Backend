@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { ErrorSender } from '../../classes/ErrorSender';
 import { DocumentHandler } from '../../classes/DocumentHandler.ts';
-import { APIVersions, defaultDocumentLifetime } from '../../utils/constants.ts';
+import { defaultDocumentLifetime, ServerVersion } from '../../utils/constants.ts';
 import { errorSenderPlugin } from '../../plugins/errorSender.ts';
 
 export default new Elysia({
@@ -16,12 +16,10 @@ export default new Elysia({
 					errorSender,
 					body,
 					selectedSecret: request.headers.get('secret') || '',
-					lifetime: parseInt(
-						request.headers.get('lifetime') || defaultDocumentLifetime.toString()
-					),
+					lifetime: parseInt(request.headers.get('lifetime') || defaultDocumentLifetime.toString()),
 					password: request.headers.get('password') || query['password'] || ''
 				},
-				APIVersions.v2
+				ServerVersion.v2
 			),
 		{
 			type: 'arrayBuffer',
@@ -32,8 +30,7 @@ export default new Elysia({
 				t.Object({
 					secret: t.Optional(
 						t.String({
-							description:
-								'The selected secret, if null a new secret will be generated',
+							description: 'The selected secret, if null a new secret will be generated',
 							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					),
