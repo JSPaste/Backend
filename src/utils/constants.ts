@@ -45,10 +45,10 @@ export const serverConfig: ServerOptions = {
 		path: Bun.env.DOCS_PATH || '/docs',
 		playground: {
 			domain: ValidatorUtils.isValidDomain(Bun.env.DOCS_PLAYGROUND_DOMAIN)
-				? 'https://jspaste.eu'
-				: (Bun.env.DOCS_PLAYGROUND_HTTPS === 'true' ? 'https://' : 'http://').concat(
+				? (Bun.env.DOCS_PLAYGROUND_HTTPS === 'true' ? 'https://' : 'http://').concat(
 						Bun.env.DOCS_PLAYGROUND_DOMAIN
-					),
+					)
+				: 'https://jspaste.eu',
 			port: Bun.env.DOCS_PLAYGROUND_PORT || 443
 		}
 	}

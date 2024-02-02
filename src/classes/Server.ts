@@ -1,94 +1,50 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { JSPErrorCode, serverConfig } from '../utils/constants.ts';
+import { JSPErrorMessage, serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
 import cors from '@elysiajs/cors';
 
 export class Server {
-	private readonly app: Elysia;
+	private readonly server: Elysia;
 	private readonly serverConfig: ServerOptions;
 
 	public constructor(options: Partial<ServerOptions> = {}) {
 		this.serverConfig = { ...serverConfig, ...options };
-		this.app = this.initApplication();
+		this.server = this.initServer();
 	}
 
-	public get getApplication(): Elysia {
-		return this.app;
+	public get self(): Elysia {
+		return this.server;
 	}
 
-	public run(): void {
-		if (this.serverConfig.docs.enabled) this.initDocs();
-		this.initRoutes();
+	private initServer(): Elysia {
+		const server = new Elysia();
 
-		this.app.listen(this.serverConfig.port, (server) =>
+		this.serverConfig.docs.enabled && this.initDocs(server);
+		this.initErrorHandler(server);
+		this.initRoutes(server);
+		this.initCORS(server);
+
+		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
 		);
+
+		return server;
 	}
 
-	private initApplication(): Elysia {
-		const app = new Elysia();
-
-		app.use(
+	private initCORS(server: Elysia): void {
+		server.use(
 			cors({
 				origin: true,
 				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
 			})
 		);
-
-		app.use(errorSenderPlugin).onError(({ errorSender, path, set, code, error }) => {
-			switch (code) {
-				case 'NOT_FOUND':
-					if (path === '/404') return 'Not found';
-
-					// Redirect to the frontend 404 page
-					set.redirect = '/404';
-
-					return;
-
-				// FIXME: Add proper hint debugging messages (JSPErrorMessage)
-				case 'VALIDATION':
-					return errorSender.sendError(400, {
-						type: 'error',
-						errorCode: JSPErrorCode.validation,
-						message: 'Validation failed, please check our documentation',
-						hint: process.env.NODE_ENV === 'production' ? error?.message : error
-					});
-
-				case 'INTERNAL_SERVER_ERROR':
-					return errorSender.sendError(500, {
-						type: 'error',
-						errorCode: JSPErrorCode.internalServerError,
-						message: 'Internal server error. Something went wrong, please try again later',
-						hint: process.env.NODE_ENV === 'production' ? error?.message : error
-					});
-
-				case 'PARSE':
-					return errorSender.sendError(400, {
-						type: 'error',
-						errorCode: JSPErrorCode.parseFailed,
-						message: 'Failed to parse the request, please try again later',
-						hint: process.env.NODE_ENV === 'production' ? error?.message : error
-					});
-
-				default:
-					console.error(error);
-
-					return errorSender.sendError(400, {
-						type: 'error',
-						errorCode: JSPErrorCode.unknown,
-						message: 'Unknown error, please try again later'
-					});
-			}
-		});
-
-		return app;
 	}
 
-	private initDocs(): void {
-		this.app.use(
+	private initDocs(server: Elysia): void {
+		server.use(
 			swagger({
 				documentation: {
 					servers: [
@@ -114,7 +70,35 @@ export class Server {
 		);
 	}
 
-	private initRoutes(): void {
+	private initErrorHandler(server: Elysia): void {
+		server.use(errorSenderPlugin).onError(({ errorSender, path, set, code, error }) => {
+			switch (code) {
+				// Redirect to the frontend 404 page
+				case 'NOT_FOUND':
+					if (path === '/404') return 'Not found';
+					set.redirect = '/404';
+					return;
+
+				case 'VALIDATION':
+					console.error(error);
+					return errorSender.sendError(400, JSPErrorMessage['jsp.validation_failed']);
+
+				case 'INTERNAL_SERVER_ERROR':
+					console.error(error);
+					return errorSender.sendError(500, JSPErrorMessage['jsp.internal_server_error']);
+
+				case 'PARSE':
+					console.error(error);
+					return errorSender.sendError(400, JSPErrorMessage['jsp.parse_failed']);
+
+				default:
+					console.error(error);
+					return errorSender.sendError(400, JSPErrorMessage['jsp.unknown']);
+			}
+		});
+	}
+
+	private initRoutes(server: Elysia): void {
 		const routes = './src/routes';
 		const apiVersions = this.serverConfig.versions.toReversed();
 
@@ -125,7 +109,7 @@ export class Server {
 			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
 			const routesArray = Array.from(routesGlob.scanSync({ cwd: routes })).map((route) => {
 				try {
-					return import.meta.require(join('../routes', route)).default;
+					return require(join('../routes', route)).default;
 				} catch (err) {
 					console.error('Unable to import route', err);
 					return null;
@@ -135,10 +119,10 @@ export class Server {
 			for (const resolvedRoute of routesArray) {
 				if (!resolvedRoute) continue;
 
-				this.app.group(`/api/v${apiVersion as number}/documents`, (prefix) => prefix.use(resolvedRoute));
+				server.group(`/api/v${apiVersion as number}/documents`, (prefix) => prefix.use(resolvedRoute));
 
 				if (isLatestVersion) {
-					this.app.group('/documents', (prefix) => prefix.use(resolvedRoute));
+					server.group('/documents', (prefix) => prefix.use(resolvedRoute));
 				}
 			}
 
