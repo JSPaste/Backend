@@ -24,4 +24,5 @@ LABEL org.opencontainers.image.licenses="EUPL-1.2"
 VOLUME /home/nonroot/documents
 EXPOSE 4000/tcp
 
-CMD ["./src/index.ts"]
+# Not following WORKDIR? (./src/index.ts)
+CMD ["/home/nonroot/src/index.ts"]

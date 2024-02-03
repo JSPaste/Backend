@@ -52,7 +52,7 @@ jobs:
 
             - name: 'Build image'
               id: build_image
-              uses: redhat-actions/buildah-build@b4dc19b4ba891854660ab1f88a097d45aa158f76 # v2.12
+              uses: redhat-actions/buildah-build@c79846fb306beeba490e89fb75d2d1af95831e79 # master (Update to node20)
               with:
                   containerfiles: ./Containerfile
                   image: ${{ env.IMAGE_NAME }}
