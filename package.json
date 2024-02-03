@@ -18,7 +18,8 @@
 		"@elysiajs/swagger": "^0.8.5",
 		"@protobuf-ts/plugin": "^2.9.3",
 		"@protobuf-ts/runtime": "^2.9.3",
-		"elysia": "^0.8.15"
+		"elysia": "^0.8.15",
+		"env-var": "^7.4.1"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.0.4",

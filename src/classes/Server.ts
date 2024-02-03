@@ -48,11 +48,17 @@ export class Server {
 			swagger({
 				documentation: {
 					servers: [
-						{ url: `${this.serverConfig.docs.playground.domain}:${this.serverConfig.docs.playground.port}` }
+						{
+							url: (this.serverConfig.docs.playground.https ? 'https://' : 'http://').concat(
+								this.serverConfig.docs.playground.domain,
+								':',
+								this.serverConfig.docs.playground.port.toString()
+							)
+						}
 					],
 					info: {
 						title: 'JSPaste documentation',
-						version: this.serverConfig.versions.map((v) => `v${v}`).join(', '),
+						version: this.serverConfig.versions.map((version) => `v${version}`).join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
@@ -65,7 +71,7 @@ export class Server {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
 				path: this.serverConfig.docs.path,
-				exclude: [this.serverConfig.docs.path, `${this.serverConfig.docs.path}/json`, /^\/documents/]
+				exclude: [this.serverConfig.docs.path, this.serverConfig.docs.path.concat('/json'), /^\/documents/]
 			})
 		);
 	}

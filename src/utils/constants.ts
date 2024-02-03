@@ -1,18 +1,17 @@
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import type { ZlibCompressionOptions } from 'bun';
 import type { JSPError } from '../classes/ErrorSender.ts';
-import { ValidatorUtils } from './ValidatorUtils.ts';
+import * as env from 'env-var';
 
 // interface Bun.env
 declare module 'bun' {
 	interface Env {
 		PORT: number;
-		DOCS_ENABLED: string;
+		DOCS_ENABLED: boolean;
 		DOCS_PATH: string;
-		DOCS_PLAYGROUND_HTTPS: string;
+		DOCS_PLAYGROUND_HTTPS: boolean;
 		DOCS_PLAYGROUND_DOMAIN: string;
 		DOCS_PLAYGROUND_PORT: number;
-		ZLIB_LEVEL: Range<0, 9>;
 	}
 }
 
@@ -37,25 +36,22 @@ export enum JSPErrorCode {
 	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
 }
 
-export const serverConfig: ServerOptions = {
-	port: Bun.env.PORT || 4000,
+export const serverConfig: Required<ServerOptions> = {
+	port: env.get('PORT').default(4000).asPortNumber(),
 	versions: [ServerVersion.v1, ServerVersion.v2],
 	docs: {
-		enabled: Bun.env.DOCS_ENABLED === 'true' || true,
-		path: Bun.env.DOCS_PATH || '/docs',
+		enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
+		path: env.get('DOCS_PATH').default('/docs').asString(),
 		playground: {
-			domain: ValidatorUtils.isValidDomain(Bun.env.DOCS_PLAYGROUND_DOMAIN)
-				? (Bun.env.DOCS_PLAYGROUND_HTTPS === 'true' ? 'https://' : 'http://').concat(
-						Bun.env.DOCS_PLAYGROUND_DOMAIN
-					)
-				: 'https://jspaste.eu',
-			port: Bun.env.DOCS_PLAYGROUND_PORT || 443
+			https: env.get('DOCS_PLAYGROUND_HTTPS').asBoolStrict() ?? true,
+			domain: env.get('DOCS_PLAYGROUND_DOMAIN').default('jspaste.eu').asString(),
+			port: env.get('DOCS_PLAYGROUND_PORT').default(443).asPortNumber()
 		}
 	}
-} as const satisfies Required<ServerOptions>;
+} as const;
 
 export const zlibConfig: ZlibCompressionOptions = {
-	level: Bun.env.ZLIB_LEVEL || 6
+	level: 6
 } as const;
 
 // FIXME(inetol): Migrate to new config system

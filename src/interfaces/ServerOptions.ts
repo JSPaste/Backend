@@ -7,6 +7,7 @@ export interface ServerOptions {
 		enabled: boolean;
 		path: string;
 		playground: {
+			https: boolean;
 			domain: string;
 			port: number;
 		};

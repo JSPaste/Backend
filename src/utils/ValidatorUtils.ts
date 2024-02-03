@@ -1,14 +1,18 @@
 export class ValidatorUtils {
-	public static isValidNumber(value: number): boolean {
-		return Number.isFinite(value);
+	public static isValidType<T>(value: unknown, type: new (...args: any[]) => T): value is T {
+		return value instanceof type;
 	}
 
-	public static isValidInteger(value: number): boolean {
-		return ValidatorUtils.isValidNumber(value) && Number.isInteger(value);
+	public static isValidPrimitiveType<T>(value: unknown, type: string): value is T {
+		return typeof value === type;
+	}
+
+	public static isValidNumber(value: number): boolean {
+		return Number.isFinite(value) && Number.isInteger(value);
 	}
 
 	public static isValidString(value: string): boolean {
-		return typeof value === 'string' && !!value.trim();
+		return ValidatorUtils.isValidPrimitiveType(value, 'string') && !!value.trim();
 	}
 
 	public static isValidArray<T>(value: T[], validator: (value: T) => boolean): boolean {
@@ -41,7 +45,7 @@ export class ValidatorUtils {
 	}
 
 	public static isStringLengthBetweenLimits(value: string, min: number, max: number): boolean {
-		return ValidatorUtils.isValidString(value) && value.length >= min && value.length <= max;
+		return ValidatorUtils.isValidString(value) && ValidatorUtils.isLengthBetweenLimits(value, min, max);
 	}
 
 	public static isStringArrayLengthBetweenLimits(min: number, max: number, values: string[]): boolean {
