@@ -9,8 +9,7 @@ export default new Elysia({
 	.use(errorSenderPlugin)
 	.get(
 		':key/exists',
-		async ({ errorSender, params: { key } }) =>
-			DocumentHandler.handleExists({ errorSender, key: key }),
+		async ({ errorSender, params: { key } }) => DocumentHandler.handleExists({ errorSender, key: key }),
 		{
 			params: t.Object({
 				key: t.String({

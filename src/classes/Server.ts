@@ -1,95 +1,64 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { JSPErrorCode, defaultServerOptions } from '../utils/constants.ts';
-import { cors } from '@elysiajs/cors';
+import { JSPErrorMessage, serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
+import cors from '@elysiajs/cors';
 
 export class Server {
-	private app: Elysia;
-	private readonly serverOptions: ServerOptions;
+	private readonly server: Elysia;
+	private readonly serverConfig: ServerOptions;
 
 	public constructor(options: Partial<ServerOptions> = {}) {
-		this.serverOptions = { ...defaultServerOptions, ...options };
-		this.app = new Elysia();
-
-		// TODO: Specify better CORS headers
-		this.app
-			.use(
-				cors({
-					origin:
-						process.env.NODE_ENV === 'production'
-							? ['jspaste.eu', 'docs.jspaste.eu']
-							: 'localhost',
-					methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
-				})
-			)
-			.use(errorSenderPlugin)
-			.onError(({ errorSender, path, set, code, error }) => {
-				switch (code) {
-					case 'NOT_FOUND':
-						if (path === '/404') return 'Not found';
-
-						// Redirect to the frontend 404 page
-						set.redirect = '/404';
-
-						return;
-
-					case 'VALIDATION':
-						return errorSender.sendError(400, {
-							type: 'error',
-							errorCode: JSPErrorCode.validation,
-							message: 'Validation failed, please check our documentation',
-							hint: process.env.NODE_ENV === 'production' ? error?.message : error
-						});
-
-					case 'INTERNAL_SERVER_ERROR':
-						return errorSender.sendError(500, {
-							type: 'error',
-							errorCode: JSPErrorCode.internalServerError,
-							message:
-								'Internal server error. Something went wrong, please try again later',
-							hint: process.env.NODE_ENV === 'production' ? error?.message : error
-						});
-
-					case 'PARSE':
-						return errorSender.sendError(400, {
-							type: 'error',
-							errorCode: JSPErrorCode.parseFailed,
-							message: 'Failed to parse the request, please try again later',
-							hint: process.env.NODE_ENV === 'production' ? error?.message : error
-						});
-
-					default:
-						console.error(error);
-
-						return errorSender.sendError(400, {
-							type: 'error',
-							errorCode: JSPErrorCode.unknown,
-							message: 'Unknown error, please try again later'
-						});
-				}
-			});
+		this.serverConfig = { ...serverConfig, ...options };
+		this.server = this.initServer();
 	}
 
-	public run(): void {
-		this.initDocs();
-		this.initRoutes();
+	public get self(): Elysia {
+		return this.server;
+	}
 
-		this.app.listen(this.serverOptions.port, (server) =>
+	private initServer(): Elysia {
+		const server = new Elysia();
+
+		this.serverConfig.docs.enabled && this.initDocs(server);
+		this.initErrorHandler(server);
+		this.initRoutes(server);
+		this.initCORS(server);
+
+		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
+		);
+
+		return server;
+	}
+
+	private initCORS(server: Elysia): void {
+		server.use(
+			cors({
+				origin: true,
+				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
+			})
 		);
 	}
 
-	private initDocs(): void {
-		this.app.use(
+	private initDocs(server: Elysia): void {
+		server.use(
 			swagger({
 				documentation: {
-					servers: [{ url: this.serverOptions.docsHostname }],
+					servers: [
+						{
+							url: (this.serverConfig.docs.playground.https ? 'https://' : 'http://').concat(
+								this.serverConfig.docs.playground.domain,
+								':',
+								this.serverConfig.docs.playground.port.toString()
+							)
+						}
+					],
 					info: {
 						title: 'JSPaste documentation',
-						version: this.serverOptions.versions.map((v) => `v${v}`).join(', '),
+						version: this.serverConfig.versions.map((version) => `v${version}`).join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
@@ -101,24 +70,52 @@ export class Server {
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
-				path: '/docs',
-				exclude: ['/docs', '/docs/json', /^\/documents/]
+				path: this.serverConfig.docs.path,
+				exclude: [this.serverConfig.docs.path, this.serverConfig.docs.path.concat('/json'), /^\/documents/]
 			})
 		);
 	}
 
-	private initRoutes(): void {
-		const root = './src/routes';
-		const apiVersions = this.serverOptions.versions.toReversed();
+	private initErrorHandler(server: Elysia): void {
+		server.use(errorSenderPlugin).onError(({ errorSender, path, set, code, error }) => {
+			switch (code) {
+				// Redirect to the frontend 404 page
+				case 'NOT_FOUND':
+					if (path === '/404') return 'Not found';
+					set.redirect = '/404';
+					return;
+
+				case 'VALIDATION':
+					console.error(error);
+					return errorSender.sendError(400, JSPErrorMessage['jsp.validation_failed']);
+
+				case 'INTERNAL_SERVER_ERROR':
+					console.error(error);
+					return errorSender.sendError(500, JSPErrorMessage['jsp.internal_server_error']);
+
+				case 'PARSE':
+					console.error(error);
+					return errorSender.sendError(400, JSPErrorMessage['jsp.parse_failed']);
+
+				default:
+					console.error(error);
+					return errorSender.sendError(400, JSPErrorMessage['jsp.unknown']);
+			}
+		});
+	}
+
+	private initRoutes(server: Elysia): void {
+		const routes = './src/routes';
+		const apiVersions = this.serverConfig.versions.toReversed();
 
 		console.info('Registering routes for', apiVersions.length, 'versions...');
 
 		for (const [i, apiVersion] of apiVersions.entries()) {
 			const isLatestVersion = i === 0;
 			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
-			const routesArray = Array.from(routesGlob.scanSync({ cwd: root })).map((route) => {
+			const routesArray = Array.from(routesGlob.scanSync({ cwd: routes })).map((route) => {
 				try {
-					return import.meta.require(join('../routes', route)).default;
+					return require(join('../routes', route)).default;
 				} catch (err) {
 					console.error('Unable to import route', err);
 					return null;
@@ -128,12 +125,10 @@ export class Server {
 			for (const resolvedRoute of routesArray) {
 				if (!resolvedRoute) continue;
 
-				this.app.group(`/api/v${apiVersion as number}/documents`, (prefix) =>
-					prefix.use(resolvedRoute)
-				);
+				server.group(`/api/v${apiVersion as number}/documents`, (prefix) => prefix.use(resolvedRoute));
 
 				if (isLatestVersion) {
-					this.app.group('/documents', (prefix) => prefix.use(resolvedRoute));
+					server.group('/documents', (prefix) => prefix.use(resolvedRoute));
 				}
 			}
 

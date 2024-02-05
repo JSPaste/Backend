@@ -4,14 +4,10 @@ on:
         - cron: '33 3 * * 1'
     push:
         branches: ['dev']
-        paths-ignore:
-            - '*.md'
-            - '.*ignore'
+        paths-ignore: ['*.md', '.*ignore']
     pull_request:
         branches: ['dev']
-        paths-ignore:
-            - '*.md'
-            - '.*ignore'
+        paths-ignore: ['*.md', '.*ignore']
 
 permissions: read-all
 

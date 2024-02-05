@@ -1,8 +1,9 @@
 import { Server } from './classes/Server.ts';
-import type { ServerOptions } from './interfaces/ServerOptions.ts';
 
-const options: Partial<ServerOptions> = {
-	// Override default options on 'defaultServerOptions' here
-};
+const server = new Server();
 
-new Server(options).run();
+// FIXME(inetol): Handle exit properly (Docker)
+process.on('exit', () => {
+	console.log('Bye');
+	server.self.stop();
+});
