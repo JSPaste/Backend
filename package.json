@@ -5,13 +5,14 @@
 	"license": "EUPL-1.2",
 	"type": "module",
 	"scripts": {
-		"dev": "NODE_ENV=development bun ./src/index.ts --hot",
+		"dev": "bun run start:watch",
 		"fix": "bun run prettier",
 		"lint": "bun run lint:tsc",
 		"lint:tsc": "bunx tsc --noEmit",
-		"prepare": "is-ci || husky",
+		"prepare": "husky",
 		"prettier": "bunx prettier . --write",
-		"start": "NODE_ENV=production bun ./src/index.ts"
+		"start": "bun ./src/index.ts",
+		"start:watch": "bun ./src/index.ts --watch"
 	},
 	"dependencies": {
 		"@elysiajs/cors": "^0.8.0",
@@ -24,9 +25,8 @@
 	"devDependencies": {
 		"@types/bun": "^1.0.4",
 		"husky": "^9.0.10",
-		"is-ci": "^3.0.1",
-		"lint-staged": "^15.2.1",
-		"prettier": "^3.2.4",
+		"lint-staged": "^15.2.2",
+		"prettier": "^3.2.5",
 		"prettier-plugin-jsdoc": "^1.3.0",
 		"prettier-plugin-packagejson": "^2.4.10",
 		"typescript": "~5.3.3"
