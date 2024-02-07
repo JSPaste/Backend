@@ -1,17 +1,23 @@
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import type { ZlibCompressionOptions } from 'bun';
 import type { JSPError } from '../classes/ErrorSender.ts';
-import * as env from 'env-var';
 
 // interface Bun.env
 declare module 'bun' {
 	interface Env {
 		PORT: number;
-		DOCS_ENABLED: boolean;
-		DOCS_PATH: string;
-		DOCS_PLAYGROUND_HTTPS: boolean;
-		DOCS_PLAYGROUND_DOMAIN: string;
-		DOCS_PLAYGROUND_PORT: number;
+		DOCS: {
+			ENABLED: boolean;
+			PATH: string;
+			PLAYGROUND: {
+				HTTPS: boolean;
+				DOMAIN: string;
+				PORT: number;
+			};
+		};
+		GZIP: {
+			LEVEL: Range<0, 9>;
+		};
 	}
 }
 
@@ -33,25 +39,31 @@ export enum JSPErrorCode {
 	documentInvalidPassword = 'jsp.document.invalid_password',
 	documentInvalidLength = 'jsp.document.invalid_length',
 	documentInvalidSecret = 'jsp.document.invalid_secret',
-	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
+	documentInvalidSecretLength = 'jsp.document.invalid_secret_length',
+	documentInvalidKeyLength = 'jsp.document.invalid_key_length',
+	documentAlreadyExist = 'jsp.document.document_already_exist'
 }
 
-export const serverConfig: Required<ServerOptions> = {
-	port: env.get('PORT').default(4000).asPortNumber(),
+export const serverConfig: ServerOptions = {
+	port: Bun.env.PORT || 4000,
 	versions: [ServerVersion.v1, ServerVersion.v2],
 	docs: {
-		enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
-		path: env.get('DOCS_PATH').default('/docs').asString(),
+		enabled: Bun.env.DOCS?.ENABLED || true,
+		path: Bun.env.DOCS?.PATH || '/docs',
 		playground: {
-			https: env.get('DOCS_PLAYGROUND_HTTPS').asBoolStrict() ?? true,
-			domain: env.get('DOCS_PLAYGROUND_DOMAIN').default('jspaste.eu').asString(),
-			port: env.get('DOCS_PLAYGROUND_PORT').default(443).asPortNumber()
+			domain:
+				Bun.env.DOCS?.PLAYGROUND?.DOMAIN === undefined
+					? 'https://jspaste.eu'
+					: (Bun.env.DOCS?.PLAYGROUND?.HTTPS ? 'https://' : 'http://').concat(
+							Bun.env.DOCS?.PLAYGROUND?.DOMAIN
+						),
+			port: Bun.env.DOCS?.PLAYGROUND?.PORT || 443
 		}
 	}
-} as const;
+} as const satisfies Required<ServerOptions>;
 
 export const zlibConfig: ZlibCompressionOptions = {
-	level: 6
+	level: Bun.env.GZIP?.LEVEL || 6
 } as const;
 
 // FIXME(inetol): Migrate to new config system
@@ -126,6 +138,16 @@ export const JSPErrorMessage: Record<JSPErrorCode, JSPError> = {
 		type: 'error',
 		errorCode: JSPErrorCode.documentInvalidSecretLength,
 		message: 'The provided secret length is invalid'
+	},
+	[JSPErrorCode.documentInvalidKeyLength]: {
+		type: 'error',
+		errorCode: JSPErrorCode.documentInvalidKeyLength,
+		message: 'The provided key length is invalid'
+	},
+	[JSPErrorCode.documentAlreadyExist]: {
+		type: 'error',
+		errorCode: JSPErrorCode.documentAlreadyExist,
+		message: 'The provided key already exist'
 	}
 };
 

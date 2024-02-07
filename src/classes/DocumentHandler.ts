@@ -8,7 +8,8 @@ import {
 	JSPErrorMessage,
 	maxDocLength,
 	ServerVersion,
-	viewDocumentPath
+	viewDocumentPath,
+	type Range
 } from '../utils/constants.ts';
 import { ErrorSender } from './ErrorSender.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -38,6 +39,8 @@ interface HandlePublish {
 	selectedSecret?: string;
 	lifetime?: number;
 	password?: string;
+	selectedKeyLength?: number;
+	selectedKey?: string;
 }
 
 interface HandleRemove {
@@ -114,7 +117,7 @@ export class DocumentHandler {
 	}
 
 	public static async handlePublish(
-		{ errorSender, body, selectedSecret, lifetime, password }: HandlePublish,
+		{ errorSender, body, selectedSecret, lifetime, password, selectedKeyLength, selectedKey }: HandlePublish,
 		version: ServerVersion
 	) {
 		const buffer = Buffer.from(body as ArrayBuffer);
@@ -126,6 +129,16 @@ export class DocumentHandler {
 
 		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_secret_length']);
+
+		if (selectedKey && !ValidatorUtils.isStringLengthBetweenLimits(selectedKey, 2, 32))
+			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_key_length']);
+
+		console.log(selectedKeyLength);
+
+		console.log('( ' + (selectedKeyLength || 0 > 32) + '||' + (selectedKeyLength || 8 < 2) + ')');
+
+		if (selectedKeyLength && (selectedKeyLength > 32 || selectedKeyLength < 2))
+			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_key_length']);
 
 		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_password_length']);
@@ -145,7 +158,11 @@ export class DocumentHandler {
 			password
 		};
 
-		const key = await StringUtils.createKey();
+		const key = selectedKey || (await StringUtils.createKey((selectedKeyLength as Range<2, 32>) || 8));
+
+		if (await Bun.file(basePath + key).exists()) {
+			return errorSender.sendError(400, JSPErrorMessage['jsp.document.document_already_exist']);
+		}
 
 		await DocumentManager.write(basePath + key, newDoc);
 
