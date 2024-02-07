@@ -133,10 +133,6 @@ export class DocumentHandler {
 		if (selectedKey && !ValidatorUtils.isStringLengthBetweenLimits(selectedKey, 2, 32))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_key_length']);
 
-		console.log(selectedKeyLength);
-
-		console.log('( ' + (selectedKeyLength || 0 > 32) + '||' + (selectedKeyLength || 8 < 2) + ')');
-
 		if (selectedKeyLength && (selectedKeyLength > 32 || selectedKeyLength < 2))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_key_length']);
 
