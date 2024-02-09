@@ -1,6 +1,7 @@
 # TODO: Experimental feature
 name: 'CI -> Security-Dependencies'
-on: [pull_request]
+on:
+    - pull_request
 
 permissions:
     contents: read
