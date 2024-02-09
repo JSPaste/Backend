@@ -1,0 +1,14 @@
+version: 2
+updates:
+    - package-ecosystem: github-actions
+      directory: '/'
+      target-branch: dev
+      schedule:
+          interval: weekly
+      assignees:
+          - inetol
+      commit-message:
+          prefix: GHA
+          include: scope
+      labels:
+          - dependency

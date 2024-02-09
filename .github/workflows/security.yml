@@ -2,12 +2,20 @@ name: 'CI -> Security'
 on:
     schedule:
         - cron: '33 3 * * 1'
+
     push:
-        branches: ['dev']
-        paths-ignore: ['*.md', '.*ignore']
+        branches:
+            - dev
+        paths-ignore:
+            - '*.md'
+            - '.*ignore'
+
     pull_request:
-        branches: ['dev']
-        paths-ignore: ['*.md', '.*ignore']
+        branches:
+            - dev
+        paths-ignore:
+            - '*.md'
+            - '.*ignore'
 
 permissions: read-all
 
@@ -15,27 +23,34 @@ jobs:
     codeql:
         name: 'CodeQL analysis'
         runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                language:
+                    - javascript-typescript
+
         permissions:
             security-events: write
+            id-token: write
 
         steps:
             - name: 'Harden Runner'
-              uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+              uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
               with:
-                  egress-policy: audit
+                  policy: ci-security
 
             - name: 'Checkout'
               uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
             - name: 'Setup CodeQL'
-              uses: github/codeql-action/init@b7bf0a3ed3ecfa44160715d7c442788f65f0f923 # v3.23.2
+              uses: github/codeql-action/init@e8893c57a1f3a2b659b6b55564fdfdbbd2982911 # v3.24.0
               with:
-                  languages: '${{ matrix.language }}'
+                  languages: ${{ matrix.language }}
 
             - name: 'Run analysis'
-              uses: github/codeql-action/analyze@b7bf0a3ed3ecfa44160715d7c442788f65f0f923 # v3.23.2
+              uses: github/codeql-action/analyze@e8893c57a1f3a2b659b6b55564fdfdbbd2982911 # v3.24.0
               with:
-                  category: '/language:javascript-typescript'
+                  category: '/language:${{ matrix.language }}'
 
     scoreboard:
         name: 'Scorecard analysis'
@@ -46,9 +61,9 @@ jobs:
 
         steps:
             - name: 'Harden Runner'
-              uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+              uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
               with:
-                  egress-policy: audit
+                  policy: ci-security
 
             - name: 'Checkout'
               uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -60,9 +75,9 @@ jobs:
               with:
                   results_file: scoreboard.sarif
                   results_format: sarif
-                  publish_results: true
+                  publish_results: false
 
             - name: 'Upload to code-scanning'
-              uses: github/codeql-action/upload-sarif@b7bf0a3ed3ecfa44160715d7c442788f65f0f923 # v3.23.2
+              uses: github/codeql-action/upload-sarif@e8893c57a1f3a2b659b6b55564fdfdbbd2982911 # v3.24.0
               with:
                   sarif_file: scoreboard.sarif
