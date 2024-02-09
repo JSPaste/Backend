@@ -54,11 +54,12 @@ jobs:
               id: build_image
               uses: redhat-actions/buildah-build@c79846fb306beeba490e89fb75d2d1af95831e79 # master (update to node20)
               with:
+                  archs: 'amd64, arm64'
                   containerfiles: Containerfile
                   image: ${{ env.IMAGE_NAME }}
-                  archs: 'amd64, arm64'
-                  tags: ${{ steps.setup_tags.outputs.build_tags }}
+                  layers: true
                   oci: true
+                  tags: ${{ steps.setup_tags.outputs.build_tags }}
 
             - name: 'Push to GHCR'
               uses: redhat-actions/push-to-registry@9986a6552bc4571882a4a67e016b17361412b4df # v2.7.1
