@@ -56,7 +56,7 @@ jobs:
               with:
                   containerfiles: Containerfile
                   image: ${{ env.IMAGE_NAME }}
-                  platforms: 'linux/amd64, linux/arm64'
+                  archs: 'amd64, arm64'
                   tags: ${{ steps.setup_tags.outputs.build_tags }}
                   oci: true
 
