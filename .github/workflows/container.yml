@@ -17,6 +17,7 @@ jobs:
         name: 'Build container image'
         runs-on: ubuntu-latest
         permissions:
+            id-token: write
             packages: write
 
         env:
