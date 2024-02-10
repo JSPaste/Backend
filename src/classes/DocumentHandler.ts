@@ -131,6 +131,9 @@ export class DocumentHandler {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255))
 			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidSecretLength]);
 
+		if (selectedKey && !ValidatorUtils.isAlphanumeric(selectedKey))
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
+
 		if (selectedKey && !ValidatorUtils.isStringLengthBetweenLimits(selectedKey, 2, 32))
 			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidKeyLength]);
 
