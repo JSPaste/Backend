@@ -154,7 +154,7 @@ export class DocumentHandler {
 			password
 		};
 
-		const key = selectedKey || (await StringUtils.generateKey((selectedKeyLength as Range<2, 32>) || 8));
+		const key = selectedKey || (await StringUtils.createKey((selectedKeyLength as Range<2, 32>) || 8));
 
 		if (selectedKey && (await StringUtils.keyExists(key)))
 			return errorSender.sendError(400, JSPErrorMessage['jsp.document.key_already_exists']);
