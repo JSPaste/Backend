@@ -154,11 +154,10 @@ export class DocumentHandler {
 			password
 		};
 
-		const key = selectedKey || (await StringUtils.createKey((selectedKeyLength as Range<2, 32>) || 8));
+		const key = selectedKey || (await StringUtils.generateKey((selectedKeyLength as Range<2, 32>) || 8));
 
-		if (await Bun.file(basePath + key).exists()) {
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.document_already_exist']);
-		}
+		if (selectedKey && (await StringUtils.keyExists(key)))
+			return errorSender.sendError(400, JSPErrorMessage['jsp.document.key_already_exists']);
 
 		await DocumentManager.write(basePath + key, newDoc);
 
