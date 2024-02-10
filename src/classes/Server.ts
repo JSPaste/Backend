@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { JSPErrorMessage, serverConfig } from '../utils/constants.ts';
+import { JSPErrorCode, JSPErrorMessage, serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
 import { join } from 'path';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
@@ -87,19 +87,19 @@ export class Server {
 
 				case 'VALIDATION':
 					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage['jsp.validation_failed']);
+					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.validation]);
 
 				case 'INTERNAL_SERVER_ERROR':
 					console.error(error);
-					return errorSender.sendError(500, JSPErrorMessage['jsp.internal_server_error']);
+					return errorSender.sendError(500, JSPErrorMessage[JSPErrorCode.internalServerError]);
 
 				case 'PARSE':
 					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage['jsp.parse_failed']);
+					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.parseFailed]);
 
 				default:
 					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage['jsp.unknown']);
+					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.unknown]);
 			}
 		});
 	}
