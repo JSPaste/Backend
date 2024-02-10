@@ -33,7 +33,9 @@ export enum JSPErrorCode {
 	documentInvalidPassword = 'jsp.document.invalid_password',
 	documentInvalidLength = 'jsp.document.invalid_length',
 	documentInvalidSecret = 'jsp.document.invalid_secret',
-	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
+	documentInvalidSecretLength = 'jsp.document.invalid_secret_length',
+	documentInvalidKeyLength = 'jsp.document.invalid_key_length',
+	documentKeyAlreadyExists = 'jsp.document.key_already_exists'
 }
 
 export const serverConfig: Required<ServerOptions> = {
@@ -126,6 +128,16 @@ export const JSPErrorMessage: Record<JSPErrorCode, JSPError> = {
 		type: 'error',
 		errorCode: JSPErrorCode.documentInvalidSecretLength,
 		message: 'The provided secret length is invalid'
+	},
+	[JSPErrorCode.documentInvalidKeyLength]: {
+		type: 'error',
+		errorCode: JSPErrorCode.documentInvalidKeyLength,
+		message: 'The provided key length is invalid'
+	},
+	[JSPErrorCode.documentKeyAlreadyExists]: {
+		type: 'error',
+		errorCode: JSPErrorCode.documentKeyAlreadyExists,
+		message: 'The provided key already exists'
 	}
 };
 
