@@ -5,6 +5,7 @@ import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 import {
 	basePath,
 	defaultDocumentLifetime,
+	JSPErrorCode,
 	JSPErrorMessage,
 	maxDocLength,
 	ServerVersion,
@@ -83,22 +84,22 @@ export class DocumentHandler {
 
 	public static async handleEdit({ errorSender, key, newBody, secret }: HandleEdit) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
 
 		const file = Bun.file(basePath + key);
 		const fileExists = await file.exists();
 
-		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
+		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage[JSPErrorCode.documentNotFound]);
 
 		const buffer = Buffer.from(newBody as ArrayBuffer);
 
 		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, maxDocLength))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_length']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidLength]);
 
 		const doc = await DocumentManager.read(file);
 
 		if (doc.secret && doc.secret !== secret)
-			return errorSender.sendError(403, JSPErrorMessage['jsp.document.invalid_secret']);
+			return errorSender.sendError(403, JSPErrorMessage[JSPErrorCode.documentInvalidSecret]);
 
 		doc.rawFileData = buffer;
 
@@ -111,7 +112,7 @@ export class DocumentHandler {
 
 	public static async handleExists({ errorSender, key }: HandleExists) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
 
 		return await Bun.file(basePath + key).exists();
 	}
@@ -123,21 +124,21 @@ export class DocumentHandler {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
 		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, maxDocLength))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_length']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidLength]);
 
 		const secret = selectedSecret || StringUtils.createSecret();
 
 		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_secret_length']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidSecretLength]);
 
 		if (selectedKey && !ValidatorUtils.isStringLengthBetweenLimits(selectedKey, 2, 32))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_key_length']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidKeyLength]);
 
 		if (selectedKeyLength && (selectedKeyLength > 32 || selectedKeyLength < 2))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_key_length']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidKeyLength]);
 
 		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.invalid_password_length']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentInvalidPasswordLength]);
 
 		lifetime = lifetime ?? defaultDocumentLifetime;
 
@@ -157,7 +158,7 @@ export class DocumentHandler {
 		const key = selectedKey || (await StringUtils.createKey((selectedKeyLength as Range<2, 32>) || 8));
 
 		if (selectedKey && (await StringUtils.keyExists(key)))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.document.key_already_exists']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.documentKeyAlreadyExists]);
 
 		await DocumentManager.write(basePath + key, newDoc);
 
@@ -177,17 +178,17 @@ export class DocumentHandler {
 
 	public static async handleRemove({ errorSender, key, secret }: HandleRemove) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
 
 		const file = Bun.file(basePath + key);
 		const fileExists = await file.exists();
 
-		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
+		if (!fileExists) return errorSender.sendError(404, JSPErrorMessage[JSPErrorCode.documentNotFound]);
 
 		const doc = await DocumentManager.read(file);
 
 		if (doc.secret && doc.secret !== secret)
-			return errorSender.sendError(403, JSPErrorMessage['jsp.document.invalid_secret']);
+			return errorSender.sendError(403, JSPErrorMessage[JSPErrorCode.documentInvalidSecret]);
 
 		return {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
@@ -199,7 +200,7 @@ export class DocumentHandler {
 
 	private static async handleGetDocument({ errorSender, key, password }: HandleGetDocument) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return errorSender.sendError(400, JSPErrorMessage['jsp.input.invalid']);
+			return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
 
 		const file = Bun.file(basePath + key);
 		const fileExists = await file.exists();
@@ -209,14 +210,14 @@ export class DocumentHandler {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
 			if (fileExists) await unlink(basePath + key).catch(() => null);
 
-			return errorSender.sendError(404, JSPErrorMessage['jsp.document.not_found']);
+			return errorSender.sendError(404, JSPErrorMessage[JSPErrorCode.documentNotFound]);
 		}
 
 		if (doc.password && !password)
-			return errorSender.sendError(401, JSPErrorMessage['jsp.document.needs_password']);
+			return errorSender.sendError(401, JSPErrorMessage[JSPErrorCode.documentPasswordNeeded]);
 
 		if (doc.password && doc.password !== password)
-			return errorSender.sendError(403, JSPErrorMessage['jsp.document.invalid_password']);
+			return errorSender.sendError(403, JSPErrorMessage[JSPErrorCode.documentInvalidPassword]);
 
 		return doc;
 	}
