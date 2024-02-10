@@ -5,7 +5,6 @@ export interface JSPError {
 	type: 'error';
 	message: string;
 	errorCode: JSPErrorCode;
-	hint?: any;
 }
 
 export class ErrorSender {
@@ -24,8 +23,7 @@ export class ErrorSender {
 			{
 				type: t.String({ description: 'The error type' }),
 				message: t.String({ description: 'The error message' }),
-				errorCode: t.String({ description: 'The error code' }),
-				hint: t.Optional(t.Any({ description: 'The error hint' }))
+				errorCode: t.String({ description: 'The error code' })
 			},
 			{ description: 'An object representing an error' }
 		);
