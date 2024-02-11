@@ -92,18 +92,6 @@ export const DocumentDataStruct = $root.DocumentDataStruct = (() => {
     });
 
     /**
-     * Creates a new DocumentDataStruct instance using the specified properties.
-     * @function create
-     * @memberof DocumentDataStruct
-     * @static
-     * @param {IDocumentDataStruct=} [properties] Properties to set
-     * @returns {DocumentDataStruct} DocumentDataStruct instance
-     */
-    DocumentDataStruct.create = function create(properties) {
-        return new DocumentDataStruct(properties);
-    };
-
-    /**
      * Encodes the specified DocumentDataStruct message. Does not implicitly {@link DocumentDataStruct.verify|verify} messages.
      * @function encode
      * @memberof DocumentDataStruct
@@ -313,21 +301,6 @@ export const DocumentDataStruct = $root.DocumentDataStruct = (() => {
      */
     DocumentDataStruct.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    /**
-     * Gets the default type url for DocumentDataStruct
-     * @function getTypeUrl
-     * @memberof DocumentDataStruct
-     * @static
-     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-     * @returns {string} The default type url
-     */
-    DocumentDataStruct.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-        if (typeUrlPrefix === undefined) {
-            typeUrlPrefix = "type.googleapis.com";
-        }
-        return typeUrlPrefix + "/DocumentDataStruct";
     };
 
     return DocumentDataStruct;

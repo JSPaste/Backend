@@ -13,7 +13,7 @@ import {
 } from '../utils/constants.ts';
 import { ErrorSender } from './ErrorSender.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
-import type { DocumentDataStruct } from '../structures/Structures';
+import type { IDocumentDataStruct } from '../structures/Structures';
 
 interface HandleAccess {
 	errorSender: ErrorSender;
@@ -76,7 +76,7 @@ export class DocumentHandler {
 				return {
 					key,
 					data,
-					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain) + key,
+					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain + '/') + key,
 					expirationTimestamp: res.expirationTimestamp ? Number(res.expirationTimestamp) : undefined
 				};
 		}
@@ -152,10 +152,7 @@ export class DocumentHandler {
 		const msLifetime = lifetime * 1000;
 		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
 
-		const newDoc: DocumentDataStruct = {
-			toJSON(): { [p: string]: any } {
-				return {};
-			},
+		const newDoc: IDocumentDataStruct = {
 			rawFileData: buffer,
 			secret,
 			expirationTimestamp,
@@ -177,7 +174,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain) + key,
+					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain + '/') + key,
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 		}

@@ -44,13 +44,6 @@ export class DocumentDataStruct implements IDocumentDataStruct {
     public _password?: "password";
 
     /**
-     * Creates a new DocumentDataStruct instance using the specified properties.
-     * @param [properties] Properties to set
-     * @returns DocumentDataStruct instance
-     */
-    public static create(properties?: IDocumentDataStruct): DocumentDataStruct;
-
-    /**
      * Encodes the specified DocumentDataStruct message. Does not implicitly {@link DocumentDataStruct.verify|verify} messages.
      * @param message DocumentDataStruct message or plain object to encode
      * @param [writer] Writer to encode to
@@ -112,11 +105,4 @@ export class DocumentDataStruct implements IDocumentDataStruct {
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
-
-    /**
-     * Gets the default type url for DocumentDataStruct
-     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-     * @returns The default type url
-     */
-    public static getTypeUrl(typeUrlPrefix?: string): string;
 }
