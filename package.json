@@ -5,6 +5,9 @@
 	"license": "EUPL-1.2",
 	"type": "module",
 	"scripts": {
+		"build": "bun run build:structures && bun run build:structures:dts",
+		"build:structures": "bunx pbjs -t static-module -w es6 --no-create --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/**/*.proto",
+		"build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
 		"dev": "bun run start:watch",
 		"fix": "bun run prettier",
 		"lint": "bun run lint:tsc",
@@ -17,13 +20,13 @@
 	"dependencies": {
 		"@elysiajs/cors": "^0.8.0",
 		"@elysiajs/swagger": "^0.8.5",
-		"@protobuf-ts/plugin": "^2.9.3",
-		"@protobuf-ts/runtime": "^2.9.3",
-		"elysia": "^0.8.15",
-		"env-var": "^7.4.1"
+		"elysia": "^0.8.16",
+		"env-var": "^7.4.1",
+		"protobufjs": "~7.2.6",
+		"protobufjs-cli": "^1.1.2"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.0.4",
+		"@types/bun": "^1.0.5",
 		"husky": "^9.0.10",
 		"lint-staged": "^15.2.2",
 		"prettier": "^3.2.5",

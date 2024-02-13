@@ -1,19 +1,19 @@
 import { unlink } from 'node:fs/promises';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { DocumentManager } from './DocumentManager';
-import type { DocumentDataStruct } from '../structures/documentStruct.ts';
 import {
 	basePath,
 	defaultDocumentLifetime,
 	JSPErrorCode,
 	JSPErrorMessage,
 	maxDocLength,
-	ServerVersion,
-	viewDocumentPath,
-	type Range
+	type Range,
+	serverConfig,
+	ServerVersion
 } from '../utils/constants.ts';
 import { ErrorSender } from './ErrorSender.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
+import type { IDocumentDataStruct } from '../structures/Structures';
 
 interface HandleAccess {
 	errorSender: ErrorSender;
@@ -76,7 +76,7 @@ export class DocumentHandler {
 				return {
 					key,
 					data,
-					url: viewDocumentPath + key,
+					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain + '/') + key,
 					expirationTimestamp: res.expirationTimestamp ? Number(res.expirationTimestamp) : undefined
 				};
 		}
@@ -152,7 +152,7 @@ export class DocumentHandler {
 		const msLifetime = lifetime * 1000;
 		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
 
-		const newDoc: DocumentDataStruct = {
+		const newDoc: IDocumentDataStruct = {
 			rawFileData: buffer,
 			secret,
 			expirationTimestamp,
@@ -174,7 +174,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: viewDocumentPath + key,
+					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain + '/') + key,
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 		}

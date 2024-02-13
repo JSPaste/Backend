@@ -1,13 +1,16 @@
 import type { ServerVersion } from '../utils/constants';
 
 export interface ServerOptions {
+	tls: boolean;
+	domain: string;
 	port: number;
 	versions: ServerVersion[];
+	files: {};
 	docs: {
 		enabled: boolean;
 		path: string;
 		playground: {
-			https: boolean;
+			tls: boolean;
 			domain: string;
 			port: number;
 		};

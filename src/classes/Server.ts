@@ -49,7 +49,7 @@ export class Server {
 				documentation: {
 					servers: [
 						{
-							url: (this.serverConfig.docs.playground.https ? 'https://' : 'http://').concat(
+							url: (this.serverConfig.docs.playground.tls ? 'https://' : 'http://').concat(
 								this.serverConfig.docs.playground.domain,
 								':',
 								this.serverConfig.docs.playground.port.toString()
