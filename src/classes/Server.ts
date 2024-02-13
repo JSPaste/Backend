@@ -2,9 +2,9 @@ import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import { JSPErrorCode, JSPErrorMessage, serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
-import { join } from 'path';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
 import cors from '@elysiajs/cors';
+import { IndexV1 } from '../routes/IndexV1.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -24,8 +24,10 @@ export class Server {
 
 		this.serverConfig.docs.enabled && this.initDocs(server);
 		this.initErrorHandler(server);
-		this.initRoutes(server);
 		this.initCORS(server);
+
+		// TODO: Only for testing
+		new IndexV1(server).register('/test');
 
 		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
@@ -102,43 +104,5 @@ export class Server {
 					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.unknown]);
 			}
 		});
-	}
-
-	private initRoutes(server: Elysia): void {
-		const routes = './src/routes';
-		const apiVersions = this.serverConfig.versions.toReversed();
-
-		console.info('Registering routes for', apiVersions.length, 'versions...');
-
-		for (const [i, apiVersion] of apiVersions.entries()) {
-			const isLatestVersion = i === 0;
-			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
-			const routesArray = Array.from(routesGlob.scanSync({ cwd: routes })).map((route) => {
-				try {
-					return require(join('../routes', route)).default;
-				} catch (err) {
-					console.error('Unable to import route', err);
-					return null;
-				}
-			});
-
-			for (const resolvedRoute of routesArray) {
-				if (!resolvedRoute) continue;
-
-				server.group(`/api/v${apiVersion as number}/documents`, (prefix) => prefix.use(resolvedRoute));
-
-				if (isLatestVersion) {
-					server.group('/documents', (prefix) => prefix.use(resolvedRoute));
-				}
-			}
-
-			console.info(
-				'Registered',
-				routesArray.length,
-				'routes for API version',
-				apiVersion,
-				isLatestVersion ? '(latest)' : ''
-			);
-		}
 	}
 }

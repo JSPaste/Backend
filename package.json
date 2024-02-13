@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@elysiajs/cors": "^0.8.0",
 		"@elysiajs/swagger": "^0.8.5",
-		"elysia": "^0.8.16",
+		"elysia": "^0.8.17",
 		"env-var": "^7.4.1",
 		"protobufjs": "~7.2.6",
 		"protobufjs-cli": "^1.1.2"
