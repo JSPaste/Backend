@@ -1,8 +1,8 @@
-import { basePath, characters, type Range } from './constants.ts';
+import { base64URL, basePath, type Range } from './constants.ts';
 
 export class StringUtils {
 	public static random(length: number, base: Range<2, 64> = 62): string {
-		const baseSet = characters.slice(0, base);
+		const baseSet = base64URL.slice(0, base);
 
 		let string = '';
 
