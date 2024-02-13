@@ -27,7 +27,7 @@ export class Server {
 		this.initCORS(server);
 
 		// TODO: Only for testing
-		new IndexV1(server).register('/test');
+		new IndexV1(server, '/test').group('/testv1');
 
 		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)

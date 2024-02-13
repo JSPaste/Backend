@@ -7,5 +7,7 @@ export abstract class RouteHandler {
 		this.server = server;
 	}
 
+	protected abstract group(group: string): this;
+
 	protected abstract register(path: string): void;
 }
