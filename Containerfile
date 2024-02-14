@@ -5,12 +5,12 @@ WORKDIR /build/
 COPY . ./
 
 RUN bun install --production --frozen-lockfile --ignore-scripts
+RUN bun run production:build
 
 # Runner
-FROM docker.io/oven/bun:1.0-distroless AS runner
-WORKDIR /home/nonroot/
+FROM gcr.io/distroless/static-debian12:latest AS runner
 
-COPY --from=builder /build/. ./
+COPY --from=builder /build/dist/jspaste ./
 
 ENV DOCS_ENABLED=false
 
@@ -21,7 +21,8 @@ LABEL org.opencontainers.image.description="The backend for JSPaste, built with 
 LABEL org.opencontainers.image.documentation="https://docs.jspaste.eu"
 LABEL org.opencontainers.image.licenses="EUPL-1.2"
 
+# TODO: Check folder
 VOLUME /home/nonroot/documents
 EXPOSE 4000/tcp
 
-CMD ["./src/index.ts"]
+CMD ["jspaste"]
