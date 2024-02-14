@@ -16,14 +16,14 @@ export class Server {
 
 	public constructor(options: Partial<ServerOptions> = {}) {
 		this.serverConfig = { ...serverConfig, ...options };
-		this.server = this.initServer();
+		this.server = this.init();
 	}
 
 	public get self(): Elysia {
 		return this.server;
 	}
 
-	private initServer(): Elysia {
+	private init(): Elysia {
 		const server = new Elysia();
 
 		this.initCORS(server);
