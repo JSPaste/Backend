@@ -11,7 +11,7 @@ export class AccessV1 extends RouteHandler {
 
 	public override register(path: string): Elysia {
 		return this.server.get(
-			path,
+			path.concat('/:key'),
 			async ({ errorSender, params: { key } }) =>
 				DocumentHandler.handleAccess({ errorSender, key: key }, ServerVersion.v1),
 			{

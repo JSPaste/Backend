@@ -10,7 +10,7 @@ export class RemoveV1 extends RouteHandler {
 
 	public override register(path: string): Elysia {
 		return this.server.delete(
-			path,
+			path.concat('/:key'),
 			async ({ errorSender, request, params: { key } }) =>
 				DocumentHandler.handleRemove({
 					errorSender,

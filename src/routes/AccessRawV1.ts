@@ -11,7 +11,7 @@ export class AccessRawV1 extends RouteHandler {
 
 	public override register(path: string): Elysia {
 		return this.server.get(
-			path,
+			path.concat('/:key/raw'),
 			async ({ errorSender, set, params: { key } }) => {
 				set.headers['Content-Type'] = 'text/plain';
 

@@ -111,11 +111,19 @@ export class Server {
 	}
 
 	private initRoutes(server: Elysia) {
-		// FIXME: Group
-		new AccessV1(server).register('/api/v1/documents/:key');
-		new AccessRawV1(server).register('/api/v1/documents/:key/raw');
-		new IndexV1(server).register('/api/v1/documents');
-		new PublishV1(server).register('/api/v1/documents');
-		new RemoveV1(server).register('/api/v1/documents/:key');
+		const endpoint = {
+			v1: [AccessV1, AccessRawV1, IndexV1, PublishV1, RemoveV1],
+			v2: []
+		};
+
+		const path = {
+			v1: ['/api/v1/documents', '/test/alias', '/typescript/go/wild', '/memory/go/brr'],
+			v2: []
+		};
+
+		endpoint.v1.forEach((Class) => {
+			const endpoint = new Class(server);
+			path.v1.forEach(endpoint.register.bind(endpoint));
+		});
 	}
 }
