@@ -5,6 +5,10 @@ import swagger from '@elysiajs/swagger';
 import { errorSenderPlugin } from '../plugins/errorSender.ts';
 import cors from '@elysiajs/cors';
 import { IndexV1 } from '../routes/IndexV1.ts';
+import { AccessV1 } from '../routes/AccessV1.ts';
+import { AccessRawV1 } from '../routes/AccessRawV1.ts';
+import { PublishV1 } from '../routes/PublishV1.ts';
+import { RemoveV1 } from '../routes/RemoveV1.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -22,12 +26,12 @@ export class Server {
 	private initServer(): Elysia {
 		const server = new Elysia();
 
+		this.initCORS(server);
 		this.serverConfig.docs.enabled && this.initDocs(server);
 		this.initErrorHandler(server);
-		this.initCORS(server);
+		this.initRoutes(server);
 
-		// TODO: Only for testing
-		new IndexV1(server, '/test').group('/testv1');
+		server.use(errorSenderPlugin);
 
 		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
@@ -104,5 +108,14 @@ export class Server {
 					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.unknown]);
 			}
 		});
+	}
+
+	private initRoutes(server: Elysia) {
+		// FIXME: Group
+		new AccessV1(server).register('/api/v1/documents/:key');
+		new AccessRawV1(server).register('/api/v1/documents/:key/raw');
+		new IndexV1(server).register('/api/v1/documents');
+		new PublishV1(server).register('/api/v1/documents');
+		new RemoveV1(server).register('/api/v1/documents/:key');
 	}
 }
