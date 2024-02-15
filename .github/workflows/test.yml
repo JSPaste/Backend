@@ -75,6 +75,4 @@ jobs:
               run: bun install --production --frozen-lockfile --ignore-scripts
 
             - name: 'Run build'
-              run: |
-                  bun run build:bundle
-                  bun run build:standalone
+              run: bun run build:standalone

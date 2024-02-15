@@ -16,14 +16,14 @@ export class Server {
 
 	public constructor(options: Partial<ServerOptions> = {}) {
 		this.serverConfig = { ...serverConfig, ...options };
-		this.server = this.init();
+		this.server = this.createServer();
 	}
 
 	public get self(): Elysia {
 		return this.server;
 	}
 
-	private init(): Elysia {
+	private createServer(): Elysia {
 		const server = new Elysia();
 
 		this.initCORS(server);
@@ -81,28 +81,28 @@ export class Server {
 	}
 
 	private initPlugins(server: Elysia): void {
-		const plugin = [ErrorSenderPlugin];
+		const plugins = [ErrorSenderPlugin];
 
-		plugin.forEach((Plugin) => server.use(new Plugin(server).load()));
+		plugins.forEach((Plugin) => server.use(new Plugin(server).load()));
 	}
 
 	private initRoutes(server: Elysia): void {
-		const endpoint = {
+		const endpoints = {
 			v1: [AccessV1, AccessRawV1, IndexV1, PublishV1, RemoveV1],
 			v2: []
 		};
 
-		const prefix = {
+		const prefixes = {
 			v1: ['/api/v1/documents'],
 			v2: ['/api/v2/documents', '/documents']
 		};
 
-		endpoint.v1.forEach((Endpoint) => {
+		endpoints.v1.forEach((Endpoint) => {
 			const endpoint = new Endpoint(server);
 
-			prefix.v1.forEach(endpoint.register.bind(endpoint));
+			prefixes.v1.forEach(endpoint.register.bind(endpoint));
 		});
 
-		console.info('Registered', endpoint.v1.length, 'routes for v1');
+		console.info('Registered', endpoints.v1.length, 'routes for v1');
 	}
 }
