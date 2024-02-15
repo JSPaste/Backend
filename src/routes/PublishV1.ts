@@ -9,7 +9,7 @@ export class PublishV1 extends AbstractRoute {
 		super(server);
 	}
 
-	public override register(path: string): Elysia {
+	public override register(path: string): void {
 		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({ description: 'The file to be uploaded' }),
@@ -30,7 +30,7 @@ export class PublishV1 extends AbstractRoute {
 			detail: { summary: 'Publish document', tags: ['v1'] }
 		};
 
-		return this.server.post(
+		this.server.post(
 			path,
 			async ({ errorSender, body }) => DocumentHandler.handlePublish({ errorSender, body }, ServerVersion.v1),
 			hook

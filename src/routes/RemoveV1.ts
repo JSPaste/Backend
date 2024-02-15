@@ -8,7 +8,7 @@ export class RemoveV1 extends AbstractRoute {
 		super(server);
 	}
 
-	public override register(path: string): Elysia {
+	public override register(path: string): void {
 		const hook = {
 			params: t.Object({
 				key: t.String({
@@ -38,7 +38,7 @@ export class RemoveV1 extends AbstractRoute {
 			detail: { summary: 'Remove document', tags: ['v1'] }
 		};
 
-		return this.server.delete(
+		this.server.delete(
 			path.concat('/:key'),
 			async ({ errorSender, request, params: { key } }) =>
 				DocumentHandler.handleRemove({

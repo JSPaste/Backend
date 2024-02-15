@@ -7,5 +7,5 @@ export abstract class AbstractRoute {
 		this.server = server;
 	}
 
-	protected abstract register(path: string): Elysia;
+	protected abstract register(path: string): void;
 }

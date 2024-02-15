@@ -9,7 +9,7 @@ export class AccessRawV1 extends AbstractRoute {
 		super(server);
 	}
 
-	public override register(path: string): Elysia {
+	public override register(path: string): void {
 		const hook = {
 			params: t.Object(
 				{
@@ -37,7 +37,7 @@ export class AccessRawV1 extends AbstractRoute {
 			}
 		};
 
-		return this.server.get(
+		this.server.get(
 			path.concat('/:key/raw'),
 			async ({ errorSender, set, params: { key } }) => {
 				set.headers['Content-Type'] = 'text/plain';

@@ -9,7 +9,7 @@ export class AccessV1 extends AbstractRoute {
 		super(server);
 	}
 
-	public override register(path: string): Elysia {
+	public override register(path: string): void {
 		const hook = {
 			params: t.Object({
 				key: t.String({
@@ -37,7 +37,7 @@ export class AccessV1 extends AbstractRoute {
 			detail: { summary: 'Get document', tags: ['v1'] }
 		};
 
-		return this.server.get(
+		this.server.get(
 			path.concat('/:key'),
 			async ({ errorSender, params: { key } }) =>
 				DocumentHandler.handleAccess({ errorSender, key: key }, ServerVersion.v1),

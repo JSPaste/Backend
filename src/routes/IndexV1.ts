@@ -6,7 +6,7 @@ export class IndexV1 extends AbstractRoute {
 		super(server);
 	}
 
-	public override register(path: string): Elysia {
+	public override register(path: string): void {
 		const hook = {
 			response: t.String({
 				description: 'A small welcome message with the current API version',
@@ -15,6 +15,6 @@ export class IndexV1 extends AbstractRoute {
 			detail: { summary: 'Index', tags: ['v1'] }
 		};
 
-		return this.server.get(path, () => 'Welcome to JSPaste API v1', hook);
+		this.server.get(path, () => 'Welcome to JSPaste API v1', hook);
 	}
 }
