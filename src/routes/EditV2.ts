@@ -1,22 +1,15 @@
-import { Elysia, t } from 'elysia';
-import { ErrorSender } from '../../classes/ErrorSender';
-import { DocumentHandler } from '../../classes/DocumentHandler.ts';
-import { errorSenderPlugin } from '../../plugins/errorSender.ts';
+import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { type Elysia, t } from 'elysia';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { ErrorSender } from '../classes/ErrorSender.ts';
 
-export default new Elysia({
-	name: 'routes:v2:documents:edit'
-})
-	.use(errorSenderPlugin)
-	.patch(
-		':key',
-		async ({ errorSender, request, body, params: { key } }) =>
-			DocumentHandler.handleEdit({
-				errorSender,
-				key,
-				newBody: body,
-				secret: request.headers.get('secret') || ''
-			}),
-		{
+export class EditV2 extends AbstractRoute {
+	public constructor(server: Elysia) {
+		super(server);
+	}
+
+	public override register(path: string): void {
+		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({ description: 'The new file' }),
 			params: t.Object({
@@ -45,5 +38,18 @@ export default new Elysia({
 				404: ErrorSender.errorType()
 			},
 			detail: { summary: 'Edit document', tags: ['v2'] }
-		}
-	);
+		};
+
+		this.server.patch(
+			path.concat('/:key'),
+			async ({ errorSender, request, body, params: { key } }) =>
+				DocumentHandler.handleEdit({
+					errorSender,
+					key,
+					newBody: body,
+					secret: request.headers.get('secret') || ''
+				}),
+			hook
+		);
+	}
+}

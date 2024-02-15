@@ -5,33 +5,35 @@
 	"license": "EUPL-1.2",
 	"type": "module",
 	"scripts": {
-		"build": "bun run build:structures && bun run build:structures:dts",
+		"build": "bun run build:structures && bun run build:structures:dts && bun run build:bundle",
+		"build:bundle": "bun build --target bun --format esm --minify --outdir ./dist/ ./src/index.ts",
+		"build:standalone": "bun build --compile --target bun --format esm --minify --outfile ./dist/jspaste ./src/index.ts",
 		"build:structures": "bunx pbjs -t static-module -w es6 --no-create --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/**/*.proto",
 		"build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
-		"dev": "bun run start:watch",
-		"fix": "bun run prettier",
+		"fix": "bun run fix:prettier",
+		"fix:prettier": "bunx prettier . --write",
 		"lint": "bun run lint:tsc",
 		"lint:tsc": "bunx tsc --noEmit",
 		"prepare": "husky",
-		"prettier": "bunx prettier . --write",
-		"start": "bun ./src/index.ts",
-		"start:watch": "bun ./src/index.ts --watch"
+		"production:build": "bun run build:structures && bun run build:structures:dts && bun run build:standalone",
+		"start": "bun run build && bun ./dist/index.js",
+		"start:dev": "bun ./src/index.ts --watch"
 	},
 	"dependencies": {
 		"@elysiajs/cors": "^0.8.0",
 		"@elysiajs/swagger": "^0.8.5",
-		"elysia": "^0.8.16",
+		"@types/bun": "^1.0.5",
+		"elysia": "^0.8.17",
 		"env-var": "^7.4.1",
 		"protobufjs": "~7.2.6",
-		"protobufjs-cli": "^1.1.2"
+		"protobufjs-cli": "^1.1.2",
+		"typescript": "~5.3.3"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.0.5",
-		"husky": "^9.0.10",
+		"husky": "^9.0.11",
 		"lint-staged": "^15.2.2",
 		"prettier": "^3.2.5",
 		"prettier-plugin-jsdoc": "^1.3.0",
-		"prettier-plugin-packagejson": "^2.4.10",
-		"typescript": "~5.3.3"
+		"prettier-plugin-packagejson": "^2.4.10"
 	}
 }

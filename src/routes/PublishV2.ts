@@ -1,29 +1,16 @@
-import { Elysia, t } from 'elysia';
-import { ErrorSender } from '../../classes/ErrorSender';
-import { DocumentHandler } from '../../classes/DocumentHandler.ts';
-import { defaultDocumentLifetime, ServerVersion } from '../../utils/constants.ts';
-import { errorSenderPlugin } from '../../plugins/errorSender.ts';
+import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { type Elysia, t } from 'elysia';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { ErrorSender } from '../classes/ErrorSender.ts';
+import { defaultDocumentLifetime, ServerVersion } from '../utils/constants.ts';
 
-export default new Elysia({
-	name: 'routes:v2:documents:publish'
-})
-	.use(errorSenderPlugin)
-	.post(
-		'',
-		async ({ errorSender, request, query, body }) =>
-			DocumentHandler.handlePublish(
-				{
-					errorSender,
-					body,
-					selectedKey: request.headers.get('key') || '',
-					selectedKeyLength: parseInt(request.headers.get('key-length') ?? '') || undefined,
-					selectedSecret: request.headers.get('secret') || '',
-					lifetime: parseInt(request.headers.get('lifetime') || defaultDocumentLifetime.toString()),
-					password: request.headers.get('password') || query['password'] || ''
-				},
-				ServerVersion.v2
-			),
-		{
+export class PublishV2 extends AbstractRoute {
+	public constructor(server: Elysia) {
+		super(server);
+	}
+
+	public override register(path: string): void {
+		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({
 				description: 'The file to be uploaded'
@@ -97,5 +84,24 @@ export default new Elysia({
 				400: ErrorSender.errorType()
 			},
 			detail: { summary: 'Publish document', tags: ['v2'] }
-		}
-	);
+		};
+
+		this.server.post(
+			path,
+			async ({ errorSender, request, query, body }) =>
+				DocumentHandler.handlePublish(
+					{
+						errorSender,
+						body,
+						selectedKey: request.headers.get('key') || '',
+						selectedKeyLength: parseInt(request.headers.get('key-length') ?? '') || undefined,
+						selectedSecret: request.headers.get('secret') || '',
+						lifetime: parseInt(request.headers.get('lifetime') || defaultDocumentLifetime.toString()),
+						password: request.headers.get('password') || query['password'] || ''
+					},
+					ServerVersion.v2
+				),
+			hook
+		);
+	}
+}

@@ -1,21 +1,15 @@
-import { Elysia, t } from 'elysia';
-import { ErrorSender } from '../../classes/ErrorSender';
-import { DocumentHandler } from '../../classes/DocumentHandler.ts';
-import { errorSenderPlugin } from '../../plugins/errorSender.ts';
+import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { type Elysia, t } from 'elysia';
+import { ErrorSender } from '../classes/ErrorSender.ts';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
 
-export default new Elysia({
-	name: 'routes:v1:documents:remove'
-})
-	.use(errorSenderPlugin)
-	.delete(
-		':key',
-		async ({ errorSender, request, params: { key } }) =>
-			DocumentHandler.handleRemove({
-				errorSender,
-				key,
-				secret: request.headers.get('secret') || ''
-			}),
-		{
+export class RemoveV1 extends AbstractRoute {
+	public constructor(server: Elysia) {
+		super(server);
+	}
+
+	public override register(path: string): void {
+		const hook = {
 			params: t.Object({
 				key: t.String({
 					description: 'The document key',
@@ -42,5 +36,17 @@ export default new Elysia({
 				404: ErrorSender.errorType()
 			},
 			detail: { summary: 'Remove document', tags: ['v1'] }
-		}
-	);
+		};
+
+		this.server.delete(
+			path.concat('/:key'),
+			async ({ errorSender, request, params: { key } }) =>
+				DocumentHandler.handleRemove({
+					errorSender,
+					key,
+					secret: request.headers.get('secret') || ''
+				}),
+			hook
+		);
+	}
+}

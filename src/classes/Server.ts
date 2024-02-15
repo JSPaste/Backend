@@ -1,10 +1,21 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { JSPErrorCode, JSPErrorMessage, serverConfig } from '../utils/constants.ts';
+import { serverConfig, ServerVersion } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
-import { join } from 'path';
-import { errorSenderPlugin } from '../plugins/errorSender.ts';
 import cors from '@elysiajs/cors';
+import { IndexV1 } from '../routes/IndexV1.ts';
+import { AccessV1 } from '../routes/AccessV1.ts';
+import { AccessRawV1 } from '../routes/AccessRawV1.ts';
+import { PublishV1 } from '../routes/PublishV1.ts';
+import { RemoveV1 } from '../routes/RemoveV1.ts';
+import { ErrorSenderPlugin } from '../plugins/ErrorSenderPlugin.ts';
+import { EditV2 } from '../routes/EditV2.ts';
+import { ExistsV2 } from '../routes/ExistsV2.ts';
+import { IndexV2 } from '../routes/IndexV2.ts';
+import { PublishV2 } from '../routes/PublishV2.ts';
+import { RemoveV2 } from '../routes/RemoveV2.ts';
+import { AccessV2 } from '../routes/AccessV2.ts';
+import { AccessRawV2 } from '../routes/AccessRawV2.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -12,20 +23,20 @@ export class Server {
 
 	public constructor(options: Partial<ServerOptions> = {}) {
 		this.serverConfig = { ...serverConfig, ...options };
-		this.server = this.initServer();
+		this.server = this.createServer();
 	}
 
 	public get self(): Elysia {
 		return this.server;
 	}
 
-	private initServer(): Elysia {
+	private createServer(): Elysia {
 		const server = new Elysia();
 
-		this.serverConfig.docs.enabled && this.initDocs(server);
-		this.initErrorHandler(server);
-		this.initRoutes(server);
 		this.initCORS(server);
+		this.serverConfig.docs.enabled && this.initDocs(server);
+		this.initPlugins(server);
+		this.initRoutes(server);
 
 		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
@@ -76,68 +87,38 @@ export class Server {
 		);
 	}
 
-	private initErrorHandler(server: Elysia): void {
-		server.use(errorSenderPlugin).onError(({ errorSender, path, set, code, error }) => {
-			switch (code) {
-				// Redirect to the frontend 404 page
-				case 'NOT_FOUND':
-					if (path === '/404') return 'Not found';
-					set.redirect = '/404';
-					return;
+	private initPlugins(server: Elysia): void {
+		const plugins = [ErrorSenderPlugin];
 
-				case 'VALIDATION':
-					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.validation]);
-
-				case 'INTERNAL_SERVER_ERROR':
-					console.error(error);
-					return errorSender.sendError(500, JSPErrorMessage[JSPErrorCode.internalServerError]);
-
-				case 'PARSE':
-					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.parseFailed]);
-
-				default:
-					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.unknown]);
-			}
-		});
+		plugins.forEach((Plugin) => server.use(new Plugin(server).load()));
 	}
 
 	private initRoutes(server: Elysia): void {
-		const routes = './src/routes';
 		const apiVersions = this.serverConfig.versions.toReversed();
-
-		console.info('Registering routes for', apiVersions.length, 'versions...');
-
-		for (const [i, apiVersion] of apiVersions.entries()) {
-			const isLatestVersion = i === 0;
-			const routesGlob = new Bun.Glob(`v${apiVersion}/**/*.route.ts`);
-			const routesArray = Array.from(routesGlob.scanSync({ cwd: routes })).map((route) => {
-				try {
-					return require(join('../routes', route)).default;
-				} catch (err) {
-					console.error('Unable to import route', err);
-					return null;
-				}
-			});
-
-			for (const resolvedRoute of routesArray) {
-				if (!resolvedRoute) continue;
-
-				server.group(`/api/v${apiVersion as number}/documents`, (prefix) => prefix.use(resolvedRoute));
-
-				if (isLatestVersion) {
-					server.group('/documents', (prefix) => prefix.use(resolvedRoute));
-				}
+		const routes = {
+			[ServerVersion.v1]: {
+				endpoints: [AccessRawV1, AccessV1, IndexV1, PublishV1, RemoveV1],
+				prefixes: ['/api/v1/documents']
+			},
+			[ServerVersion.v2]: {
+				endpoints: [AccessRawV2, AccessV2, EditV2, ExistsV2, IndexV2, PublishV2, RemoveV2],
+				prefixes: ['/api/v2/documents', '/documents']
 			}
+		};
+
+		for (const [i, version] of apiVersions.entries()) {
+			routes[version].endpoints.forEach((Endpoint) => {
+				const endpoint = new Endpoint(server);
+
+				routes[version].prefixes.forEach(endpoint.register.bind(endpoint));
+			});
 
 			console.info(
 				'Registered',
-				routesArray.length,
-				'routes for API version',
-				apiVersion,
-				isLatestVersion ? '(latest)' : ''
+				routes[version].endpoints.length,
+				'routes for version',
+				version,
+				i === 0 ? '(latest)' : ''
 			);
 		}
 	}

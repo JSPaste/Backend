@@ -1,5 +1,3 @@
-//npx protoc --proto_path=".\src\structures" --ts_out=".\src\structures" "documentStruct.proto" 
-
 syntax = "proto3";
 
 option optimize_for = SPEED;

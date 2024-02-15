@@ -1,16 +1,16 @@
 # Builder
-FROM docker.io/oven/bun:1.0-slim AS builder
+FROM docker.io/imbios/bun-node:1.0-21-alpine AS builder
 WORKDIR /build/
 
 COPY . ./
 
 RUN bun install --production --frozen-lockfile --ignore-scripts
+RUN bun run production:build
 
 # Runner
-FROM docker.io/oven/bun:1.0-distroless AS runner
-WORKDIR /home/nonroot/
+FROM gcr.io/distroless/base-nossl-debian12:nonroot AS runner
 
-COPY --from=builder /build/. ./
+COPY --from=builder /build/dist/jspaste ./
 
 ENV DOCS_ENABLED=false
 
@@ -24,4 +24,4 @@ LABEL org.opencontainers.image.licenses="EUPL-1.2"
 VOLUME /home/nonroot/documents
 EXPOSE 4000/tcp
 
-CMD ["./src/index.ts"]
+CMD ["./jspaste"]

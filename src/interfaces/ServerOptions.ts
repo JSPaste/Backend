@@ -1,4 +1,4 @@
-import type { ServerVersion } from '../utils/constants';
+import type { ServerVersion } from '../utils/constants.ts';
 
 export interface ServerOptions {
 	tls: boolean;
