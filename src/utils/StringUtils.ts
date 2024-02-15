@@ -1,19 +1,28 @@
-import { basePath, characters, type Range } from './constants.ts';
+import { base64URL, basePath, type Range } from './constants.ts';
 
 export class StringUtils {
 	public static random(length: number, base: Range<2, 64> = 62): string {
-		const baseSet = characters.slice(0, base);
+		const baseSet = base64URL.slice(0, base);
+
 		let string = '';
 
 		while (length--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
+
 		return string;
 	}
 
-	public static async createKey(length: Range<6, 16> = 8): Promise<string> {
-		const key = StringUtils.random(length, 64);
-		const exists = await Bun.file(basePath + key).exists();
+	public static generateKey(length: Range<2, 32> = 8): string {
+		return StringUtils.random(length, 64);
+	}
 
-		return exists ? StringUtils.createKey() : key;
+	public static async keyExists(key: string): Promise<boolean> {
+		return Bun.file(basePath + key).exists();
+	}
+
+	public static async createKey(length: Range<2, 32> = 8): Promise<string> {
+		const key = StringUtils.generateKey(length);
+
+		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as Range<2, 32>) : key;
 	}
 
 	public static createSecret(chunkLength: number = 5, chunks: number = 4): string {

@@ -1,6 +1,6 @@
-**/documents/
 **/node_modules/
-**/src/structures/
+documents/
+src/structures/
 .prettierrc.json
 LICENSE
 tsconfig.json

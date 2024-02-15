@@ -3,18 +3,6 @@ import type { ZlibCompressionOptions } from 'bun';
 import type { JSPError } from '../classes/ErrorSender.ts';
 import * as env from 'env-var';
 
-// interface Bun.env
-declare module 'bun' {
-	interface Env {
-		PORT: number;
-		DOCS_ENABLED: boolean;
-		DOCS_PATH: string;
-		DOCS_PLAYGROUND_HTTPS: boolean;
-		DOCS_PLAYGROUND_DOMAIN: string;
-		DOCS_PLAYGROUND_PORT: number;
-	}
-}
-
 export enum ServerVersion {
 	v1 = 1,
 	v2 = 2
@@ -33,17 +21,22 @@ export enum JSPErrorCode {
 	documentInvalidPassword = 'jsp.document.invalid_password',
 	documentInvalidLength = 'jsp.document.invalid_length',
 	documentInvalidSecret = 'jsp.document.invalid_secret',
-	documentInvalidSecretLength = 'jsp.document.invalid_secret_length'
+	documentInvalidSecretLength = 'jsp.document.invalid_secret_length',
+	documentInvalidKeyLength = 'jsp.document.invalid_key_length',
+	documentKeyAlreadyExists = 'jsp.document.key_already_exists'
 }
 
 export const serverConfig: Required<ServerOptions> = {
+	tls: env.get('TLS').asBoolStrict() ?? false,
+	domain: env.get('DOMAIN').default('localhost').asString(),
 	port: env.get('PORT').default(4000).asPortNumber(),
 	versions: [ServerVersion.v1, ServerVersion.v2],
+	files: {},
 	docs: {
 		enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
 		path: env.get('DOCS_PATH').default('/docs').asString(),
 		playground: {
-			https: env.get('DOCS_PLAYGROUND_HTTPS').asBoolStrict() ?? true,
+			tls: env.get('DOCS_PLAYGROUND_TLS').asBoolStrict() ?? true,
 			domain: env.get('DOCS_PLAYGROUND_DOMAIN').default('jspaste.eu').asString(),
 			port: env.get('DOCS_PLAYGROUND_PORT').default(443).asPortNumber()
 		}
@@ -58,8 +51,7 @@ export const zlibConfig: ZlibCompressionOptions = {
 export const basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
 export const maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
 export const defaultDocumentLifetime = parseInt(process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400');
-export const viewDocumentPath = process.env['VIEW_DOCUMENTS_PATH'] || 'https://jspaste.eu/';
-export const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+export const base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_' as const;
 
 export const JSPErrorMessage: Record<JSPErrorCode, JSPError> = {
 	[JSPErrorCode.unknown]: {
@@ -126,8 +118,18 @@ export const JSPErrorMessage: Record<JSPErrorCode, JSPError> = {
 		type: 'error',
 		errorCode: JSPErrorCode.documentInvalidSecretLength,
 		message: 'The provided secret length is invalid'
+	},
+	[JSPErrorCode.documentInvalidKeyLength]: {
+		type: 'error',
+		errorCode: JSPErrorCode.documentInvalidKeyLength,
+		message: 'The provided key length is invalid'
+	},
+	[JSPErrorCode.documentKeyAlreadyExists]: {
+		type: 'error',
+		errorCode: JSPErrorCode.documentKeyAlreadyExists,
+		message: 'The provided key already exists'
 	}
-};
+} as const;
 
 // https://github.com/microsoft/TypeScript/issues/43505
 export type Range<

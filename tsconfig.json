@@ -24,8 +24,10 @@
 		"noImplicitReturns": true,
 		"noPropertyAccessFromIndexSignature": true,
 		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
 		"verbatimModuleSyntax": true
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*"],
 	"exclude": ["dist/", "documents/", "node_modules/"]
 }

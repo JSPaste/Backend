@@ -2,8 +2,12 @@ import { Server } from './classes/Server.ts';
 
 const server = new Server();
 
-// FIXME(inetol): Handle exit properly (Docker)
-process.on('exit', () => {
-	console.log('Bye');
-	server.self.stop();
-});
+process
+	.on('SIGTERM', () => {
+		server.self.stop();
+		process.exit(0);
+	})
+	.on('SIGINT', () => {
+		server.self.stop();
+		process.exit(0);
+	});
