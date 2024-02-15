@@ -14,6 +14,8 @@ import { ExistsV2 } from '../routes/ExistsV2.ts';
 import { IndexV2 } from '../routes/IndexV2.ts';
 import { PublishV2 } from '../routes/PublishV2.ts';
 import { RemoveV2 } from '../routes/RemoveV2.ts';
+import { AccessV2 } from '../routes/AccessV2.ts';
+import { AccessRawV2 } from '../routes/AccessRawV2.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -99,7 +101,7 @@ export class Server {
 				prefixes: ['/api/v1/documents']
 			},
 			[ServerVersion.v2]: {
-				endpoints: [EditV2, ExistsV2, IndexV2, PublishV2, RemoveV2],
+				endpoints: [AccessRawV2, AccessV2, EditV2, ExistsV2, IndexV2, PublishV2, RemoveV2],
 				prefixes: ['/api/v2/documents', '/documents']
 			}
 		};
