@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { serverConfig } from '../utils/constants.ts';
+import { serverConfig, ServerVersion } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
 import cors from '@elysiajs/cors';
 import { IndexV1 } from '../routes/IndexV1.ts';
@@ -9,6 +9,11 @@ import { AccessRawV1 } from '../routes/AccessRawV1.ts';
 import { PublishV1 } from '../routes/PublishV1.ts';
 import { RemoveV1 } from '../routes/RemoveV1.ts';
 import { ErrorSenderPlugin } from '../plugins/ErrorSenderPlugin.ts';
+import { EditV2 } from '../routes/EditV2.ts';
+import { ExistsV2 } from '../routes/ExistsV2.ts';
+import { IndexV2 } from '../routes/IndexV2.ts';
+import { PublishV2 } from '../routes/PublishV2.ts';
+import { RemoveV2 } from '../routes/RemoveV2.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -87,22 +92,32 @@ export class Server {
 	}
 
 	private initRoutes(server: Elysia): void {
-		const endpoints = {
-			v1: [AccessV1, AccessRawV1, IndexV1, PublishV1, RemoveV1],
-			v2: []
+		const apiVersions = this.serverConfig.versions.toReversed();
+		const routes = {
+			[ServerVersion.v1]: {
+				endpoints: [AccessRawV1, AccessV1, IndexV1, PublishV1, RemoveV1],
+				prefixes: ['/api/v1/documents']
+			},
+			[ServerVersion.v2]: {
+				endpoints: [EditV2, ExistsV2, IndexV2, PublishV2, RemoveV2],
+				prefixes: ['/api/v2/documents', '/documents']
+			}
 		};
 
-		const prefixes = {
-			v1: ['/api/v1/documents'],
-			v2: ['/api/v2/documents', '/documents']
-		};
+		for (const [i, version] of apiVersions.entries()) {
+			routes[version].endpoints.forEach((Endpoint) => {
+				const endpoint = new Endpoint(server);
 
-		endpoints.v1.forEach((Endpoint) => {
-			const endpoint = new Endpoint(server);
+				routes[version].prefixes.forEach(endpoint.register.bind(endpoint));
+			});
 
-			prefixes.v1.forEach(endpoint.register.bind(endpoint));
-		});
-
-		console.info('Registered', endpoints.v1.length, 'routes for v1');
+			console.info(
+				'Registered',
+				routes[version].endpoints.length,
+				'routes for version',
+				version,
+				i === 0 ? '(latest)' : ''
+			);
+		}
 	}
 }
