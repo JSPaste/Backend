@@ -25,7 +25,7 @@ permissions:
 
 jobs:
     lint:
-        name: 'Test lint'
+        name: 'Lint'
         runs-on: ubuntu-latest
         permissions:
             id-token: write
@@ -43,13 +43,13 @@ jobs:
               uses: oven-sh/setup-bun@9b21598af8d4dfc302e5a30250007de0fda92acc # v1.1.1
 
             - name: 'Setup dependencies'
-              run: bun install --production --frozen-lockfile
+              run: bun install --production --frozen-lockfile --ignore-scripts
 
             - name: 'Run lint'
               run: bun run lint
 
     build:
-        name: 'Test build'
+        name: 'Build'
         runs-on: ubuntu-latest
         permissions:
             id-token: write
@@ -72,7 +72,7 @@ jobs:
               uses: oven-sh/setup-bun@9b21598af8d4dfc302e5a30250007de0fda92acc # v1.1.1
 
             - name: 'Setup dependencies'
-              run: bun install --production --frozen-lockfile
+              run: bun install --production --frozen-lockfile --ignore-scripts
 
             - name: 'Run build'
               run: |
