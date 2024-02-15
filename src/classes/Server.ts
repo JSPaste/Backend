@@ -1,14 +1,14 @@
 import { Elysia } from 'elysia';
 import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { JSPErrorCode, JSPErrorMessage, serverConfig } from '../utils/constants.ts';
+import { serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
-import { errorSenderPlugin } from '../plugins/errorSender.ts';
 import cors from '@elysiajs/cors';
 import { IndexV1 } from '../routes/IndexV1.ts';
 import { AccessV1 } from '../routes/AccessV1.ts';
 import { AccessRawV1 } from '../routes/AccessRawV1.ts';
 import { PublishV1 } from '../routes/PublishV1.ts';
 import { RemoveV1 } from '../routes/RemoveV1.ts';
+import { ErrorSenderPlugin } from '../plugins/ErrorSenderPlugin.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -28,10 +28,8 @@ export class Server {
 
 		this.initCORS(server);
 		this.serverConfig.docs.enabled && this.initDocs(server);
-		this.initErrorHandler(server);
+		this.initPlugins(server);
 		this.initRoutes(server);
-
-		server.use(errorSenderPlugin);
 
 		server.listen(this.serverConfig.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
@@ -82,48 +80,29 @@ export class Server {
 		);
 	}
 
-	private initErrorHandler(server: Elysia): void {
-		server.use(errorSenderPlugin).onError(({ errorSender, path, set, code, error }) => {
-			switch (code) {
-				// Redirect to the frontend 404 page
-				case 'NOT_FOUND':
-					if (path === '/404') return 'Not found';
-					set.redirect = '/404';
-					return;
+	private initPlugins(server: Elysia): void {
+		const plugin = [ErrorSenderPlugin];
 
-				case 'VALIDATION':
-					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.validation]);
-
-				case 'INTERNAL_SERVER_ERROR':
-					console.error(error);
-					return errorSender.sendError(500, JSPErrorMessage[JSPErrorCode.internalServerError]);
-
-				case 'PARSE':
-					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.parseFailed]);
-
-				default:
-					console.error(error);
-					return errorSender.sendError(400, JSPErrorMessage[JSPErrorCode.unknown]);
-			}
-		});
+		plugin.forEach((Plugin) => server.use(new Plugin(server).load()));
 	}
 
-	private initRoutes(server: Elysia) {
+	private initRoutes(server: Elysia): void {
 		const endpoint = {
 			v1: [AccessV1, AccessRawV1, IndexV1, PublishV1, RemoveV1],
 			v2: []
 		};
 
-		const path = {
-			v1: ['/api/v1/documents', '/test/alias', '/typescript/go/wild', '/memory/go/brr'],
-			v2: []
+		const prefix = {
+			v1: ['/api/v1/documents'],
+			v2: ['/api/v2/documents', '/documents']
 		};
 
-		endpoint.v1.forEach((Class) => {
-			const endpoint = new Class(server);
-			path.v1.forEach(endpoint.register.bind(endpoint));
+		endpoint.v1.forEach((Endpoint) => {
+			const endpoint = new Endpoint(server);
+
+			prefix.v1.forEach(endpoint.register.bind(endpoint));
 		});
+
+		console.info('Registered', endpoint.v1.length, 'routes for v1');
 	}
 }

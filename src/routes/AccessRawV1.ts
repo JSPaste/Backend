@@ -1,15 +1,42 @@
-import { RouteHandler } from '../classes/RouteHandler.ts';
+import { AbstractRoute } from '../classes/AbstractRoute.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ServerVersion } from '../utils/constants.ts';
 import { ErrorSender } from '../classes/ErrorSender.ts';
 
-export class AccessRawV1 extends RouteHandler {
+export class AccessRawV1 extends AbstractRoute {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
 	public override register(path: string): Elysia {
+		const hook = {
+			params: t.Object(
+				{
+					key: t.String({
+						description: 'The document key',
+						examples: ['abc123']
+					})
+				},
+				{
+					description: 'The request parameters',
+					examples: [{ key: 'abc123' }]
+				}
+			),
+			response: {
+				200: t.Any({
+					description: 'The raw document',
+					examples: ['Hello world']
+				}),
+				400: ErrorSender.errorType(),
+				404: ErrorSender.errorType()
+			},
+			detail: {
+				summary: 'Get raw document',
+				tags: ['v1']
+			}
+		};
+
 		return this.server.get(
 			path.concat('/:key/raw'),
 			async ({ errorSender, set, params: { key } }) => {
@@ -17,32 +44,7 @@ export class AccessRawV1 extends RouteHandler {
 
 				return DocumentHandler.handleAccess({ errorSender, key: key, raw: true }, ServerVersion.v1);
 			},
-			{
-				params: t.Object(
-					{
-						key: t.String({
-							description: 'The document key',
-							examples: ['abc123']
-						})
-					},
-					{
-						description: 'The request parameters',
-						examples: [{ key: 'abc123' }]
-					}
-				),
-				response: {
-					200: t.Any({
-						description: 'The raw document',
-						examples: ['Hello world']
-					}),
-					400: ErrorSender.errorType(),
-					404: ErrorSender.errorType()
-				},
-				detail: {
-					summary: 'Get raw document',
-					tags: ['v1']
-				}
-			}
+			hook
 		);
 	}
 }

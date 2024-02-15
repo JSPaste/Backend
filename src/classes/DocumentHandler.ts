@@ -1,6 +1,6 @@
 import { unlink } from 'node:fs/promises';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
-import { DocumentManager } from './DocumentManager';
+import { DocumentManager } from './DocumentManager.ts';
 import {
 	basePath,
 	defaultDocumentLifetime,

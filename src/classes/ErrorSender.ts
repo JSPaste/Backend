@@ -1,5 +1,5 @@
 import { type Context, t } from 'elysia';
-import { JSPErrorCode } from '../utils/constants';
+import { JSPErrorCode } from '../utils/constants.ts';
 
 export interface JSPError {
 	type: 'error';
@@ -8,7 +8,7 @@ export interface JSPError {
 }
 
 export class ErrorSender {
-	context: Context;
+	private readonly context: Context;
 
 	public constructor(context: Context) {
 		this.context = context;

@@ -1,6 +1,6 @@
 import type { Elysia } from 'elysia';
 
-export abstract class RouteHandler {
+export abstract class AbstractRoute {
 	protected readonly server: Elysia;
 
 	protected constructor(server: Elysia) {
