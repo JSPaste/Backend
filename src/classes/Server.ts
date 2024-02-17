@@ -24,7 +24,10 @@ export class Server {
 		domain: env.get('DOMAIN').default('localhost').asString(),
 		port: env.get('PORT').default(4000).asPortNumber(),
 		versions: [ServerVersion.v1, ServerVersion.v2],
-		files: {},
+		documents: {
+			maxLength: env.get('DOCUMENTS_MAXLENGTH').default(2000000).asIntPositive(),
+			maxTime: env.get('DOCUMENTS_MAXTIME').default(86400).asIntPositive()
+		},
 		docs: {
 			enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
 			path: env.get('DOCS_PATH').default('/docs').asString(),
@@ -38,11 +41,6 @@ export class Server {
 			level: 6
 		}
 	};
-
-	// FIXME(inetol): Migrate to new config system
-	public static readonly basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
-	public static readonly maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
-	public static readonly defaultDocumentLifetime = parseInt(process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400');
 
 	private readonly server: Elysia = this.createServer();
 

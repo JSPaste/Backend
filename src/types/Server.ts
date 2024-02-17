@@ -10,7 +10,10 @@ type ServerOptions = {
 	domain: string;
 	port: number;
 	versions: ServerVersion[];
-	files: {};
+	documents: {
+		maxLength: number;
+		maxTime: number;
+	};
 	docs: {
 		enabled: boolean;
 		path: string;

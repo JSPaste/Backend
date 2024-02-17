@@ -44,14 +44,14 @@ export class DocumentHandler {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		const file = Bun.file(Server.basePath + key);
+		const file = Bun.file(key);
 		const fileExists = await file.exists();
 
 		if (!fileExists) return JSPError.send(set, 404, JSPError.message[ErrorCode.documentNotFound]);
 
 		const buffer = Buffer.from(newBody as ArrayBuffer);
 
-		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.maxDocLength))
+		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.config.documents.maxLength))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidLength]);
 
 		const doc = await DocumentManager.read(file);
@@ -62,7 +62,7 @@ export class DocumentHandler {
 		doc.rawFileData = buffer;
 
 		return {
-			edited: await DocumentManager.write(Server.basePath + key, doc)
+			edited: await DocumentManager.write(key, doc)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -72,7 +72,7 @@ export class DocumentHandler {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		return await Bun.file(Server.basePath + key).exists();
+		return await Bun.file(key).exists();
 	}
 
 	public static async handlePublish(
@@ -82,7 +82,7 @@ export class DocumentHandler {
 	) {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
-		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.maxDocLength))
+		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.config.documents.maxLength))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidLength]);
 
 		const secret = selectedSecret || StringUtils.createSecret();
@@ -103,7 +103,7 @@ export class DocumentHandler {
 		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidPasswordLength]);
 
-		lifetime = lifetime ?? Server.defaultDocumentLifetime;
+		lifetime = lifetime ?? Server.config.documents.maxTime;
 
 		// Make the document permanent if the value exceeds 5 years
 		if (lifetime > 157_784_760) lifetime = 0;
@@ -123,7 +123,7 @@ export class DocumentHandler {
 		if (selectedKey && (await StringUtils.keyExists(key)))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentKeyAlreadyExists]);
 
-		await DocumentManager.write(Server.basePath + key, newDoc);
+		await DocumentManager.write(key, newDoc);
 
 		switch (version) {
 			case ServerVersion.v1:
@@ -143,7 +143,7 @@ export class DocumentHandler {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		const file = Bun.file(Server.basePath + key);
+		const file = Bun.file(key);
 		const fileExists = await file.exists();
 
 		if (!fileExists) return JSPError.send(set, 404, JSPError.message[ErrorCode.documentNotFound]);
@@ -155,7 +155,7 @@ export class DocumentHandler {
 
 		return {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
-			removed: await unlink(Server.basePath + key)
+			removed: await unlink(key)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -165,13 +165,13 @@ export class DocumentHandler {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
 			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		const file = Bun.file(Server.basePath + key);
+		const file = Bun.file(key);
 		const fileExists = await file.exists();
 		const doc = fileExists && (await DocumentManager.read(file));
 
 		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp < Date.now())) {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
-			if (fileExists) await unlink(Server.basePath + key).catch(() => null);
+			if (fileExists) await unlink(key).catch(() => null);
 
 			return JSPError.send(set, 404, JSPError.message[ErrorCode.documentNotFound]);
 		}

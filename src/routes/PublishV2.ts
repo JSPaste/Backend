@@ -46,7 +46,7 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					lifetime: t.Optional(
 						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.defaultDocumentLifetime}`,
+							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.config.documents.maxTime}`,
 							examples: ['60', '0']
 						})
 					)
@@ -98,7 +98,7 @@ export class PublishV2 extends AbstractEndpoint {
 						selectedKeyLength: parseInt(request.headers.get('key-length') ?? '') || undefined,
 						selectedSecret: request.headers.get('secret') || '',
 						lifetime: parseInt(
-							request.headers.get('lifetime') || Server.defaultDocumentLifetime.toString()
+							request.headers.get('lifetime') || Server.config.documents.maxTime.toString()
 						),
 						password: request.headers.get('password') || query['password'] || ''
 					},
