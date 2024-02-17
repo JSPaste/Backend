@@ -11,6 +11,7 @@ type ServerOptions = {
 	port: number;
 	versions: ServerVersion[];
 	documents: {
+		documentPath: string;
 		maxLength: number;
 		maxTime: number;
 	};

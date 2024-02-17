@@ -1,4 +1,5 @@
 import type { Range } from '../types/Range.ts';
+import { Server } from '../classes/Server.ts';
 
 export class StringUtils {
 	public static readonly base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
@@ -18,7 +19,7 @@ export class StringUtils {
 	}
 
 	public static async keyExists(key: string): Promise<boolean> {
-		return Bun.file(key).exists();
+		return Bun.file(Server.config.documents.documentPath + key).exists();
 	}
 
 	public static async createKey(length: Range<2, 32> = 8): Promise<string> {

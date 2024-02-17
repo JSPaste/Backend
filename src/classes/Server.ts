@@ -25,6 +25,7 @@ export class Server {
 		port: env.get('PORT').default(4000).asPortNumber(),
 		versions: [ServerVersion.v1, ServerVersion.v2],
 		documents: {
+			documentPath: 'documents/',
 			maxLength: env.get('DOCUMENTS_MAXLENGTH').default(2000000).asIntPositive(),
 			maxTime: env.get('DOCUMENTS_MAXTIME').default(86400).asIntPositive()
 		},
@@ -53,7 +54,7 @@ export class Server {
 
 		this.initCORS(server);
 		Server.config.docs.enabled && this.initDocs(server);
-		this.initErrorHandling(server);
+		this.initErrorHandler(server);
 		this.initRoutes(server);
 
 		server.listen(Server.config.port, (server) =>
@@ -105,7 +106,7 @@ export class Server {
 		);
 	}
 
-	private initErrorHandling(server: Elysia): void {
+	private initErrorHandler(server: Elysia): void {
 		server.onError(({ set, code, error }) => {
 			switch (code) {
 				case 'NOT_FOUND':
