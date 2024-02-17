@@ -25,8 +25,8 @@ export class ValidatorUtils {
 		return ValidatorUtils.isValidArray(values, ValidatorUtils.isValidString);
 	}
 
-	public static isJSPError(err?: any): err is ErrorType {
-		return (err as ErrorType)?.type === 'error';
+	public static isJSPError(value?: any): value is ErrorType {
+		return (value as ErrorType)?.type === 'error';
 	}
 
 	public static isValidStringList(...values: string[]): boolean {

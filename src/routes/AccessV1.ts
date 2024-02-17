@@ -39,7 +39,7 @@ export class AccessV1 extends AbstractEndpoint {
 
 		this.server.get(
 			prefix.concat('/:key'),
-			async ({ set, params: { key } }) => DocumentHandler.handleAccess(set, { key: key }, ServerVersion.v1),
+			async ({ set, params: { key } }) => DocumentHandler.handleAccess(set, { key }, ServerVersion.v1),
 			hook
 		);
 	}
