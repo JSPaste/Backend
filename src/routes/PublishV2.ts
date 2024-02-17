@@ -1,15 +1,15 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { ErrorSender } from '../classes/ErrorSender.ts';
-import { defaultDocumentLifetime, ServerVersion } from '../utils/constants.ts';
+import { defaultDocumentLifetime, genericErrorType } from '../utils/constants.ts';
+import { ServerVersion } from '../types/Server.ts';
 
-export class PublishV2 extends AbstractRoute {
+export class PublishV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({
@@ -81,17 +81,17 @@ export class PublishV2 extends AbstractRoute {
 							'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: ErrorSender.errorType()
+				400: genericErrorType
 			},
 			detail: { summary: 'Publish document', tags: ['v2'] }
 		};
 
 		this.server.post(
-			path,
-			async ({ errorSender, request, query, body }) =>
+			prefix,
+			async ({ set, request, query, body }) =>
 				DocumentHandler.handlePublish(
+					set,
 					{
-						errorSender,
 						body,
 						selectedKey: request.headers.get('key') || '',
 						selectedKeyLength: parseInt(request.headers.get('key-length') ?? '') || undefined,

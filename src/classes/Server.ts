@@ -1,6 +1,5 @@
 import { Elysia } from 'elysia';
-import type { ServerOptions } from '../interfaces/ServerOptions.ts';
-import { serverConfig, ServerVersion } from '../utils/constants.ts';
+import { JSPErrorMessage, serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
 import cors from '@elysiajs/cors';
 import { IndexV1 } from '../routes/IndexV1.ts';
@@ -8,7 +7,6 @@ import { AccessV1 } from '../routes/AccessV1.ts';
 import { AccessRawV1 } from '../routes/AccessRawV1.ts';
 import { PublishV1 } from '../routes/PublishV1.ts';
 import { RemoveV1 } from '../routes/RemoveV1.ts';
-import { ErrorSenderPlugin } from '../plugins/ErrorSenderPlugin.ts';
 import { EditV2 } from '../routes/EditV2.ts';
 import { ExistsV2 } from '../routes/ExistsV2.ts';
 import { IndexV2 } from '../routes/IndexV2.ts';
@@ -16,6 +14,9 @@ import { PublishV2 } from '../routes/PublishV2.ts';
 import { RemoveV2 } from '../routes/RemoveV2.ts';
 import { AccessV2 } from '../routes/AccessV2.ts';
 import { AccessRawV2 } from '../routes/AccessRawV2.ts';
+import { type ServerOptions, ServerVersion } from '../types/Server.ts';
+import { ErrorHandler } from './ErrorHandler.ts';
+import { JSPErrorCode } from '../types/ErrorHandler.ts';
 
 export class Server {
 	private readonly server: Elysia;
@@ -35,7 +36,7 @@ export class Server {
 
 		this.initCORS(server);
 		this.serverConfig.docs.enabled && this.initDocs(server);
-		this.initPlugins(server);
+		this.initErrorHandling(server);
 		this.initRoutes(server);
 
 		server.listen(this.serverConfig.port, (server) =>
@@ -87,10 +88,26 @@ export class Server {
 		);
 	}
 
-	private initPlugins(server: Elysia): void {
-		const plugins = [ErrorSenderPlugin];
+	private initErrorHandling(server: Elysia): void {
+		server.onError(({ set, code, error }) => {
+			switch (code) {
+				case 'VALIDATION':
+					console.error(error);
+					return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.validation]);
 
-		plugins.forEach((Plugin) => server.use(new Plugin(server).load()));
+				case 'INTERNAL_SERVER_ERROR':
+					console.error(error);
+					return ErrorHandler.send(set, 500, JSPErrorMessage[JSPErrorCode.internalServerError]);
+
+				case 'PARSE':
+					console.error(error);
+					return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.parseFailed]);
+
+				default:
+					console.error(error);
+					return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.unknown]);
+			}
+		});
 	}
 
 	private initRoutes(server: Elysia): void {

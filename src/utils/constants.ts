@@ -1,30 +1,17 @@
-import type { ServerOptions } from '../interfaces/ServerOptions.ts';
 import type { ZlibCompressionOptions } from 'bun';
-import type { JSPError } from '../classes/ErrorSender.ts';
 import * as env from 'env-var';
+import { type ServerOptions, ServerVersion } from '../types/Server.ts';
+import { t } from 'elysia';
+import { type JSPError, JSPErrorCode } from '../types/ErrorHandler.ts';
 
-export enum ServerVersion {
-	v1 = 1,
-	v2 = 2
-}
-
-export enum JSPErrorCode {
-	unknown = 'jsp.unknown',
-	notFound = 'jsp.not_found',
-	validation = 'jsp.validation_failed',
-	internalServerError = 'jsp.internal_server_error',
-	parseFailed = 'jsp.parse_failed',
-	inputInvalid = 'jsp.input.invalid',
-	documentNotFound = 'jsp.document.not_found',
-	documentPasswordNeeded = 'jsp.document.needs_password',
-	documentInvalidPasswordLength = 'jsp.document.invalid_password_length',
-	documentInvalidPassword = 'jsp.document.invalid_password',
-	documentInvalidLength = 'jsp.document.invalid_length',
-	documentInvalidSecret = 'jsp.document.invalid_secret',
-	documentInvalidSecretLength = 'jsp.document.invalid_secret_length',
-	documentInvalidKeyLength = 'jsp.document.invalid_key_length',
-	documentKeyAlreadyExists = 'jsp.document.key_already_exists'
-}
+export const genericErrorType = t.Object(
+	{
+		type: t.String({ description: 'The error type' }),
+		message: t.String({ description: 'The error message' }),
+		errorCode: t.String({ description: 'The error code' })
+	},
+	{ description: 'An object representing an error' }
+);
 
 export const serverConfig: Required<ServerOptions> = {
 	tls: env.get('TLS').asBoolStrict() ?? false,

@@ -8,7 +8,7 @@
 		"build": "bun run build:structures && bun run build:structures:dts && bun run build:bundle",
 		"build:bundle": "bun build --target bun --format esm --minify --outdir ./dist/ ./src/index.ts",
 		"build:standalone": "bun build --compile --target bun --format esm --minify --outfile ./dist/jspaste ./src/index.ts",
-		"build:structures": "bunx pbjs -t static-module -w es6 --no-create --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/**/*.proto",
+		"build:structures": "bunx pbjs -t static-module -w es6 --no-create --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/protocols/**/*.proto",
 		"build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
 		"fix": "bun run fix:prettier",
 		"fix:prettier": "bunx prettier . --write",

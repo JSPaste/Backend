@@ -1,6 +1,9 @@
-import type { ServerVersion } from '../utils/constants.ts';
+enum ServerVersion {
+	v1 = 1,
+	v2 = 2
+}
 
-export interface ServerOptions {
+type ServerOptions = {
 	tls: boolean;
 	domain: string;
 	port: number;
@@ -15,4 +18,6 @@ export interface ServerOptions {
 			port: number;
 		};
 	};
-}
+};
+
+export { ServerVersion, type ServerOptions };

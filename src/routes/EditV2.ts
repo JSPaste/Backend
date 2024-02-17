@@ -1,14 +1,14 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { ErrorSender } from '../classes/ErrorSender.ts';
+import { genericErrorType } from '../utils/constants.ts';
 
-export class EditV2 extends AbstractRoute {
+export class EditV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({ description: 'The new file' }),
@@ -33,18 +33,17 @@ export class EditV2 extends AbstractRoute {
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: ErrorSender.errorType(),
-				403: ErrorSender.errorType(),
-				404: ErrorSender.errorType()
+				400: genericErrorType,
+				403: genericErrorType,
+				404: genericErrorType
 			},
 			detail: { summary: 'Edit document', tags: ['v2'] }
 		};
 
 		this.server.patch(
-			path.concat('/:key'),
-			async ({ errorSender, request, body, params: { key } }) =>
-				DocumentHandler.handleEdit({
-					errorSender,
+			prefix.concat('/:key'),
+			async ({ set, request, body, params: { key } }) =>
+				DocumentHandler.handleEdit(set, {
 					key,
 					newBody: body,
 					secret: request.headers.get('secret') || ''

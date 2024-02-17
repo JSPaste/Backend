@@ -1,15 +1,15 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { ServerVersion } from '../utils/constants.ts';
-import { ErrorSender } from '../classes/ErrorSender.ts';
+import { ServerVersion } from '../types/Server.ts';
+import { genericErrorType } from '../utils/constants.ts';
 
-export class AccessV2 extends AbstractRoute {
+export class AccessV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			params: t.Object({
 				key: t.String({
@@ -68,18 +68,18 @@ export class AccessV2 extends AbstractRoute {
 							'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: ErrorSender.errorType(),
-				404: ErrorSender.errorType()
+				400: genericErrorType,
+				404: genericErrorType
 			},
 			detail: { summary: 'Get document', tags: ['v2'] }
 		};
 
 		this.server.get(
-			path.concat('/:key'),
-			async ({ errorSender, request, query: { p }, params: { key } }) =>
+			prefix.concat('/:key'),
+			async ({ set, request, query: { p }, params: { key } }) =>
 				DocumentHandler.handleAccess(
+					set,
 					{
-						errorSender,
 						key,
 						password: request.headers.get('password') || p || ''
 					},
