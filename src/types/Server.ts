@@ -1,3 +1,5 @@
+import type { ZlibCompressionOptions } from 'bun';
+
 enum ServerVersion {
 	v1 = 1,
 	v2 = 2
@@ -18,6 +20,7 @@ type ServerOptions = {
 			port: number;
 		};
 	};
+	zlib: ZlibCompressionOptions;
 };
 
 export { ServerVersion, type ServerOptions };

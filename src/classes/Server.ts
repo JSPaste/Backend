@@ -1,5 +1,4 @@
 import { Elysia } from 'elysia';
-import { JSPErrorMessage, serverConfig } from '../utils/constants.ts';
 import swagger from '@elysiajs/swagger';
 import cors from '@elysiajs/cors';
 import { IndexV1 } from '../routes/IndexV1.ts';
@@ -15,17 +14,37 @@ import { RemoveV2 } from '../routes/RemoveV2.ts';
 import { AccessV2 } from '../routes/AccessV2.ts';
 import { AccessRawV2 } from '../routes/AccessRawV2.ts';
 import { type ServerOptions, ServerVersion } from '../types/Server.ts';
-import { ErrorHandler } from './ErrorHandler.ts';
-import { JSPErrorCode } from '../types/ErrorHandler.ts';
+import { JSPError } from './JSPError.ts';
+import * as env from 'env-var';
+import { ErrorCode } from '../types/JSPError.ts';
 
 export class Server {
-	private readonly server: Elysia;
-	private readonly serverConfig: ServerOptions;
+	public static readonly config: Required<ServerOptions> = {
+		tls: env.get('TLS').asBoolStrict() ?? false,
+		domain: env.get('DOMAIN').default('localhost').asString(),
+		port: env.get('PORT').default(4000).asPortNumber(),
+		versions: [ServerVersion.v1, ServerVersion.v2],
+		files: {},
+		docs: {
+			enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
+			path: env.get('DOCS_PATH').default('/docs').asString(),
+			playground: {
+				tls: env.get('DOCS_PLAYGROUND_TLS').asBoolStrict() ?? true,
+				domain: env.get('DOCS_PLAYGROUND_DOMAIN').default('jspaste.eu').asString(),
+				port: env.get('DOCS_PLAYGROUND_PORT').default(443).asPortNumber()
+			}
+		},
+		zlib: {
+			level: 6
+		}
+	};
 
-	public constructor(options: Partial<ServerOptions> = {}) {
-		this.serverConfig = { ...serverConfig, ...options };
-		this.server = this.createServer();
-	}
+	// FIXME(inetol): Migrate to new config system
+	public static readonly basePath = process.env['DOCUMENTS_PATH'] || 'documents/';
+	public static readonly maxDocLength = parseInt(process.env['MAX_FILE_LENGTH'] || '2000000');
+	public static readonly defaultDocumentLifetime = parseInt(process.env['DEFAULT_DOCUMENT_LIFETIME'] || '86400');
+
+	private readonly server: Elysia = this.createServer();
 
 	public get self(): Elysia {
 		return this.server;
@@ -35,11 +54,11 @@ export class Server {
 		const server = new Elysia();
 
 		this.initCORS(server);
-		this.serverConfig.docs.enabled && this.initDocs(server);
+		Server.config.docs.enabled && this.initDocs(server);
 		this.initErrorHandling(server);
 		this.initRoutes(server);
 
-		server.listen(this.serverConfig.port, (server) =>
+		server.listen(Server.config.port, (server) =>
 			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
 		);
 
@@ -61,16 +80,16 @@ export class Server {
 				documentation: {
 					servers: [
 						{
-							url: (this.serverConfig.docs.playground.tls ? 'https://' : 'http://').concat(
-								this.serverConfig.docs.playground.domain,
+							url: (Server.config.docs.playground.tls ? 'https://' : 'http://').concat(
+								Server.config.docs.playground.domain,
 								':',
-								this.serverConfig.docs.playground.port.toString()
+								Server.config.docs.playground.port.toString()
 							)
 						}
 					],
 					info: {
 						title: 'JSPaste documentation',
-						version: this.serverConfig.versions.map((version) => `v${version}`).join(', '),
+						version: Server.config.versions.map((version) => `v${version}`).join(', '),
 						description:
 							'The JSPaste API documentation. Note that you can use /documents instead of /api/vX/documents to use the latest API version by default.',
 						license: {
@@ -82,8 +101,8 @@ export class Server {
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
-				path: this.serverConfig.docs.path,
-				exclude: [this.serverConfig.docs.path, this.serverConfig.docs.path.concat('/json'), /^\/documents/]
+				path: Server.config.docs.path,
+				exclude: [Server.config.docs.path, Server.config.docs.path.concat('/json'), /^\/documents/]
 			})
 		);
 	}
@@ -91,27 +110,28 @@ export class Server {
 	private initErrorHandling(server: Elysia): void {
 		server.onError(({ set, code, error }) => {
 			switch (code) {
+				case 'NOT_FOUND':
+					return 'Not found';
+
 				case 'VALIDATION':
-					console.error(error);
-					return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.validation]);
+					return JSPError.send(set, 400, JSPError.message[ErrorCode.validation]);
 
 				case 'INTERNAL_SERVER_ERROR':
 					console.error(error);
-					return ErrorHandler.send(set, 500, JSPErrorMessage[JSPErrorCode.internalServerError]);
+					return JSPError.send(set, 500, JSPError.message[ErrorCode.internalServerError]);
 
 				case 'PARSE':
-					console.error(error);
-					return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.parseFailed]);
+					return JSPError.send(set, 400, JSPError.message[ErrorCode.parseFailed]);
 
 				default:
 					console.error(error);
-					return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.unknown]);
+					return JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
 			}
 		});
 	}
 
 	private initRoutes(server: Elysia): void {
-		const apiVersions = this.serverConfig.versions.toReversed();
+		const apiVersions = Server.config.versions.toReversed();
 		const routes = {
 			[ServerVersion.v1]: {
 				endpoints: [AccessRawV1, AccessV1, IndexV1, PublishV1, RemoveV1],

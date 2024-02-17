@@ -1,7 +1,7 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { genericErrorType } from '../utils/constants.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
 export class RemoveV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
@@ -31,9 +31,9 @@ export class RemoveV2 extends AbstractEndpoint {
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: genericErrorType,
-				403: genericErrorType,
-				404: genericErrorType
+				400: JSPError.errorSchema,
+				403: JSPError.errorSchema,
+				404: JSPError.errorSchema
 			},
 			detail: { summary: 'Remove document', tags: ['v2'] }
 		};

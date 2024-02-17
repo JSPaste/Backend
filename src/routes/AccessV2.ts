@@ -2,7 +2,7 @@ import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ServerVersion } from '../types/Server.ts';
-import { genericErrorType } from '../utils/constants.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
 export class AccessV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
@@ -68,8 +68,8 @@ export class AccessV2 extends AbstractEndpoint {
 							'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: genericErrorType,
-				404: genericErrorType
+				400: JSPError.errorSchema,
+				404: JSPError.errorSchema
 			},
 			detail: { summary: 'Get document', tags: ['v2'] }
 		};

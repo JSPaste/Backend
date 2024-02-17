@@ -2,7 +2,7 @@ import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ServerVersion } from '../types/Server.ts';
-import { genericErrorType } from '../utils/constants.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
 export class AccessRawV1 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
@@ -28,8 +28,8 @@ export class AccessRawV1 extends AbstractEndpoint {
 					description: 'The raw document',
 					examples: ['Hello world']
 				}),
-				400: genericErrorType,
-				404: genericErrorType
+				400: JSPError.errorSchema,
+				404: JSPError.errorSchema
 			},
 			detail: {
 				summary: 'Get raw document',

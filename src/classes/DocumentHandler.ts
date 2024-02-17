@@ -1,14 +1,6 @@
 import { unlink } from 'node:fs/promises';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { DocumentManager } from './DocumentManager.ts';
-import {
-	basePath,
-	defaultDocumentLifetime,
-	JSPErrorMessage,
-	maxDocLength,
-	type Range,
-	serverConfig
-} from '../utils/constants.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
 import type { IDocumentDataStruct } from '../structures/Structures';
 import type {
@@ -20,13 +12,15 @@ import type {
 	HandleRemove
 } from '../types/DocumentHandler.ts';
 import { ServerVersion } from '../types/Server.ts';
-import { ErrorHandler } from './ErrorHandler.ts';
-import { JSPErrorCode } from '../types/ErrorHandler.ts';
+import { JSPError } from './JSPError.ts';
+import { Server } from './Server.ts';
+import type { Range } from '../types/Range.ts';
+import { ErrorCode } from '../types/JSPError.ts';
 
 export class DocumentHandler {
 	public static async handleAccess(set: any, { key, password, raw = false }: HandleAccess, version: ServerVersion) {
 		const res = await DocumentHandler.handleGetDocument(set, { key: key, password });
-		if (ErrorHandler.isJSPError(res)) return res;
+		if (ValidatorUtils.isJSPError(res)) return res;
 
 		if (raw) return new Response(res.rawFileData);
 
@@ -40,7 +34,7 @@ export class DocumentHandler {
 				return {
 					key,
 					data,
-					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain + '/') + key,
+					url: (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain + '/') + key,
 					expirationTimestamp: res.expirationTimestamp ? Number(res.expirationTimestamp) : undefined
 				};
 		}
@@ -48,27 +42,27 @@ export class DocumentHandler {
 
 	public static async handleEdit(set: any, { key, newBody, secret }: HandleEdit) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		const file = Bun.file(basePath + key);
+		const file = Bun.file(Server.basePath + key);
 		const fileExists = await file.exists();
 
-		if (!fileExists) return ErrorHandler.send(set, 404, JSPErrorMessage[JSPErrorCode.documentNotFound]);
+		if (!fileExists) return JSPError.send(set, 404, JSPError.message[ErrorCode.documentNotFound]);
 
 		const buffer = Buffer.from(newBody as ArrayBuffer);
 
-		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, maxDocLength))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.documentInvalidLength]);
+		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.maxDocLength))
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidLength]);
 
 		const doc = await DocumentManager.read(file);
 
 		if (doc.secret && doc.secret !== secret)
-			return ErrorHandler.send(set, 403, JSPErrorMessage[JSPErrorCode.documentInvalidSecret]);
+			return JSPError.send(set, 403, JSPError.message[ErrorCode.documentInvalidSecret]);
 
 		doc.rawFileData = buffer;
 
 		return {
-			edited: await DocumentManager.write(basePath + key, doc)
+			edited: await DocumentManager.write(Server.basePath + key, doc)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -76,9 +70,9 @@ export class DocumentHandler {
 
 	public static async handleExists(set: any, { key }: HandleExists) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		return await Bun.file(basePath + key).exists();
+		return await Bun.file(Server.basePath + key).exists();
 	}
 
 	public static async handlePublish(
@@ -88,28 +82,28 @@ export class DocumentHandler {
 	) {
 		const buffer = Buffer.from(body as ArrayBuffer);
 
-		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, maxDocLength))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.documentInvalidLength]);
+		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.maxDocLength))
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidLength]);
 
 		const secret = selectedSecret || StringUtils.createSecret();
 
 		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.documentInvalidSecretLength]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidSecretLength]);
 
 		if (
 			selectedKey &&
 			(!ValidatorUtils.isStringLengthBetweenLimits(selectedKey, 2, 32) ||
 				!ValidatorUtils.isAlphanumeric(selectedKey))
 		)
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
 		if (selectedKeyLength && (selectedKeyLength > 32 || selectedKeyLength < 2))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.documentInvalidKeyLength]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidKeyLength]);
 
 		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.documentInvalidPasswordLength]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentInvalidPasswordLength]);
 
-		lifetime = lifetime ?? defaultDocumentLifetime;
+		lifetime = lifetime ?? Server.defaultDocumentLifetime;
 
 		// Make the document permanent if the value exceeds 5 years
 		if (lifetime > 157_784_760) lifetime = 0;
@@ -127,9 +121,9 @@ export class DocumentHandler {
 		const key = selectedKey || (await StringUtils.createKey((selectedKeyLength as Range<2, 32>) || 8));
 
 		if (selectedKey && (await StringUtils.keyExists(key)))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.documentKeyAlreadyExists]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.documentKeyAlreadyExists]);
 
-		await DocumentManager.write(basePath + key, newDoc);
+		await DocumentManager.write(Server.basePath + key, newDoc);
 
 		switch (version) {
 			case ServerVersion.v1:
@@ -139,7 +133,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: (serverConfig.tls ? 'https://' : 'http://').concat(serverConfig.domain + '/') + key,
+					url: (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain + '/') + key,
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 		}
@@ -147,21 +141,21 @@ export class DocumentHandler {
 
 	public static async handleRemove(set: any, { key, secret }: HandleRemove) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		const file = Bun.file(basePath + key);
+		const file = Bun.file(Server.basePath + key);
 		const fileExists = await file.exists();
 
-		if (!fileExists) return ErrorHandler.send(set, 404, JSPErrorMessage[JSPErrorCode.documentNotFound]);
+		if (!fileExists) return JSPError.send(set, 404, JSPError.message[ErrorCode.documentNotFound]);
 
 		const doc = await DocumentManager.read(file);
 
 		if (doc.secret && doc.secret !== secret)
-			return ErrorHandler.send(set, 403, JSPErrorMessage[JSPErrorCode.documentInvalidSecret]);
+			return JSPError.send(set, 403, JSPError.message[ErrorCode.documentInvalidSecret]);
 
 		return {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
-			removed: await unlink(basePath + key)
+			removed: await unlink(Server.basePath + key)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -169,24 +163,24 @@ export class DocumentHandler {
 
 	private static async handleGetDocument(set: any, { key, password }: HandleGetDocument) {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(key, 1, 255) || !ValidatorUtils.isAlphanumeric(key))
-			return ErrorHandler.send(set, 400, JSPErrorMessage[JSPErrorCode.inputInvalid]);
+			return JSPError.send(set, 400, JSPError.message[ErrorCode.inputInvalid]);
 
-		const file = Bun.file(basePath + key);
+		const file = Bun.file(Server.basePath + key);
 		const fileExists = await file.exists();
 		const doc = fileExists && (await DocumentManager.read(file));
 
 		if (!doc || (doc.expirationTimestamp && doc.expirationTimestamp > 0 && doc.expirationTimestamp < Date.now())) {
 			// TODO: Use optimized Bun.unlink when available -> https://bun.sh/docs/api/file-io#writing-files-bun-write
-			if (fileExists) await unlink(basePath + key).catch(() => null);
+			if (fileExists) await unlink(Server.basePath + key).catch(() => null);
 
-			return ErrorHandler.send(set, 404, JSPErrorMessage[JSPErrorCode.documentNotFound]);
+			return JSPError.send(set, 404, JSPError.message[ErrorCode.documentNotFound]);
 		}
 
 		if (doc.password && !password)
-			return ErrorHandler.send(set, 401, JSPErrorMessage[JSPErrorCode.documentPasswordNeeded]);
+			return JSPError.send(set, 401, JSPError.message[ErrorCode.documentPasswordNeeded]);
 
 		if (doc.password && doc.password !== password)
-			return ErrorHandler.send(set, 403, JSPErrorMessage[JSPErrorCode.documentInvalidPassword]);
+			return JSPError.send(set, 403, JSPError.message[ErrorCode.documentInvalidPassword]);
 
 		return doc;
 	}
