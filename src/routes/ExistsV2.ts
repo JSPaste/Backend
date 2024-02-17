@@ -1,14 +1,14 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
-import { ErrorSender } from '../classes/ErrorSender.ts';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
-export class ExistsV2 extends AbstractRoute {
+export class ExistsV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			params: t.Object({
 				key: t.String({
@@ -18,14 +18,14 @@ export class ExistsV2 extends AbstractRoute {
 			}),
 			response: {
 				200: t.Boolean({ description: 'A boolean indicating if the document exists' }),
-				400: ErrorSender.errorType()
+				400: JSPError.errorSchema
 			},
 			detail: { summary: 'Check document', tags: ['v2'] }
 		};
 
 		this.server.get(
-			path.concat('/:key/exists'),
-			async ({ errorSender, params: { key } }) => DocumentHandler.handleExists({ errorSender, key: key }),
+			prefix.concat('/:key/exists'),
+			async ({ set, params: { key } }) => DocumentHandler.handleExists(set, { key: key }),
 			hook
 		);
 	}

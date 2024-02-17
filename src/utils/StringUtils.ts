@@ -1,8 +1,11 @@
-import { base64URL, basePath, type Range } from './constants.ts';
+import type { Range } from '../types/Range.ts';
+import { Server } from '../classes/Server.ts';
 
 export class StringUtils {
+	public static readonly base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+
 	public static random(length: number, base: Range<2, 64> = 62): string {
-		const baseSet = base64URL.slice(0, base);
+		const baseSet = StringUtils.base64URL.slice(0, base);
 
 		let string = '';
 
@@ -16,7 +19,7 @@ export class StringUtils {
 	}
 
 	public static async keyExists(key: string): Promise<boolean> {
-		return Bun.file(basePath + key).exists();
+		return Bun.file(Server.config.documents.documentPath + key).exists();
 	}
 
 	public static async createKey(length: Range<2, 32> = 8): Promise<string> {

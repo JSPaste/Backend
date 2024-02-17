@@ -1,15 +1,16 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { ErrorSender } from '../classes/ErrorSender.ts';
-import { defaultDocumentLifetime, ServerVersion } from '../utils/constants.ts';
+import { ServerVersion } from '../types/Server.ts';
+import { JSPError } from '../classes/JSPError.ts';
+import { Server } from '../classes/Server.ts';
 
-export class PublishV2 extends AbstractRoute {
+export class PublishV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({
@@ -45,7 +46,7 @@ export class PublishV2 extends AbstractRoute {
 					),
 					lifetime: t.Optional(
 						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${defaultDocumentLifetime}`,
+							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.config.documents.maxTime}`,
 							examples: ['60', '0']
 						})
 					)
@@ -81,22 +82,24 @@ export class PublishV2 extends AbstractRoute {
 							'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: ErrorSender.errorType()
+				400: JSPError.errorSchema
 			},
 			detail: { summary: 'Publish document', tags: ['v2'] }
 		};
 
 		this.server.post(
-			path,
-			async ({ errorSender, request, query, body }) =>
+			prefix,
+			async ({ set, request, query, body }) =>
 				DocumentHandler.handlePublish(
+					set,
 					{
-						errorSender,
 						body,
 						selectedKey: request.headers.get('key') || '',
 						selectedKeyLength: parseInt(request.headers.get('key-length') ?? '') || undefined,
 						selectedSecret: request.headers.get('secret') || '',
-						lifetime: parseInt(request.headers.get('lifetime') || defaultDocumentLifetime.toString()),
+						lifetime: parseInt(
+							request.headers.get('lifetime') || Server.config.documents.maxTime.toString()
+						),
 						password: request.headers.get('password') || query['password'] || ''
 					},
 					ServerVersion.v2

@@ -1,14 +1,14 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
-import { ErrorSender } from '../classes/ErrorSender.ts';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
-export class RemoveV1 extends AbstractRoute {
+export class RemoveV1 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			params: t.Object({
 				key: t.String({
@@ -31,18 +31,17 @@ export class RemoveV1 extends AbstractRoute {
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: ErrorSender.errorType(),
-				403: ErrorSender.errorType(),
-				404: ErrorSender.errorType()
+				400: JSPError.errorSchema,
+				403: JSPError.errorSchema,
+				404: JSPError.errorSchema
 			},
 			detail: { summary: 'Remove document', tags: ['v1'] }
 		};
 
 		this.server.delete(
-			path.concat('/:key'),
-			async ({ errorSender, request, params: { key } }) =>
-				DocumentHandler.handleRemove({
-					errorSender,
+			prefix.concat('/:key'),
+			async ({ set, request, params: { key } }) =>
+				DocumentHandler.handleRemove(set, {
 					key,
 					secret: request.headers.get('secret') || ''
 				}),

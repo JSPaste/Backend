@@ -1,11 +1,11 @@
 import type { Elysia } from 'elysia';
 
-export abstract class AbstractPlugin {
+export abstract class AbstractEndpoint {
 	protected readonly server: Elysia;
 
 	protected constructor(server: Elysia) {
 		this.server = server;
 	}
 
-	protected abstract load(): Elysia;
+	protected abstract register(prefix: string): void;
 }

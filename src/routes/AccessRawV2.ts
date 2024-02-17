@@ -1,15 +1,15 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { ServerVersion } from '../utils/constants.ts';
-import { ErrorSender } from '../classes/ErrorSender.ts';
+import { ServerVersion } from '../types/Server.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
-export class AccessRawV2 extends AbstractRoute {
+export class AccessRawV2 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			params: t.Object(
 				{
@@ -49,8 +49,8 @@ export class AccessRawV2 extends AbstractRoute {
 					description: 'The raw document',
 					examples: ['Hello world']
 				}),
-				400: ErrorSender.errorType(),
-				404: ErrorSender.errorType()
+				400: JSPError.errorSchema,
+				404: JSPError.errorSchema
 			},
 			detail: {
 				summary: 'Get raw document',
@@ -59,13 +59,13 @@ export class AccessRawV2 extends AbstractRoute {
 		};
 
 		this.server.get(
-			path.concat('/:key/raw'),
-			async ({ errorSender, set, request, query: { p }, params: { key } }) => {
+			prefix.concat('/:key/raw'),
+			async ({ set, request, query: { p }, params: { key } }) => {
 				set.headers['Content-Type'] = 'text/plain';
 
 				return DocumentHandler.handleAccess(
+					set,
 					{
-						errorSender,
 						key,
 						password: request.headers.get('password') || p || '',
 						raw: true
