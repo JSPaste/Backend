@@ -15,10 +15,41 @@ import { ServerVersion } from '../types/Server.ts';
 import { JSPError } from './JSPError.ts';
 import { Server } from './Server.ts';
 import type { Range } from '../types/Range.ts';
-import { ErrorCode } from '../types/JSPError.ts';
+import { ErrorCode, type ErrorType } from '../types/JSPError.ts';
 
 export class DocumentHandler {
-	public static async handleAccess(set: any, { key, password, raw = false }: HandleAccess, version: ServerVersion) {
+	public static async handleAccess(
+		set: any,
+		{ key, password, raw }: HandleAccess & { raw?: never },
+		version: ServerVersion
+	): Promise<
+		| ErrorType
+		| {
+				key: string;
+				data: string;
+				url?: string;
+				expirationTimestamp?: number;
+		  }
+	>;
+	public static async handleAccess(
+		set: any,
+		{ key, password, raw }: HandleAccess & { raw: true },
+		version: ServerVersion
+	): Promise<ErrorType | Response>;
+	public static async handleAccess(
+		set: any,
+		{ key, password, raw = false }: HandleAccess,
+		version: ServerVersion
+	): Promise<
+		| ErrorType
+		| Response
+		| {
+				key: string;
+				data: string;
+				url?: string;
+				expirationTimestamp?: number;
+		  }
+	> {
 		const res = await DocumentHandler.handleGetDocument(set, { key: key, password });
 		if (ValidatorUtils.isJSPError(res)) return res;
 
