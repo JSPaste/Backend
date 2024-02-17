@@ -20,10 +20,10 @@
 		"start:dev": "bun ./src/index.ts --watch"
 	},
 	"dependencies": {
-		"@elysiajs/cors": "^0.8.0",
-		"@elysiajs/swagger": "^0.8.5",
-		"@types/bun": "^1.0.5",
-		"elysia": "^0.8.17",
+		"@elysiajs/cors": "1.0.0-beta.2",
+		"@elysiajs/swagger": "1.0.0-beta.1",
+		"@types/bun": "^1.0.6",
+		"elysia": "1.0.0-beta.6",
 		"env-var": "^7.4.1",
 		"protobufjs": "~7.2.6",
 		"protobufjs-cli": "^1.1.2",
@@ -34,6 +34,6 @@
 		"lint-staged": "^15.2.2",
 		"prettier": "^3.2.5",
 		"prettier-plugin-jsdoc": "^1.3.0",
-		"prettier-plugin-packagejson": "^2.4.10"
+		"prettier-plugin-packagejson": "^2.4.11"
 	}
 }
