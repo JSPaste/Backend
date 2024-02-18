@@ -1,7 +1,7 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
 import { ServerVersion } from '../types/Server.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { Error } from '../classes/Error.ts';
 import type { Server } from '../classes/Server.ts';
 
 export class PublishV1 extends AbstractEndpoint {
@@ -25,7 +25,7 @@ export class PublishV1 extends AbstractEndpoint {
 					},
 					{ description: 'An object with a key and a secret for the document' }
 				),
-				400: JSPError.schema
+				400: Error.schema
 			},
 			detail: { summary: 'Publish document', tags: ['v1'] }
 		};

@@ -1,8 +1,8 @@
 import { t } from 'elysia';
-import { ErrorCode, type ErrorType } from '../types/JSPError.ts';
+import { ErrorCode, type ErrorSchema } from '../types/Error.ts';
 
-export class JSPError {
-	public static readonly message: Record<ErrorCode, ErrorType> = {
+export class Error {
+	public static readonly message: Record<ErrorCode, ErrorSchema> = {
 		[ErrorCode.unknown]: {
 			type: 'error',
 			errorCode: ErrorCode.unknown,
@@ -89,7 +89,7 @@ export class JSPError {
 		{ description: 'An object representing an error' }
 	);
 
-	public static send(context: any, code: number, error: ErrorType): ErrorType {
+	public static send(context: any, code: number, error: ErrorSchema): ErrorSchema {
 		context.status = code;
 		return error;
 	}

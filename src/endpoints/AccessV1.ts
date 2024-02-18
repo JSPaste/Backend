@@ -1,7 +1,7 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
 import { ServerVersion } from '../types/Server.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { Error } from '../classes/Error.ts';
 import type { Server } from '../classes/Server.ts';
 
 export class AccessV1 extends AbstractEndpoint {
@@ -31,8 +31,8 @@ export class AccessV1 extends AbstractEndpoint {
 					},
 					{ description: 'The document object' }
 				),
-				400: JSPError.schema,
-				404: JSPError.schema
+				400: Error.schema,
+				404: Error.schema
 			},
 			detail: { summary: 'Get document', tags: ['v1'] }
 		};

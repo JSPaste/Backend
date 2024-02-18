@@ -1,17 +1,15 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { JSPError } from '../classes/JSPError.ts';
+import { Error } from '../classes/Error.ts';
 import type { Server } from '../classes/Server.ts';
 
-export class EditV2 extends AbstractEndpoint {
+export class RemoveV2 extends AbstractEndpoint {
 	public constructor(server: Server) {
 		super(server);
 	}
 
 	public override register(prefix: string): void {
 		const hook = {
-			type: 'arrayBuffer',
-			body: t.Any({ description: 'The new file' }),
 			params: t.Object({
 				key: t.String({
 					description: 'The document key',
@@ -27,26 +25,25 @@ export class EditV2 extends AbstractEndpoint {
 			response: {
 				200: t.Object(
 					{
-						edited: t.Boolean({
-							description: 'A boolean indicating if the edit was successful'
+						removed: t.Boolean({
+							description: 'A boolean indicating if the deletion was successful'
 						})
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: JSPError.schema,
-				403: JSPError.schema,
-				404: JSPError.schema
+				400: Error.schema,
+				403: Error.schema,
+				404: Error.schema
 			},
-			detail: { summary: 'Edit document', tags: ['v2'] }
+			detail: { summary: 'Remove document', tags: ['v2'] }
 		};
 
-		this.server.getElysia.patch(
+		this.server.getElysia.delete(
 			prefix.concat('/:key'),
-			async ({ set, headers, body, params }) => {
+			async ({ set, headers, params }) => {
 				this.server.getDocumentHandler.setContext = set;
-				return this.server.getDocumentHandler.edit({
+				return this.server.getDocumentHandler.remove({
 					key: params.key,
-					newBody: body,
 					secret: headers.secret
 				});
 			},

@@ -1,23 +1,23 @@
 import { Elysia } from 'elysia';
 import swagger from '@elysiajs/swagger';
 import cors from '@elysiajs/cors';
-import { IndexV1 } from '../routes/IndexV1.ts';
-import { AccessV1 } from '../routes/AccessV1.ts';
-import { AccessRawV1 } from '../routes/AccessRawV1.ts';
-import { PublishV1 } from '../routes/PublishV1.ts';
-import { RemoveV1 } from '../routes/RemoveV1.ts';
-import { EditV2 } from '../routes/EditV2.ts';
-import { ExistsV2 } from '../routes/ExistsV2.ts';
-import { IndexV2 } from '../routes/IndexV2.ts';
-import { PublishV2 } from '../routes/PublishV2.ts';
-import { RemoveV2 } from '../routes/RemoveV2.ts';
-import { AccessV2 } from '../routes/AccessV2.ts';
-import { AccessRawV2 } from '../routes/AccessRawV2.ts';
+import { IndexV1 } from '../endpoints/IndexV1.ts';
+import { AccessV1 } from '../endpoints/AccessV1.ts';
+import { AccessRawV1 } from '../endpoints/AccessRawV1.ts';
+import { PublishV1 } from '../endpoints/PublishV1.ts';
+import { RemoveV1 } from '../endpoints/RemoveV1.ts';
+import { EditV2 } from '../endpoints/EditV2.ts';
+import { ExistsV2 } from '../endpoints/ExistsV2.ts';
+import { IndexV2 } from '../endpoints/IndexV2.ts';
+import { PublishV2 } from '../endpoints/PublishV2.ts';
+import { RemoveV2 } from '../endpoints/RemoveV2.ts';
+import { AccessV2 } from '../endpoints/AccessV2.ts';
+import { AccessRawV2 } from '../endpoints/AccessRawV2.ts';
 import { type ServerOptions, ServerVersion } from '../types/Server.ts';
-import { JSPError } from './JSPError.ts';
+import { Error } from './Error.ts';
 import * as env from 'env-var';
 import { DocumentHandler } from './DocumentHandler.ts';
-import { ErrorCode } from '../types/JSPError.ts';
+import { ErrorCode } from '../types/Error.ts';
 
 export class Server {
 	public static readonly config: Required<ServerOptions> = {
@@ -43,6 +43,7 @@ export class Server {
 			level: 6
 		}
 	};
+
 	private readonly elysia: Elysia = new Elysia();
 	private readonly documentHandler: DocumentHandler = new DocumentHandler();
 
@@ -114,18 +115,18 @@ export class Server {
 					return '';
 
 				case 'VALIDATION':
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.validation]);
+					return Error.send(set, 400, Error.message[ErrorCode.validation]);
 
 				case 'INTERNAL_SERVER_ERROR':
 					console.error(error);
-					return JSPError.send(set, 500, JSPError.message[ErrorCode.internalServerError]);
+					return Error.send(set, 500, Error.message[ErrorCode.internalServerError]);
 
 				case 'PARSE':
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.parseFailed]);
+					return Error.send(set, 400, Error.message[ErrorCode.parseFailed]);
 
 				default:
 					console.error(error);
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
+					return Error.send(set, 400, Error.message[ErrorCode.unknown]);
 			}
 		});
 	}

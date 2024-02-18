@@ -1,4 +1,4 @@
-import type { ErrorType } from '../types/JSPError.ts';
+import type { ErrorSchema } from '../types/Error.ts';
 
 export class ValidatorUtils {
 	public static isValidType<T>(value: unknown, type: new (...args: any[]) => T): value is T {
@@ -25,8 +25,8 @@ export class ValidatorUtils {
 		return ValidatorUtils.isValidArray(values, ValidatorUtils.isValidString);
 	}
 
-	public static isJSPError(value?: any): value is ErrorType {
-		return (value as ErrorType)?.type === 'error';
+	public static isJSPError(value?: any): value is ErrorSchema {
+		return (value as ErrorSchema)?.type === 'error';
 	}
 
 	public static isValidStringList(...values: string[]): boolean {

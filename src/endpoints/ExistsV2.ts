@@ -1,6 +1,6 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { JSPError } from '../classes/JSPError.ts';
+import { Error } from '../classes/Error.ts';
 import type { Server } from '../classes/Server.ts';
 
 export class ExistsV2 extends AbstractEndpoint {
@@ -18,7 +18,7 @@ export class ExistsV2 extends AbstractEndpoint {
 			}),
 			response: {
 				200: t.Boolean({ description: 'A boolean indicating if the document exists' }),
-				400: JSPError.schema
+				400: Error.schema
 			},
 			detail: { summary: 'Check document', tags: ['v2'] }
 		};

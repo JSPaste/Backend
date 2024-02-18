@@ -16,10 +16,10 @@ enum ErrorCode {
 	documentKeyAlreadyExists = 'jsp.document.key_already_exists'
 }
 
-type ErrorType = {
+type ErrorSchema = {
 	type: 'error';
 	message: string;
 	errorCode: ErrorCode;
 };
 
-export { ErrorCode, type ErrorType };
+export { ErrorCode, type ErrorSchema };
