@@ -44,7 +44,7 @@ export class Server {
 		}
 	};
 	private readonly elysia: Elysia = new Elysia();
-	private readonly documentHandler: DocumentHandler = new DocumentHandler(this);
+	private readonly documentHandler: DocumentHandler = new DocumentHandler();
 
 	public constructor() {
 		this.initCORS();

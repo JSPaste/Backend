@@ -12,35 +12,20 @@ import type { Range } from '../types/Range.ts';
 import type { BunFile } from 'bun';
 
 export class DocumentHandler {
-	private readonly server: Server;
 	private context: any;
-
-	public constructor(server: Server) {
-		this.server = server;
-	}
 
 	public set setContext(value: any) {
 		this.context = value;
 	}
 
 	public async access(params: Access, version: ServerVersion) {
-		this.validateKeyValue(params.key);
+		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
 		const document = await DocumentManager.read(file);
 
-		if (
-			document.expirationTimestamp &&
-			ValidatorUtils.isLengthBetweenLimits(document.expirationTimestamp, 0, Date.now())
-		) {
-			await unlink(Server.config.documents.documentPath + params.key);
-
-			throw JSPError.send(this.context, 404, JSPError.message[ErrorCode.documentNotFound]);
-		}
-
-		if (document.password && document.password !== params.password) {
-			throw JSPError.send(this.context, 403, JSPError.message[ErrorCode.documentInvalidPassword]);
-		}
+		this.validateTimestamp(params.key, document.expirationTimestamp);
+		this.validatePassword(params.password, document.password);
 
 		const data = new TextDecoder().decode(document.rawFileData);
 
@@ -59,19 +44,16 @@ export class DocumentHandler {
 	}
 
 	public async edit(params: Edit) {
-		this.validateKeyValue(params.key);
-
-		const buffer = Buffer.from(params.newBody as ArrayBuffer);
-
-		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.config.documents.maxLength))
-			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidLength]);
+		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
 		const document = await DocumentManager.read(file);
 
-		if (document.secret && document.secret !== params.secret) {
-			throw JSPError.send(this.context, 403, JSPError.message[ErrorCode.documentInvalidSecret]);
-		}
+		this.validateSecret(params.secret, document.secret);
+
+		const buffer = Buffer.from(params.newBody as ArrayBuffer);
+
+		this.validateSizeBetweenLimits(buffer);
 
 		document.rawFileData = buffer;
 
@@ -82,36 +64,23 @@ export class DocumentHandler {
 		};
 	}
 
-	public async exists(params: Exists): Promise<boolean> {
-		this.validateKeyValue(params.key);
+	public async exists(params: Exists) {
+		this.validateKey(params.key);
 
 		return Bun.file(Server.config.documents.documentPath + params.key).exists();
 	}
 
-	// TODO: Rework publish
 	public async publish(params: Publish, version: ServerVersion) {
-		const buffer = Buffer.from(params.body as ArrayBuffer);
-
-		if (!ValidatorUtils.isLengthBetweenLimits(buffer, 1, Server.config.documents.maxLength))
-			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidLength]);
-
 		const secret = params.selectedSecret || StringUtils.createSecret();
 
-		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255))
-			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidSecretLength]);
+		this.validateSecretLength(secret);
+		this.validatePasswordLength(params.password);
+		this.validateSelectedKey(params.selectedKey);
+		this.validateSelectedKeyLength(params.selectedKeyLength);
 
-		if (
-			params.selectedKey &&
-			(!ValidatorUtils.isStringLengthBetweenLimits(params.selectedKey, 2, 32) ||
-				!ValidatorUtils.isAlphanumeric(params.selectedKey))
-		)
-			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.inputInvalid]);
+		const buffer = Buffer.from(params.body as ArrayBuffer);
 
-		if (params.selectedKeyLength && (params.selectedKeyLength > 32 || params.selectedKeyLength < 2))
-			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidKeyLength]);
-
-		if (params.password && !ValidatorUtils.isStringLengthBetweenLimits(params.password, 0, 255))
-			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidPasswordLength]);
+		this.validateSizeBetweenLimits(buffer);
 
 		params.lifetime = params.lifetime ?? Server.config.documents.maxTime;
 
@@ -151,14 +120,12 @@ export class DocumentHandler {
 	}
 
 	public async remove(params: Remove) {
-		this.validateKeyValue(params.key);
+		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
 		const document = await DocumentManager.read(file);
 
-		if (document.secret && document.secret !== params.secret) {
-			throw JSPError.send(this.context, 403, JSPError.message[ErrorCode.documentInvalidSecret]);
-		}
+		this.validateSecret(params.secret, document.secret);
 
 		return {
 			removed: await unlink(Server.config.documents.documentPath + params.key)
@@ -167,7 +134,7 @@ export class DocumentHandler {
 		};
 	}
 
-	private validateKeyValue(key: string): void {
+	private validateKey(key: string): void {
 		if (!ValidatorUtils.isAlphanumeric(key) || !ValidatorUtils.isStringLengthBetweenLimits(key, 2, 32)) {
 			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.inputInvalid]);
 		}
@@ -181,5 +148,55 @@ export class DocumentHandler {
 		}
 
 		return file;
+	}
+
+	private validateSecret(secret: string | undefined, documentSecret: string): void {
+		if (documentSecret && documentSecret !== secret) {
+			throw JSPError.send(this.context, 403, JSPError.message[ErrorCode.documentInvalidSecret]);
+		}
+	}
+
+	private validateSecretLength(secret: string): void {
+		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255)) {
+			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidSecretLength]);
+		}
+	}
+
+	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
+		if (documentPassword && documentPassword !== password) {
+			throw JSPError.send(this.context, 403, JSPError.message[ErrorCode.documentInvalidPassword]);
+		}
+	}
+
+	private validatePasswordLength(password: string | undefined): void {
+		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255)) {
+			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidPasswordLength]);
+		}
+	}
+
+	private validateTimestamp(key: string, timestamp: number): void {
+		if (timestamp && ValidatorUtils.isLengthBetweenLimits(timestamp, 0, Date.now())) {
+			unlink(Server.config.documents.documentPath + key);
+
+			throw JSPError.send(this.context, 404, JSPError.message[ErrorCode.documentNotFound]);
+		}
+	}
+
+	private validateSizeBetweenLimits(body: Buffer): void {
+		if (!ValidatorUtils.isLengthBetweenLimits(body, 1, Server.config.documents.maxLength)) {
+			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidLength]);
+		}
+	}
+
+	private validateSelectedKey(key: string | undefined): void {
+		if (key && (!ValidatorUtils.isStringLengthBetweenLimits(key, 2, 32) || !ValidatorUtils.isAlphanumeric(key))) {
+			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.inputInvalid]);
+		}
+	}
+
+	private validateSelectedKeyLength(length: number | undefined): void {
+		if (length && (length > 32 || length < 2)) {
+			throw JSPError.send(this.context, 400, JSPError.message[ErrorCode.documentInvalidKeyLength]);
+		}
 	}
 }
