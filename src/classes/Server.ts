@@ -114,18 +114,18 @@ export class Server {
 					return '';
 
 				case 'VALIDATION':
-					throw JSPError.send(set, 400, JSPError.message[ErrorCode.validation]);
+					return JSPError.send(set, 400, JSPError.message[ErrorCode.validation]);
 
 				case 'INTERNAL_SERVER_ERROR':
 					console.error(error);
-					throw JSPError.send(set, 500, JSPError.message[ErrorCode.internalServerError]);
+					return JSPError.send(set, 500, JSPError.message[ErrorCode.internalServerError]);
 
 				case 'PARSE':
-					throw JSPError.send(set, 400, JSPError.message[ErrorCode.parseFailed]);
+					return JSPError.send(set, 400, JSPError.message[ErrorCode.parseFailed]);
 
 				default:
 					console.error(error);
-					throw JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
+					return JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
 			}
 		});
 	}
