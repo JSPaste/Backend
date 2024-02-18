@@ -1,20 +1,20 @@
-type HandleAccess = {
+type Access = {
 	key: string;
 	password?: string;
 	raw?: boolean;
 };
 
-type HandleEdit = {
+type Edit = {
 	key: string;
 	newBody: any;
 	secret?: string;
 };
 
-type HandleExists = {
+type Exists = {
 	key: string;
 };
 
-type HandlePublish = {
+type Publish = {
 	body: any;
 	selectedSecret?: string;
 	lifetime?: number;
@@ -23,14 +23,9 @@ type HandlePublish = {
 	selectedKey?: string;
 };
 
-type HandleRemove = {
+type Remove = {
 	key: string;
 	secret: string;
 };
 
-type HandleGetDocument = {
-	key: string;
-	password?: string;
-};
-
-export type { HandleAccess, HandleEdit, HandleExists, HandlePublish, HandleRemove, HandleGetDocument };
+export type { Access, Edit, Exists, Publish, Remove };

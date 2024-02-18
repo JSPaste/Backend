@@ -16,6 +16,7 @@ import { AccessRawV2 } from '../routes/AccessRawV2.ts';
 import { type ServerOptions, ServerVersion } from '../types/Server.ts';
 import { JSPError } from './JSPError.ts';
 import * as env from 'env-var';
+import { DocumentHandler } from './DocumentHandler.ts';
 import { ErrorCode } from '../types/JSPError.ts';
 
 export class Server {
@@ -42,30 +43,30 @@ export class Server {
 			level: 6
 		}
 	};
+	private readonly elysia: Elysia = new Elysia();
+	private readonly documentHandler: DocumentHandler = new DocumentHandler(this);
 
-	private readonly server: Elysia = this.createServer();
+	public constructor() {
+		this.initCORS();
+		Server.config.docs.enabled && this.initDocs();
+		this.initErrorHandler();
+		this.initRoutes();
 
-	public get self(): Elysia {
-		return this.server;
-	}
-
-	private createServer(): Elysia {
-		const server = new Elysia();
-
-		this.initCORS(server);
-		Server.config.docs.enabled && this.initDocs(server);
-		this.initErrorHandler(server);
-		this.initRoutes(server);
-
-		server.listen(Server.config.port, (server) =>
-			console.info('Listening on port', server.port, `-> http://localhost:${server.port}`)
+		this.elysia.listen(Server.config.port, ({ port }) =>
+			console.info('Listening on port', port, `-> http://localhost:${port}`)
 		);
-
-		return server;
 	}
 
-	private initCORS(server: Elysia): void {
-		server.use(
+	public get getElysia(): Elysia {
+		return this.elysia;
+	}
+
+	public get getDocumentHandler(): DocumentHandler {
+		return this.documentHandler;
+	}
+
+	private initCORS(): void {
+		this.elysia.use(
 			cors({
 				origin: true,
 				methods: ['GET', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
@@ -73,8 +74,8 @@ export class Server {
 		);
 	}
 
-	private initDocs(server: Elysia): void {
-		server.use(
+	private initDocs(): void {
+		this.elysia.use(
 			swagger({
 				documentation: {
 					servers: [
@@ -106,30 +107,30 @@ export class Server {
 		);
 	}
 
-	private initErrorHandler(server: Elysia): void {
-		server.onError(({ set, code, error }) => {
+	private initErrorHandler(): void {
+		this.elysia.onError(({ set, code, error }) => {
 			switch (code) {
 				case 'NOT_FOUND':
-					return 'Not found';
+					return '';
 
 				case 'VALIDATION':
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.validation]);
+					throw JSPError.send(set, 400, JSPError.message[ErrorCode.validation]);
 
 				case 'INTERNAL_SERVER_ERROR':
 					console.error(error);
-					return JSPError.send(set, 500, JSPError.message[ErrorCode.internalServerError]);
+					throw JSPError.send(set, 500, JSPError.message[ErrorCode.internalServerError]);
 
 				case 'PARSE':
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.parseFailed]);
+					throw JSPError.send(set, 400, JSPError.message[ErrorCode.parseFailed]);
 
 				default:
 					console.error(error);
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
+					throw JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
 			}
 		});
 	}
 
-	private initRoutes(server: Elysia): void {
+	private initRoutes(): void {
 		const apiVersions = Server.config.versions.toReversed();
 		const routes = {
 			[ServerVersion.v1]: {
@@ -144,7 +145,7 @@ export class Server {
 
 		for (const [i, version] of apiVersions.entries()) {
 			routes[version].endpoints.forEach((Endpoint) => {
-				const endpoint = new Endpoint(server);
+				const endpoint = new Endpoint(this);
 
 				routes[version].prefixes.forEach(endpoint.register.bind(endpoint));
 			});

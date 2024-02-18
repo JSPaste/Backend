@@ -1,10 +1,10 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { type Elysia, t } from 'elysia';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { t } from 'elysia';
 import { JSPError } from '../classes/JSPError.ts';
+import type { Server } from '../classes/Server.ts';
 
 export class RemoveV1 extends AbstractEndpoint {
-	public constructor(server: Elysia) {
+	public constructor(server: Server) {
 		super(server);
 	}
 
@@ -31,20 +31,22 @@ export class RemoveV1 extends AbstractEndpoint {
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: JSPError.errorSchema,
-				403: JSPError.errorSchema,
-				404: JSPError.errorSchema
+				400: JSPError.schema,
+				403: JSPError.schema,
+				404: JSPError.schema
 			},
 			detail: { summary: 'Remove document', tags: ['v1'] }
 		};
 
-		this.server.delete(
+		this.server.getElysia.delete(
 			prefix.concat('/:key'),
-			async ({ set, request, params: { key } }) =>
-				DocumentHandler.handleRemove(set, {
-					key,
-					secret: request.headers.get('secret') || ''
-				}),
+			async ({ set, headers, params }) => {
+				this.server.getDocumentHandler.setContext = set;
+				return this.server.getDocumentHandler.remove({
+					key: params.key,
+					secret: headers.secret
+				});
+			},
 			hook
 		);
 	}

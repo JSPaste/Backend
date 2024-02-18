@@ -1,9 +1,9 @@
-import type { Elysia } from 'elysia';
+import type { Server } from './Server.ts';
 
 export abstract class AbstractEndpoint {
-	protected readonly server: Elysia;
+	protected readonly server: Server;
 
-	protected constructor(server: Elysia) {
+	protected constructor(server: Server) {
 		this.server = server;
 	}
 

@@ -80,7 +80,7 @@ export class JSPError {
 		}
 	};
 
-	public static readonly errorSchema = t.Object(
+	public static readonly schema = t.Object(
 		{
 			type: t.String({ description: 'The error type' }),
 			message: t.String({ description: 'The error message' }),

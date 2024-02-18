@@ -1,11 +1,11 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { type Elysia, t } from 'elysia';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { t } from 'elysia';
 import { ServerVersion } from '../types/Server.ts';
 import { JSPError } from '../classes/JSPError.ts';
+import type { Server } from '../classes/Server.ts';
 
 export class PublishV1 extends AbstractEndpoint {
-	public constructor(server: Elysia) {
+	public constructor(server: Server) {
 		super(server);
 	}
 
@@ -25,14 +25,17 @@ export class PublishV1 extends AbstractEndpoint {
 					},
 					{ description: 'An object with a key and a secret for the document' }
 				),
-				400: JSPError.errorSchema
+				400: JSPError.schema
 			},
 			detail: { summary: 'Publish document', tags: ['v1'] }
 		};
 
-		this.server.post(
+		this.server.getElysia.post(
 			prefix,
-			async ({ set, body }) => DocumentHandler.handlePublish(set, { body }, ServerVersion.v1),
+			async ({ set, body }) => {
+				this.server.getDocumentHandler.setContext = set;
+				return this.server.getDocumentHandler.publish({ body }, ServerVersion.v1);
+			},
 			hook
 		);
 	}

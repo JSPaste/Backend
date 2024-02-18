@@ -4,10 +4,10 @@ const server = new Server();
 
 process
 	.on('SIGTERM', () => {
-		server.self.stop();
+		server.getElysia.stop();
 		process.exit(0);
 	})
 	.on('SIGINT', () => {
-		server.self.stop();
+		server.getElysia.stop();
 		process.exit(0);
 	});

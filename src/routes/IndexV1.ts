@@ -1,8 +1,9 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { type Elysia, t } from 'elysia';
+import { t } from 'elysia';
+import type { Server } from '../classes/Server.ts';
 
 export class IndexV1 extends AbstractEndpoint {
-	public constructor(server: Elysia) {
+	public constructor(server: Server) {
 		super(server);
 	}
 
@@ -15,6 +16,6 @@ export class IndexV1 extends AbstractEndpoint {
 			detail: { summary: 'Index', tags: ['v1'] }
 		};
 
-		this.server.get(prefix, () => 'Welcome to JSPaste API v1', hook);
+		this.server.getElysia.get(prefix, 'Welcome to JSPaste API v1', hook);
 	}
 }

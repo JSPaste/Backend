@@ -1,12 +1,11 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { type Elysia, t } from 'elysia';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { t } from 'elysia';
 import { ServerVersion } from '../types/Server.ts';
 import { JSPError } from '../classes/JSPError.ts';
 import { Server } from '../classes/Server.ts';
 
 export class PublishV2 extends AbstractEndpoint {
-	public constructor(server: Elysia) {
+	public constructor(server: Server) {
 		super(server);
 	}
 
@@ -24,7 +23,7 @@ export class PublishV2 extends AbstractEndpoint {
 							examples: ['abc123']
 						})
 					),
-					['key-length']: t.Optional(
+					keyLength: t.Optional(
 						t.Numeric({
 							description:
 								'If a custom key is not set, this will determine the key length of the automatically generated key',
@@ -82,28 +81,27 @@ export class PublishV2 extends AbstractEndpoint {
 							'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: JSPError.errorSchema
+				400: JSPError.schema
 			},
 			detail: { summary: 'Publish document', tags: ['v2'] }
 		};
 
-		this.server.post(
+		this.server.getElysia.post(
 			prefix,
-			async ({ set, request, query, body }) =>
-				DocumentHandler.handlePublish(
-					set,
+			async ({ set, headers, query, body }) => {
+				this.server.getDocumentHandler.setContext = set;
+				return this.server.getDocumentHandler.publish(
 					{
 						body,
-						selectedKey: request.headers.get('key') || '',
-						selectedKeyLength: parseInt(request.headers.get('key-length') ?? '') || undefined,
-						selectedSecret: request.headers.get('secret') || '',
-						lifetime: parseInt(
-							request.headers.get('lifetime') || Server.config.documents.maxTime.toString()
-						),
-						password: request.headers.get('password') || query['password'] || ''
+						selectedKey: headers.key || '',
+						selectedKeyLength: headers.keyLength,
+						selectedSecret: headers.secret || '',
+						lifetime: headers.lifetime ?? Server.config.documents.maxTime,
+						password: headers.password || query['password'] || ''
 					},
 					ServerVersion.v2
-				),
+				);
+			},
 			hook
 		);
 	}

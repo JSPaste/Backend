@@ -1,10 +1,10 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { type Elysia, t } from 'elysia';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { t } from 'elysia';
 import { JSPError } from '../classes/JSPError.ts';
+import type { Server } from '../classes/Server.ts';
 
 export class EditV2 extends AbstractEndpoint {
-	public constructor(server: Elysia) {
+	public constructor(server: Server) {
 		super(server);
 	}
 
@@ -33,21 +33,23 @@ export class EditV2 extends AbstractEndpoint {
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: JSPError.errorSchema,
-				403: JSPError.errorSchema,
-				404: JSPError.errorSchema
+				400: JSPError.schema,
+				403: JSPError.schema,
+				404: JSPError.schema
 			},
 			detail: { summary: 'Edit document', tags: ['v2'] }
 		};
 
-		this.server.patch(
+		this.server.getElysia.patch(
 			prefix.concat('/:key'),
-			async ({ set, request, body, params: { key } }) =>
-				DocumentHandler.handleEdit(set, {
-					key,
+			async ({ set, headers, body, params }) => {
+				this.server.getDocumentHandler.setContext = set;
+				return this.server.getDocumentHandler.edit({
+					key: params.key,
 					newBody: body,
-					secret: request.headers.get('secret') || ''
-				}),
+					secret: headers.secret
+				});
+			},
 			hook
 		);
 	}

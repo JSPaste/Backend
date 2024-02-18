@@ -1,11 +1,11 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { type Elysia, t } from 'elysia';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
+import { t } from 'elysia';
 import { ServerVersion } from '../types/Server.ts';
 import { JSPError } from '../classes/JSPError.ts';
+import type { Server } from '../classes/Server.ts';
 
 export class AccessV1 extends AbstractEndpoint {
-	public constructor(server: Elysia) {
+	public constructor(server: Server) {
 		super(server);
 	}
 
@@ -31,15 +31,18 @@ export class AccessV1 extends AbstractEndpoint {
 					},
 					{ description: 'The document object' }
 				),
-				400: JSPError.errorSchema,
-				404: JSPError.errorSchema
+				400: JSPError.schema,
+				404: JSPError.schema
 			},
 			detail: { summary: 'Get document', tags: ['v1'] }
 		};
 
-		this.server.get(
+		this.server.getElysia.get(
 			prefix.concat('/:key'),
-			async ({ set, params: { key } }) => DocumentHandler.handleAccess(set, { key }, ServerVersion.v1),
+			async ({ set, params }) => {
+				this.server.getDocumentHandler.setContext = set;
+				return this.server.getDocumentHandler.access({ key: params.key }, ServerVersion.v1);
+			},
 			hook
 		);
 	}
