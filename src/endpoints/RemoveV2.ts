@@ -1,6 +1,6 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { Error } from '../classes/Error.ts';
+import { JSPError } from '../classes/JSPError.ts';
 import type { Server } from '../classes/Server.ts';
 
 export class RemoveV2 extends AbstractEndpoint {
@@ -31,9 +31,9 @@ export class RemoveV2 extends AbstractEndpoint {
 					},
 					{ description: 'A response object with a boolean' }
 				),
-				400: Error.schema,
-				403: Error.schema,
-				404: Error.schema
+				400: JSPError.schema,
+				403: JSPError.schema,
+				404: JSPError.schema
 			},
 			detail: { summary: 'Remove document', tags: ['v2'] }
 		};

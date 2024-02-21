@@ -1,4 +1,4 @@
-enum ErrorCode {
+enum JSPErrorCode {
 	unknown = 'jsp.unknown',
 	notFound = 'jsp.not_found',
 	validation = 'jsp.validation_failed',
@@ -16,10 +16,10 @@ enum ErrorCode {
 	documentKeyAlreadyExists = 'jsp.document.key_already_exists'
 }
 
-type ErrorSchema = {
+type JSPErrorSchema = {
 	type: 'error';
 	message: string;
-	errorCode: ErrorCode;
+	errorCode: JSPErrorCode;
 };
 
-export { ErrorCode, type ErrorSchema };
+export { JSPErrorCode, type JSPErrorSchema };

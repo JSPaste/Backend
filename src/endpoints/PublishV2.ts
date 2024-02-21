@@ -1,7 +1,7 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { ServerVersion } from '../types/Server.ts';
-import { Error } from '../classes/Error.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
+import { JSPError } from '../classes/JSPError.ts';
 import { Server } from '../classes/Server.ts';
 
 export class PublishV2 extends AbstractEndpoint {
@@ -81,7 +81,7 @@ export class PublishV2 extends AbstractEndpoint {
 							'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: Error.schema
+				400: JSPError.schema
 			},
 			detail: { summary: 'Publish document', tags: ['v2'] }
 		};
@@ -99,7 +99,7 @@ export class PublishV2 extends AbstractEndpoint {
 						lifetime: headers.lifetime ?? Server.config.documents.maxTime,
 						password: headers.password || query['password'] || ''
 					},
-					ServerVersion.v2
+					ServerEndpointVersion.v2
 				);
 			},
 			hook

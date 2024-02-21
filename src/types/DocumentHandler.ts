@@ -1,12 +1,12 @@
-import { ServerVersion } from './Server.ts';
+import { ServerEndpointVersion } from './Server.ts';
 import type { Range } from './Range.ts';
 
 type Parameters = {
 	access: {
-		[ServerVersion.v1]: {
+		[ServerEndpointVersion.v1]: {
 			key: string;
 		};
-		[ServerVersion.v2]: {
+		[ServerEndpointVersion.v2]: {
 			key: string;
 			password?: string;
 		};
@@ -20,10 +20,10 @@ type Parameters = {
 		key: string;
 	};
 	publish: {
-		[ServerVersion.v1]: {
+		[ServerEndpointVersion.v1]: {
 			body: any;
 		};
-		[ServerVersion.v2]: {
+		[ServerEndpointVersion.v2]: {
 			body: any;
 			selectedSecret?: string;
 			lifetime?: number;

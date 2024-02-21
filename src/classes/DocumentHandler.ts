@@ -1,8 +1,8 @@
 import type { Parameters } from '../types/DocumentHandler.ts';
-import { ServerVersion } from '../types/Server.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
-import { Error } from './Error.ts';
-import { ErrorCode, type ErrorSchema } from '../types/Error.ts';
+import { JSPError } from './JSPError.ts';
+import { JSPErrorCode, type JSPErrorSchema } from '../types/JSPError.ts';
 import { Server } from './Server.ts';
 import { DocumentManager } from './DocumentManager.ts';
 import { unlink } from 'node:fs/promises';
@@ -17,9 +17,9 @@ export class DocumentHandler {
 		this.context = value;
 	}
 
-	public async access(params: Parameters['access'], version: ServerVersion) {
+	public async access(params: Parameters['access'], version: ServerEndpointVersion) {
 		switch (version) {
-			case ServerVersion.v1: {
+			case ServerEndpointVersion.v1: {
 				this.validateKey(params[version].key);
 
 				const file = await this.validateKeyExistance(params[version].key);
@@ -34,7 +34,7 @@ export class DocumentHandler {
 				return { key: params[version].key, data };
 			}
 
-			case ServerVersion.v2: {
+			case ServerEndpointVersion.v2: {
 				this.validateKey(params[version].key);
 
 				const file = await this.validateKeyExistance(params[version].key);
@@ -50,9 +50,7 @@ export class DocumentHandler {
 				return {
 					key: params[version].key,
 					data,
-					url:
-						(Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain + '/') +
-						params[version].key,
+					url: Server.hostname.concat('/', params[version].key),
 					expirationTimestamp: document.expirationTimestamp
 				};
 			}
@@ -88,11 +86,11 @@ export class DocumentHandler {
 		return Bun.file(Server.config.documents.documentPath + params.key).exists();
 	}
 
-	public async publish(params: Parameters['publish'], version: ServerVersion) {
+	public async publish(params: Parameters['publish'], version: ServerEndpointVersion) {
 		const bodyBuffer = Buffer.from(params[version].body as ArrayBuffer);
 
 		switch (version) {
-			case ServerVersion.v1: {
+			case ServerEndpointVersion.v1: {
 				const secret = StringUtils.createSecret();
 
 				this.validateSizeBetweenLimits(bodyBuffer);
@@ -109,7 +107,7 @@ export class DocumentHandler {
 				return { key, secret };
 			}
 
-			case ServerVersion.v2: {
+			case ServerEndpointVersion.v2: {
 				const secret = params[version].selectedSecret || StringUtils.createSecret();
 
 				this.validateSecretLength(secret);
@@ -131,7 +129,7 @@ export class DocumentHandler {
 					(await StringUtils.createKey(params[version].selectedKeyLength ?? 8));
 
 				if (params[version].selectedKey && (await StringUtils.keyExists(key)))
-					throw Error.send(this.context, 400, Error.message[ErrorCode.documentKeyAlreadyExists]);
+					throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentKeyAlreadyExists]);
 
 				const document: IDocumentDataStruct = {
 					rawFileData: bodyBuffer,
@@ -145,7 +143,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain + '/') + key,
+					url: Server.hostname.concat('/', key),
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 			}
@@ -169,35 +167,35 @@ export class DocumentHandler {
 		};
 	}
 
-	private validateKey(key: string): ErrorSchema | undefined {
+	private validateKey(key: string): JSPErrorSchema | undefined {
 		if (!ValidatorUtils.isAlphanumeric(key) || !ValidatorUtils.isStringLengthBetweenLimits(key, 2, 32)) {
-			return Error.send(this.context, 400, Error.message[ErrorCode.inputInvalid]);
+			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
 
 		return undefined;
 	}
 
-	private async validateKeyExistance(key: string): Promise<ErrorSchema | BunFile> {
+	private async validateKeyExistance(key: string): Promise<JSPErrorSchema | BunFile> {
 		const file = Bun.file(Server.config.documents.documentPath + key);
 
 		if (!(await file.exists())) {
-			return Error.send(this.context, 404, Error.message[ErrorCode.documentNotFound]);
+			return JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
 		}
 
 		return file;
 	}
 
-	private validateSecret(secret: string | undefined, documentSecret: string): ErrorSchema | undefined {
+	private validateSecret(secret: string | undefined, documentSecret: string): JSPErrorSchema | undefined {
 		if (documentSecret && documentSecret !== secret) {
-			throw Error.send(this.context, 403, Error.message[ErrorCode.documentInvalidSecret]);
+			throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidSecret]);
 		}
 
 		return undefined;
 	}
 
-	private validateSecretLength(secret: string): ErrorSchema | undefined {
+	private validateSecretLength(secret: string): JSPErrorSchema | undefined {
 		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255)) {
-			return Error.send(this.context, 400, Error.message[ErrorCode.documentInvalidSecretLength]);
+			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidSecretLength]);
 		}
 
 		return undefined;
@@ -206,51 +204,51 @@ export class DocumentHandler {
 	private validatePassword(
 		password: string | undefined,
 		documentPassword: string | null | undefined
-	): ErrorSchema | undefined {
+	): JSPErrorSchema | undefined {
 		if (documentPassword && documentPassword !== password) {
-			return Error.send(this.context, 403, Error.message[ErrorCode.documentInvalidPassword]);
+			return JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidPassword]);
 		}
 
 		return undefined;
 	}
 
-	private validatePasswordLength(password: string | undefined): ErrorSchema | undefined {
+	private validatePasswordLength(password: string | undefined): JSPErrorSchema | undefined {
 		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255)) {
-			return Error.send(this.context, 400, Error.message[ErrorCode.documentInvalidPasswordLength]);
+			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidPasswordLength]);
 		}
 
 		return undefined;
 	}
 
-	private validateTimestamp(key: string, timestamp: number): ErrorSchema | undefined {
+	private validateTimestamp(key: string, timestamp: number): JSPErrorSchema | undefined {
 		if (timestamp && ValidatorUtils.isLengthBetweenLimits(timestamp, 0, Date.now())) {
 			unlink(Server.config.documents.documentPath + key);
 
-			return Error.send(this.context, 404, Error.message[ErrorCode.documentNotFound]);
+			return JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
 		}
 
 		return undefined;
 	}
 
-	private validateSizeBetweenLimits(body: Buffer): ErrorSchema | undefined {
+	private validateSizeBetweenLimits(body: Buffer): JSPErrorSchema | undefined {
 		if (!ValidatorUtils.isLengthBetweenLimits(body, 1, Server.config.documents.maxLength)) {
-			return Error.send(this.context, 400, Error.message[ErrorCode.documentInvalidLength]);
+			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidLength]);
 		}
 
 		return undefined;
 	}
 
-	private validateSelectedKey(key: string | undefined): ErrorSchema | undefined {
+	private validateSelectedKey(key: string | undefined): JSPErrorSchema | undefined {
 		if (key && (!ValidatorUtils.isStringLengthBetweenLimits(key, 2, 32) || !ValidatorUtils.isAlphanumeric(key))) {
-			return Error.send(this.context, 400, Error.message[ErrorCode.inputInvalid]);
+			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
 
 		return undefined;
 	}
 
-	private validateSelectedKeyLength(length: number | undefined): ErrorSchema | undefined {
-		if (length && (length > 32 || length < 2)) {
-			return Error.send(this.context, 400, Error.message[ErrorCode.documentInvalidKeyLength]);
+	private validateSelectedKeyLength(length: number | undefined): JSPErrorSchema | undefined {
+		if (length && ValidatorUtils.isLengthBetweenLimits(length, 2, 32)) {
+			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidKeyLength]);
 		}
 
 		return undefined;

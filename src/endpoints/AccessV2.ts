@@ -1,7 +1,7 @@
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { ServerVersion } from '../types/Server.ts';
-import { Error } from '../classes/Error.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
+import { JSPError } from '../classes/JSPError.ts';
 import type { Server } from '../classes/Server.ts';
 
 export class AccessV2 extends AbstractEndpoint {
@@ -68,8 +68,8 @@ export class AccessV2 extends AbstractEndpoint {
 							'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
 					}
 				),
-				400: Error.schema,
-				404: Error.schema
+				400: JSPError.schema,
+				404: JSPError.schema
 			},
 			detail: { summary: 'Get document', tags: ['v2'] }
 		};
@@ -80,7 +80,7 @@ export class AccessV2 extends AbstractEndpoint {
 				this.server.getDocumentHandler.setContext = set;
 				return this.server.getDocumentHandler.access(
 					{ key: params.key, password: headers.password || query.p || '' },
-					ServerVersion.v2
+					ServerEndpointVersion.v2
 				);
 			},
 			hook

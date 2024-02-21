@@ -1,15 +1,15 @@
 import type { ZlibCompressionOptions } from 'bun';
 
-enum ServerVersion {
+enum ServerEndpointVersion {
 	v1 = 1,
 	v2 = 2
 }
 
-type ServerOptions = {
+type ServerConfig = {
 	tls: boolean;
 	domain: string;
 	port: number;
-	versions: ServerVersion[];
+	versions: ServerEndpointVersion[];
 	documents: {
 		documentPath: string;
 		maxLength: number;
@@ -27,4 +27,4 @@ type ServerOptions = {
 	zlib: ZlibCompressionOptions;
 };
 
-export { ServerVersion, type ServerOptions };
+export { ServerEndpointVersion, type ServerConfig };
