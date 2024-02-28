@@ -8,4 +8,6 @@ type Range<
 	? ACC | START | END
 	: Range<START, END, [...ARR, 1], ARR[START] extends undefined ? ACC : ACC | ARR['length']>;
 
-export type { Range };
+type KeyRange = Range<2, 32>;
+
+export type { Range, KeyRange };

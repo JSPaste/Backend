@@ -2,7 +2,7 @@ import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { JSPError } from '../classes/JSPError.ts';
-import type { Server } from '../classes/Server.ts';
+import { Server } from '../classes/Server.ts';
 
 export class PublishV1 extends AbstractEndpoint {
 	public constructor(server: Server) {
@@ -33,7 +33,17 @@ export class PublishV1 extends AbstractEndpoint {
 		this.server.getElysia.post(
 			prefix,
 			async ({ set, body }) => {
-				return this.server.getDocumentHandler.setContext(set).publish({ body }, ServerEndpointVersion.v1);
+				return this.server.getDocumentHandler.setContext(set).publish(
+					{
+						lifetime: 0,
+						password: '',
+						selectedKey: '',
+						selectedKeyLength: Server.config.documents.defaultKeyLength,
+						selectedSecret: '',
+						body
+					},
+					ServerEndpointVersion.v1
+				);
 			},
 			hook
 		);

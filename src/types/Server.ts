@@ -11,6 +11,7 @@ type ServerConfig = {
 	port: number;
 	versions: ServerEndpointVersion[];
 	documents: {
+		defaultKeyLength: 8;
 		documentPath: string;
 		maxLength: number;
 		maxTime: number;

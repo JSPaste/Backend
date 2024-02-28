@@ -1,4 +1,4 @@
-import type { Range } from '../types/Range.ts';
+import type { KeyRange, Range } from '../types/Range.ts';
 import { Server } from '../classes/Server.ts';
 
 export class StringUtils {
@@ -14,7 +14,7 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateKey(length: Range<2, 32> = 8): string {
+	public static generateKey(length: KeyRange = Server.config.documents.defaultKeyLength): string {
 		return StringUtils.random(length, 64);
 	}
 
@@ -22,11 +22,10 @@ export class StringUtils {
 		return Bun.file(Server.config.documents.documentPath + key).exists();
 	}
 
-	public static async createKey(length: number = 8): Promise<string> {
-		// FIXME
-		const key = StringUtils.generateKey(length as Range<2, 32>);
+	public static async createKey(length: KeyRange = Server.config.documents.defaultKeyLength): Promise<string> {
+		const key = StringUtils.generateKey(length);
 
-		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as Range<2, 32>) : key;
+		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as KeyRange) : key;
 	}
 
 	public static createSecret(chunkLength: number = 5, chunks: number = 4): string {

@@ -17,27 +17,23 @@ export class AccessV2 extends AbstractEndpoint {
 					examples: ['abc123']
 				})
 			}),
-			headers: t.Optional(
-				t.Object({
-					password: t.Optional(
-						t.String({
-							description: 'The document password if aplicable',
-							examples: ['abc123']
-						})
-					)
-				})
-			),
-			query: t.Optional(
-				t.Object({
-					p: t.Optional(
-						t.String({
-							description:
-								'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
-						})
-					)
-				})
-			),
+			headers: t.Object({
+				password: t.Optional(
+					t.String({
+						description: 'The document password if aplicable',
+						examples: ['abc123']
+					})
+				)
+			}),
+			query: t.Object({
+				p: t.Optional(
+					t.String({
+						description:
+							'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
+						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					})
+				)
+			}),
 			response: {
 				200: t.Object(
 					{
@@ -56,7 +52,7 @@ export class AccessV2 extends AbstractEndpoint {
 							})
 						),
 						expirationTimestamp: t.Optional(
-							t.Number({
+							t.Integer({
 								description:
 									'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
 								examples: [60, 0]

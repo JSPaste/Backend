@@ -1,3 +1,5 @@
+import type { KeyRange } from './Range.ts';
+
 type Parameters = {
 	access: {
 		key: string;
@@ -6,18 +8,18 @@ type Parameters = {
 	edit: {
 		body: any;
 		key: string;
-		secret?: string;
+		secret: string;
 	};
 	exists: {
 		key: string;
 	};
 	publish: {
 		body: any;
-		selectedSecret?: string;
-		lifetime?: number;
-		password?: string;
-		selectedKeyLength?: number;
-		selectedKey?: string;
+		selectedSecret: string;
+		lifetime: number;
+		password: string;
+		selectedKeyLength: KeyRange;
+		selectedKey: string;
 	};
 	remove: {
 		key: string;
