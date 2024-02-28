@@ -22,8 +22,9 @@ export class StringUtils {
 		return Bun.file(Server.config.documents.documentPath + key).exists();
 	}
 
-	public static async createKey(length: Range<2, 32> = 8): Promise<string> {
-		const key = StringUtils.generateKey(length);
+	public static async createKey(length: number = 8): Promise<string> {
+		// FIXME
+		const key = StringUtils.generateKey(length as Range<2, 32>);
 
 		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as Range<2, 32>) : key;
 	}

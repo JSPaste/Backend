@@ -41,8 +41,7 @@ export class RemoveV1 extends AbstractEndpoint {
 		this.server.getElysia.delete(
 			prefix.concat('/:key'),
 			async ({ set, headers, params }) => {
-				this.server.getDocumentHandler.setContext = set;
-				return this.server.getDocumentHandler.remove({
+				return this.server.getDocumentHandler.setContext(set).remove({
 					key: params.key,
 					secret: headers.secret
 				});

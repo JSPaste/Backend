@@ -13,46 +13,40 @@ import type { BunFile } from 'bun';
 export class DocumentHandler {
 	private context: any;
 
-	public set setContext(value: any) {
+	public setContext(value: any): this {
 		this.context = value;
+		return this;
 	}
 
 	public async access(params: Parameters['access'], version: ServerEndpointVersion) {
+		this.validateKey(params.key);
+
+		const file = await this.validateKeyExistance(params.key);
+		if (ValidatorUtils.isTypeOf<JSPErrorSchema>(file, 'error')) return file;
+
+		const document = await DocumentManager.read(file);
+
+		this.validateTimestamp(params.key, document.expirationTimestamp);
+		this.validatePassword(params.password, document.password);
+
+		const data = new TextDecoder().decode(document.rawFileData);
+
 		switch (version) {
 			case ServerEndpointVersion.v1: {
-				this.validateKey(params[version].key);
-
-				const file = await this.validateKeyExistance(params[version].key);
-				if (ValidatorUtils.isJSPError(file)) return file;
-
-				const document = await DocumentManager.read(file);
-
-				this.validateTimestamp(params[version].key, document.expirationTimestamp);
-
-				const data = new TextDecoder().decode(document.rawFileData);
-
-				return { key: params[version].key, data };
+				return { key: params.key, data };
 			}
 
 			case ServerEndpointVersion.v2: {
-				this.validateKey(params[version].key);
-
-				const file = await this.validateKeyExistance(params[version].key);
-				if (ValidatorUtils.isJSPError(file)) return file;
-
-				const document = await DocumentManager.read(file);
-
-				this.validateTimestamp(params[version].key, document.expirationTimestamp);
-				this.validatePassword(params[version].password, document.password);
-
-				const data = new TextDecoder().decode(document.rawFileData);
-
 				return {
-					key: params[version].key,
+					key: params.key,
 					data,
-					url: Server.hostname.concat('/', params[version].key),
+					url: Server.hostname.concat('/', params.key),
 					expirationTimestamp: document.expirationTimestamp
 				};
+			}
+
+			default: {
+				return JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
 			}
 		}
 	}
@@ -61,7 +55,7 @@ export class DocumentHandler {
 		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
-		if (ValidatorUtils.isJSPError(file)) return file;
+		if (ValidatorUtils.isTypeOf<JSPErrorSchema>(file, 'error')) return file;
 
 		const document = await DocumentManager.read(file);
 
@@ -87,65 +81,57 @@ export class DocumentHandler {
 	}
 
 	public async publish(params: Parameters['publish'], version: ServerEndpointVersion) {
-		const bodyBuffer = Buffer.from(params[version].body as ArrayBuffer);
+		// FIXME: laziest solution ever
+		if (version < ServerEndpointVersion.v1) this.validateSelectedKey(params.selectedKey);
+		if (version < ServerEndpointVersion.v1) this.validateSelectedKeyLength(params.selectedKeyLength);
+		if (version < ServerEndpointVersion.v1) this.validatePasswordLength(params.password);
+
+		const secret = params.selectedSecret || StringUtils.createSecret();
+
+		this.validateSecretLength(secret);
+
+		const bodyBuffer = Buffer.from(params.body as ArrayBuffer);
+
+		this.validateSizeBetweenLimits(bodyBuffer);
+
+		let lifetime = params.lifetime ?? Server.config.documents.maxTime;
+
+		// Make the document permanent if the value exceeds 5 years
+		if (lifetime > 157_784_760) lifetime = 0;
+
+		const msLifetime = lifetime * 1000;
+		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
+
+		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength ?? 8));
+
+		if (params.selectedKey && (await StringUtils.keyExists(key)))
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentKeyAlreadyExists]);
+
+		const document: IDocumentDataStruct = {
+			rawFileData: bodyBuffer,
+			secret,
+			expirationTimestamp,
+			password: params.password
+		};
+
+		await DocumentManager.write(Server.config.documents.documentPath + key, document);
 
 		switch (version) {
 			case ServerEndpointVersion.v1: {
-				const secret = StringUtils.createSecret();
-
-				this.validateSizeBetweenLimits(bodyBuffer);
-
-				const key = await StringUtils.createKey();
-
-				const document: IDocumentDataStruct = {
-					rawFileData: bodyBuffer,
-					secret
-				};
-
-				await DocumentManager.write(Server.config.documents.documentPath + key, document);
-
 				return { key, secret };
 			}
 
 			case ServerEndpointVersion.v2: {
-				const secret = params[version].selectedSecret || StringUtils.createSecret();
-
-				this.validateSecretLength(secret);
-				this.validatePasswordLength(params[version].password);
-				this.validateSelectedKey(params[version].selectedKey);
-				this.validateSelectedKeyLength(params[version].selectedKeyLength);
-				this.validateSizeBetweenLimits(bodyBuffer);
-
-				let lifetime = params[version].lifetime ?? Server.config.documents.maxTime;
-
-				// Make the document permanent if the value exceeds 5 years
-				if (lifetime > 157_784_760) lifetime = 0;
-
-				const msLifetime = lifetime * 1000;
-				const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
-
-				const key =
-					params[version].selectedKey ||
-					(await StringUtils.createKey(params[version].selectedKeyLength ?? 8));
-
-				if (params[version].selectedKey && (await StringUtils.keyExists(key)))
-					throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentKeyAlreadyExists]);
-
-				const document: IDocumentDataStruct = {
-					rawFileData: bodyBuffer,
-					secret,
-					expirationTimestamp,
-					password: params[version].password
-				};
-
-				await DocumentManager.write(Server.config.documents.documentPath + key, document);
-
 				return {
 					key,
 					secret,
 					url: Server.hostname.concat('/', key),
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
+			}
+
+			default: {
+				return JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
 			}
 		}
 	}
@@ -154,7 +140,7 @@ export class DocumentHandler {
 		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
-		if (ValidatorUtils.isJSPError(file)) return file;
+		if (ValidatorUtils.isTypeOf<JSPErrorSchema>(file, 'error')) return file;
 
 		const document = await DocumentManager.read(file);
 
@@ -168,7 +154,7 @@ export class DocumentHandler {
 	}
 
 	private validateKey(key: string): JSPErrorSchema | undefined {
-		if (!ValidatorUtils.isAlphanumeric(key) || !ValidatorUtils.isStringLengthBetweenLimits(key, 2, 32)) {
+		if (!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isStringLengthWithinRange(key, 2, 32)) {
 			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
 
@@ -194,7 +180,7 @@ export class DocumentHandler {
 	}
 
 	private validateSecretLength(secret: string): JSPErrorSchema | undefined {
-		if (!ValidatorUtils.isStringLengthBetweenLimits(secret || '', 1, 255)) {
+		if (!ValidatorUtils.isStringLengthWithinRange(secret || '', 1, 255)) {
 			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidSecretLength]);
 		}
 
@@ -213,7 +199,7 @@ export class DocumentHandler {
 	}
 
 	private validatePasswordLength(password: string | undefined): JSPErrorSchema | undefined {
-		if (password && !ValidatorUtils.isStringLengthBetweenLimits(password, 0, 255)) {
+		if (password && !ValidatorUtils.isStringLengthWithinRange(password, 0, 255)) {
 			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidPasswordLength]);
 		}
 
@@ -221,7 +207,7 @@ export class DocumentHandler {
 	}
 
 	private validateTimestamp(key: string, timestamp: number): JSPErrorSchema | undefined {
-		if (timestamp && ValidatorUtils.isLengthBetweenLimits(timestamp, 0, Date.now())) {
+		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
 			unlink(Server.config.documents.documentPath + key);
 
 			return JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
@@ -231,7 +217,7 @@ export class DocumentHandler {
 	}
 
 	private validateSizeBetweenLimits(body: Buffer): JSPErrorSchema | undefined {
-		if (!ValidatorUtils.isLengthBetweenLimits(body, 1, Server.config.documents.maxLength)) {
+		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.config.documents.maxLength)) {
 			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidLength]);
 		}
 
@@ -239,7 +225,7 @@ export class DocumentHandler {
 	}
 
 	private validateSelectedKey(key: string | undefined): JSPErrorSchema | undefined {
-		if (key && (!ValidatorUtils.isStringLengthBetweenLimits(key, 2, 32) || !ValidatorUtils.isAlphanumeric(key))) {
+		if (key && (!ValidatorUtils.isStringLengthWithinRange(key, 2, 32) || !ValidatorUtils.isBase64URL(key))) {
 			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
 
@@ -247,7 +233,7 @@ export class DocumentHandler {
 	}
 
 	private validateSelectedKeyLength(length: number | undefined): JSPErrorSchema | undefined {
-		if (length && ValidatorUtils.isLengthBetweenLimits(length, 2, 32)) {
+		if (length && ValidatorUtils.isLengthWithinRange(length, 2, 32)) {
 			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidKeyLength]);
 		}
 

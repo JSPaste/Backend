@@ -2,7 +2,6 @@ import { Elysia } from 'elysia';
 import swagger from '@elysiajs/swagger';
 import { IndexV1 } from '../endpoints/IndexV1.ts';
 import { AccessV1 } from '../endpoints/AccessV1.ts';
-import { AccessRawV1 } from '../endpoints/AccessRawV1.ts';
 import { PublishV1 } from '../endpoints/PublishV1.ts';
 import { RemoveV1 } from '../endpoints/RemoveV1.ts';
 import { EditV2 } from '../endpoints/EditV2.ts';
@@ -11,7 +10,6 @@ import { IndexV2 } from '../endpoints/IndexV2.ts';
 import { PublishV2 } from '../endpoints/PublishV2.ts';
 import { RemoveV2 } from '../endpoints/RemoveV2.ts';
 import { AccessV2 } from '../endpoints/AccessV2.ts';
-import { AccessRawV2 } from '../endpoints/AccessRawV2.ts';
 import * as env from 'env-var';
 import { DocumentHandler } from './DocumentHandler.ts';
 import { type ServerConfig, ServerEndpointVersion } from '../types/Server.ts';
@@ -85,7 +83,6 @@ export class Server {
 						}
 					}
 				},
-				provider: 'swagger-ui',
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
@@ -121,18 +118,11 @@ export class Server {
 	private initEndpoints(): void {
 		const routes = {
 			[ServerEndpointVersion.v1]: {
-				endpoints: [
-					new AccessRawV1(this),
-					new AccessV1(this),
-					new IndexV1(this),
-					new PublishV1(this),
-					new RemoveV1(this)
-				],
+				endpoints: [new AccessV1(this), new IndexV1(this), new PublishV1(this), new RemoveV1(this)],
 				prefixes: ['/api/v1/documents']
 			},
 			[ServerEndpointVersion.v2]: {
 				endpoints: [
-					new AccessRawV2(this),
 					new AccessV2(this),
 					new EditV2(this),
 					new ExistsV2(this),

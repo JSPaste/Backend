@@ -26,8 +26,7 @@ export class ExistsV2 extends AbstractEndpoint {
 		this.server.getElysia.get(
 			prefix.concat('/:key/exists'),
 			async ({ set, params }) => {
-				this.server.getDocumentHandler.setContext = set;
-				return this.server.getDocumentHandler.exists(params);
+				return this.server.getDocumentHandler.setContext(set).exists(params);
 			},
 			hook
 		);

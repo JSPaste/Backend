@@ -43,8 +43,7 @@ export class EditV2 extends AbstractEndpoint {
 		this.server.getElysia.patch(
 			prefix.concat('/:key'),
 			async ({ set, headers, body, params }) => {
-				this.server.getDocumentHandler.setContext = set;
-				return this.server.getDocumentHandler.edit({
+				return this.server.getDocumentHandler.setContext(set).edit({
 					key: params.key,
 					body: body,
 					secret: headers.secret

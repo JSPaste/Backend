@@ -40,8 +40,9 @@ export class AccessV1 extends AbstractEndpoint {
 		this.server.getElysia.get(
 			prefix.concat('/:key'),
 			async ({ set, params }) => {
-				this.server.getDocumentHandler.setContext = set;
-				return this.server.getDocumentHandler.access({ key: params.key }, ServerEndpointVersion.v1);
+				return this.server.getDocumentHandler
+					.setContext(set)
+					.access({ key: params.key }, ServerEndpointVersion.v1);
 			},
 			hook
 		);

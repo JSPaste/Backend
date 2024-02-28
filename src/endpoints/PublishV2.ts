@@ -89,8 +89,7 @@ export class PublishV2 extends AbstractEndpoint {
 		this.server.getElysia.post(
 			prefix,
 			async ({ set, headers, query, body }) => {
-				this.server.getDocumentHandler.setContext = set;
-				return this.server.getDocumentHandler.publish(
+				return this.server.getDocumentHandler.setContext(set).publish(
 					{
 						body: body,
 						selectedKey: headers.key || '',
