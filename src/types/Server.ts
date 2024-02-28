@@ -18,11 +18,6 @@ type ServerConfig = {
 	docs: {
 		enabled: boolean;
 		path: string;
-		playground: {
-			tls: boolean;
-			domain: string;
-			port: number;
-		};
 	};
 	zlib: ZlibCompressionOptions;
 };

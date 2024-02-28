@@ -31,12 +31,7 @@ export class Server {
 		},
 		docs: {
 			enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
-			path: env.get('DOCS_PATH').default('/docs').asString(),
-			playground: {
-				tls: env.get('DOCS_PLAYGROUND_TLS').asBoolStrict() ?? true,
-				domain: env.get('DOCS_PLAYGROUND_DOMAIN').default('jspaste.eu').asString(),
-				port: env.get('DOCS_PLAYGROUND_PORT').default(443).asPortNumber()
-			}
+			path: env.get('DOCS_PATH').default('/docs').asString()
 		},
 		zlib: {
 			level: 6
@@ -44,14 +39,6 @@ export class Server {
 	};
 
 	public static readonly hostname = (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain);
-	public static readonly origin = Server.hostname.concat(':', Server.config.port.toString());
-	public static readonly playgroundHostname = (Server.config.docs.playground.tls ? 'https://' : 'http://').concat(
-		Server.config.docs.playground.domain
-	);
-	public static readonly playgroundOrigin = Server.playgroundHostname.concat(
-		':',
-		Server.config.docs.playground.port.toString()
-	);
 
 	private readonly elysia: Elysia = new Elysia();
 	private readonly documentHandler: DocumentHandler = new DocumentHandler();
@@ -59,7 +46,7 @@ export class Server {
 	public constructor() {
 		Server.config.docs.enabled && this.initDocs();
 		this.initErrorHandler();
-		this.initRoutes();
+		this.initEndpoints();
 
 		this.elysia.listen(Server.config.port, ({ port }) =>
 			console.info('Listening on port', port, `-> http://localhost:${port}`)
@@ -80,7 +67,12 @@ export class Server {
 				documentation: {
 					servers: [
 						{
-							url: Server.origin
+							url: 'https://jspaste.eu',
+							description: 'JSPaste API'
+						},
+						{
+							url: 'http://localhost:'.concat(Server.config.port.toString()),
+							description: 'Local API'
 						}
 					],
 					info: {
@@ -93,6 +85,7 @@ export class Server {
 						}
 					}
 				},
+				provider: 'swagger-ui',
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
@@ -125,25 +118,36 @@ export class Server {
 		});
 	}
 
-	private initRoutes(): void {
-		const apiVersions = Server.config.versions.toReversed();
+	private initEndpoints(): void {
 		const routes = {
 			[ServerEndpointVersion.v1]: {
-				endpoints: [AccessRawV1, AccessV1, IndexV1, PublishV1, RemoveV1],
+				endpoints: [
+					new AccessRawV1(this),
+					new AccessV1(this),
+					new IndexV1(this),
+					new PublishV1(this),
+					new RemoveV1(this)
+				],
 				prefixes: ['/api/v1/documents']
 			},
 			[ServerEndpointVersion.v2]: {
-				endpoints: [AccessRawV2, AccessV2, EditV2, ExistsV2, IndexV2, PublishV2, RemoveV2],
+				endpoints: [
+					new AccessRawV2(this),
+					new AccessV2(this),
+					new EditV2(this),
+					new ExistsV2(this),
+					new IndexV2(this),
+					new PublishV2(this),
+					new RemoveV2(this)
+				],
 				prefixes: ['/api/v2/documents', '/documents']
 			}
 		};
 
-		for (const [i, version] of apiVersions.entries()) {
-			routes[version].endpoints.forEach((Endpoint) => {
-				const endpoint = new Endpoint(this);
-
-				routes[version].prefixes.forEach(endpoint.register.bind(endpoint));
-			});
+		Server.config.versions.toReversed().forEach((version, i) => {
+			routes[version].endpoints.forEach((endpoint) =>
+				routes[version].prefixes.forEach((prefix) => endpoint.register(prefix))
+			);
 
 			console.info(
 				'Registered',
@@ -152,6 +156,6 @@ export class Server {
 				version,
 				i === 0 ? '(latest)' : ''
 			);
-		}
+		});
 	}
 }
