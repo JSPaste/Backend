@@ -75,7 +75,8 @@ export class AccessV2 extends AbstractEndpoint {
 			async ({ set, query, headers, params }) => {
 				return this.server.getDocumentHandler
 					.setContext(set)
-					.access({ key: params.key, password: headers.password || query.p || '' }, ServerEndpointVersion.v2);
+					.setVersion(ServerEndpointVersion.v2)
+					.access({ key: params.key, password: headers.password || query.p });
 			},
 			hook
 		);

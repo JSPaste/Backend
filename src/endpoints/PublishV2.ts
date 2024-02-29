@@ -88,19 +88,18 @@ export class PublishV2 extends AbstractEndpoint {
 
 		this.server.getElysia.post(
 			prefix,
-			async ({ set, headers, query, body }) => {
-				return this.server.getDocumentHandler.setContext(set).publish(
-					{
+			async ({ set, headers, body }) => {
+				return this.server.getDocumentHandler
+					.setContext(set)
+					.setVersion(ServerEndpointVersion.v2)
+					.publish({
 						body: body,
-						selectedKey: headers.key || '',
-						selectedKeyLength:
-							(headers.keyLength as KeyRange | undefined) || Server.config.documents.defaultKeyLength,
-						selectedSecret: headers.secret || '',
-						lifetime: headers.lifetime ?? Server.config.documents.maxTime,
-						password: headers.password || query['password'] || ''
-					},
-					ServerEndpointVersion.v2
-				);
+						selectedKey: headers.key,
+						selectedKeyLength: headers.keyLength as KeyRange | undefined,
+						selectedSecret: headers.secret,
+						lifetime: headers.lifetime,
+						password: headers.password
+					});
 			},
 			hook
 		);

@@ -15,11 +15,11 @@ type Parameters = {
 	};
 	publish: {
 		body: any;
-		selectedSecret: string;
-		lifetime: number;
-		password: string;
-		selectedKeyLength: KeyRange;
-		selectedKey: string;
+		selectedSecret?: string;
+		lifetime?: number;
+		password?: string;
+		selectedKeyLength?: KeyRange;
+		selectedKey?: string;
 	};
 	remove: {
 		key: string;

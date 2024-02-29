@@ -2,7 +2,7 @@ import type { Parameters } from '../types/DocumentHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { JSPError } from './JSPError.ts';
-import { JSPErrorCode, type JSPErrorSchema } from '../types/JSPError.ts';
+import { JSPErrorCode } from '../types/JSPError.ts';
 import { Server } from './Server.ts';
 import { DocumentManager } from './DocumentManager.ts';
 import { unlink } from 'node:fs/promises';
@@ -12,18 +12,22 @@ import type { BunFile } from 'bun';
 
 export class DocumentHandler {
 	private context: any;
+	private version: ServerEndpointVersion | undefined;
 
 	public setContext(value: any): this {
 		this.context = value;
 		return this;
 	}
 
-	public async access(params: Parameters['access'], version: ServerEndpointVersion) {
+	public setVersion(value: ServerEndpointVersion): this {
+		this.version = value;
+		return this;
+	}
+
+	public async access(params: Parameters['access']) {
 		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
-		if (ValidatorUtils.isTypeOf<JSPErrorSchema>(file, 'error')) return file;
-
 		const document = await DocumentManager.read(file);
 
 		this.validateTimestamp(params.key, document.expirationTimestamp);
@@ -31,7 +35,7 @@ export class DocumentHandler {
 
 		const data = new TextDecoder().decode(document.rawFileData);
 
-		switch (version) {
+		switch (this.version) {
 			case ServerEndpointVersion.v1: {
 				return { key: params.key, data };
 			}
@@ -55,8 +59,6 @@ export class DocumentHandler {
 		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
-		if (ValidatorUtils.isTypeOf<JSPErrorSchema>(file, 'error')) return file;
-
 		const document = await DocumentManager.read(file);
 
 		this.validateSecret(params.secret, document.secret);
@@ -80,11 +82,10 @@ export class DocumentHandler {
 		return Bun.file(Server.config.documents.documentPath + params.key).exists();
 	}
 
-	public async publish(params: Parameters['publish'], version: ServerEndpointVersion) {
-		// FIXME: laziest solution ever
-		if (version < ServerEndpointVersion.v1) this.validateSelectedKey(params.selectedKey);
-		if (version < ServerEndpointVersion.v1) this.validateSelectedKeyLength(params.selectedKeyLength);
-		if (version < ServerEndpointVersion.v1) this.validatePasswordLength(params.password);
+	public async publish(params: Parameters['publish']) {
+		this.validateSelectedKey(params.selectedKey);
+		this.validateSelectedKeyLength(params.selectedKeyLength);
+		this.validatePasswordLength(params.password);
 
 		const secret = params.selectedSecret || StringUtils.createSecret();
 
@@ -116,7 +117,7 @@ export class DocumentHandler {
 
 		await DocumentManager.write(Server.config.documents.documentPath + key, document);
 
-		switch (version) {
+		switch (this.version) {
 			case ServerEndpointVersion.v1: {
 				return { key, secret };
 			}
@@ -140,8 +141,6 @@ export class DocumentHandler {
 		this.validateKey(params.key);
 
 		const file = await this.validateKeyExistance(params.key);
-		if (ValidatorUtils.isTypeOf<JSPErrorSchema>(file, 'error')) return file;
-
 		const document = await DocumentManager.read(file);
 
 		this.validateSecret(params.secret, document.secret);
@@ -153,90 +152,69 @@ export class DocumentHandler {
 		};
 	}
 
-	private validateKey(key: string): JSPErrorSchema | undefined {
+	private validateKey(key: string): void {
 		if (!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isStringLengthWithinRange(key, 2, 32)) {
-			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
-
-		return undefined;
 	}
 
-	private async validateKeyExistance(key: string): Promise<JSPErrorSchema | BunFile> {
+	private async validateKeyExistance(key: string): Promise<BunFile> {
 		const file = Bun.file(Server.config.documents.documentPath + key);
 
 		if (!(await file.exists())) {
-			return JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
+			throw JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
 		}
 
 		return file;
 	}
 
-	private validateSecret(secret: string | undefined, documentSecret: string): JSPErrorSchema | undefined {
+	private validateSecret(secret: string | undefined, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
 			throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidSecret]);
 		}
-
-		return undefined;
 	}
 
-	private validateSecretLength(secret: string): JSPErrorSchema | undefined {
+	private validateSecretLength(secret: string): void {
 		if (!ValidatorUtils.isStringLengthWithinRange(secret || '', 1, 255)) {
-			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidSecretLength]);
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidSecretLength]);
 		}
-
-		return undefined;
 	}
 
-	private validatePassword(
-		password: string | undefined,
-		documentPassword: string | null | undefined
-	): JSPErrorSchema | undefined {
-		if (documentPassword && documentPassword !== password) {
-			return JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidPassword]);
+	private validatePassword(password: undefined | string, documentPassword: undefined | null | string): void {
+		if (password && documentPassword && documentPassword !== password) {
+			throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidPassword]);
 		}
-
-		return undefined;
 	}
 
-	private validatePasswordLength(password: string | undefined): JSPErrorSchema | undefined {
+	private validatePasswordLength(password: string | undefined): void {
 		if (password && !ValidatorUtils.isStringLengthWithinRange(password, 0, 255)) {
-			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidPasswordLength]);
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidPasswordLength]);
 		}
-
-		return undefined;
 	}
 
-	private validateTimestamp(key: string, timestamp: number): JSPErrorSchema | undefined {
+	private validateTimestamp(key: string, timestamp: number): void {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
 			unlink(Server.config.documents.documentPath + key);
 
-			return JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
+			throw JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
 		}
-
-		return undefined;
 	}
 
-	private validateSizeBetweenLimits(body: Buffer): JSPErrorSchema | undefined {
+	private validateSizeBetweenLimits(body: Buffer): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.config.documents.maxLength)) {
-			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidLength]);
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidLength]);
 		}
-
-		return undefined;
 	}
 
-	private validateSelectedKey(key: string | undefined): JSPErrorSchema | undefined {
+	private validateSelectedKey(key: string | undefined): void {
 		if (key && (!ValidatorUtils.isStringLengthWithinRange(key, 2, 32) || !ValidatorUtils.isBase64URL(key))) {
-			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
-
-		return undefined;
 	}
 
-	private validateSelectedKeyLength(length: number | undefined): JSPErrorSchema | undefined {
+	private validateSelectedKeyLength(length: number | undefined): void {
 		if (length && ValidatorUtils.isLengthWithinRange(length, 2, 32)) {
-			return JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidKeyLength]);
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidKeyLength]);
 		}
-
-		return undefined;
 	}
 }

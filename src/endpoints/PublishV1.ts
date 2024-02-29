@@ -33,17 +33,10 @@ export class PublishV1 extends AbstractEndpoint {
 		this.server.getElysia.post(
 			prefix,
 			async ({ set, body }) => {
-				return this.server.getDocumentHandler.setContext(set).publish(
-					{
-						lifetime: 0,
-						password: '',
-						selectedKey: '',
-						selectedKeyLength: Server.config.documents.defaultKeyLength,
-						selectedSecret: '',
-						body
-					},
-					ServerEndpointVersion.v1
-				);
+				return this.server.getDocumentHandler
+					.setContext(set)
+					.setVersion(ServerEndpointVersion.v1)
+					.publish({ body });
 			},
 			hook
 		);

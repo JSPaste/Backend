@@ -1,4 +1,5 @@
 import type { ZlibCompressionOptions } from 'bun';
+import type { ElysiaConfig } from 'elysia';
 
 enum ServerEndpointVersion {
 	v1 = 1,
@@ -10,6 +11,7 @@ type ServerConfig = {
 	domain: string;
 	port: number;
 	versions: ServerEndpointVersion[];
+	elysia: ElysiaConfig<'', false>;
 	documents: {
 		defaultKeyLength: 8;
 		documentPath: string;
