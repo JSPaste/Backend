@@ -22,9 +22,6 @@ export class Server {
 		domain: env.get('DOMAIN').default('localhost').asString(),
 		port: env.get('PORT').default(4000).asPortNumber(),
 		versions: [ServerEndpointVersion.v1, ServerEndpointVersion.v2],
-		elysia: {
-			precompile: true
-		},
 		documents: {
 			defaultKeyLength: 8,
 			documentPath: 'documents/',
@@ -42,12 +39,12 @@ export class Server {
 
 	public static readonly hostname = (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain);
 
-	private readonly elysia: Elysia = new Elysia(Server.config.elysia);
+	private readonly elysia: Elysia = new Elysia({ precompile: true });
 	private readonly documentHandler: DocumentHandler = new DocumentHandler();
 
 	public constructor() {
 		Server.config.docs.enabled && this.initDocs();
-		this.initErrorHandler();
+		this.initErrorListener();
 		this.initEndpoints();
 
 		this.elysia.listen(Server.config.port, ({ port }) =>
@@ -73,10 +70,6 @@ export class Server {
 							description: 'JSPaste API'
 						},
 						{
-							url: 'http://localhost:4000',
-							description: 'Default local API (Only use if you are running an instance locally)'
-						},
-						{
 							url: 'http://localhost:'.concat(Server.config.port.toString()),
 							description: 'Instance local API (Only use if you are running an instance locally)'
 						}
@@ -87,7 +80,7 @@ export class Server {
 						description: 'Note: The latest API version can be used with the "/documents" alias route.',
 						license: {
 							name: 'EUPL-1.2',
-							url: 'https://raw.githubusercontent.com/JSPaste/JSP-Backend/stable/LICENSE'
+							url: 'https://joinup.ec.europa.eu/sites/default/files/custom-page/attachment/2020-03/EUPL-1.2%20EN.txt'
 						}
 					}
 				},
@@ -100,7 +93,7 @@ export class Server {
 		);
 	}
 
-	private initErrorHandler(): void {
+	private initErrorListener(): void {
 		this.elysia.onError(({ set, code, error }) => {
 			switch (code) {
 				case 'NOT_FOUND':
