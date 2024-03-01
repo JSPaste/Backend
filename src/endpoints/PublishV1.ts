@@ -9,36 +9,34 @@ export class PublishV1 extends AbstractEndpoint {
 		super(server);
 	}
 
-	public override register(prefix: string): void {
-		const hook = {
-			type: 'arrayBuffer',
-			body: t.Any({ description: 'The file to be uploaded' }),
-			response: {
-				200: t.Object(
-					{
-						key: t.String({
-							description: 'The generated key to access the document'
-						}),
-						secret: t.String({
-							description: 'The generated secret to delete the document'
-						})
-					},
-					{ description: 'An object with a key and a secret for the document' }
-				),
-				400: JSPError.schema
-			},
-			detail: { summary: 'Publish document', tags: ['v1'] }
-		};
-
+	protected override run(): void {
 		this.server.getElysia.post(
-			prefix,
+			this.prefix,
 			async ({ set, body }) => {
 				return this.server.getDocumentHandler
 					.setContext(set)
 					.setVersion(ServerEndpointVersion.v1)
 					.publish({ body });
 			},
-			hook
+			{
+				type: 'arrayBuffer',
+				body: t.Any({ description: 'The file to be uploaded' }),
+				response: {
+					200: t.Object(
+						{
+							key: t.String({
+								description: 'The generated key to access the document'
+							}),
+							secret: t.String({
+								description: 'The generated secret to delete the document'
+							})
+						},
+						{ description: 'An object with a key and a secret for the document' }
+					),
+					400: JSPError.schema
+				},
+				detail: { summary: 'Publish document', tags: ['v1'] }
+			}
 		);
 	}
 }

@@ -8,27 +8,25 @@ export class ExistsV2 extends AbstractEndpoint {
 		super(server);
 	}
 
-	public override register(prefix: string): void {
-		const hook = {
-			params: t.Object({
-				key: t.String({
-					description: 'The document key',
-					examples: ['abc123']
-				})
-			}),
-			response: {
-				200: t.Boolean({ description: 'A boolean indicating if the document exists' }),
-				400: JSPError.schema
-			},
-			detail: { summary: 'Check document', tags: ['v2'] }
-		};
-
+	protected override run(): void {
 		this.server.getElysia.get(
-			prefix.concat('/:key/exists'),
+			this.prefix.concat('/:key/exists'),
 			async ({ set, params }) => {
 				return this.server.getDocumentHandler.setContext(set).exists(params);
 			},
-			hook
+			{
+				params: t.Object({
+					key: t.String({
+						description: 'The document key',
+						examples: ['abc123']
+					})
+				}),
+				response: {
+					200: t.Boolean({ description: 'A boolean indicating if the document exists' }),
+					400: JSPError.schema
+				},
+				detail: { summary: 'Check document', tags: ['v2'] }
+			}
 		);
 	}
 }

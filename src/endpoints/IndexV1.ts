@@ -7,15 +7,13 @@ export class IndexV1 extends AbstractEndpoint {
 		super(server);
 	}
 
-	public override register(prefix: string): void {
-		const hook = {
+	protected override run(): void {
+		this.server.getElysia.get(this.prefix, 'Welcome to JSPaste API v1', {
 			response: t.String({
 				description: 'A small welcome message with the current API version',
 				examples: ['Welcome to JSPaste API v1']
 			}),
 			detail: { summary: 'Index', tags: ['v1'] }
-		};
-
-		this.server.getElysia.get(prefix, 'Welcome to JSPaste API v1', hook);
+		});
 	}
 }

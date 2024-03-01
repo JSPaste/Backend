@@ -8,40 +8,9 @@ export class EditV2 extends AbstractEndpoint {
 		super(server);
 	}
 
-	public override register(prefix: string): void {
-		const hook = {
-			type: 'arrayBuffer',
-			body: t.Any({ description: 'The new file' }),
-			params: t.Object({
-				key: t.String({
-					description: 'The document key',
-					examples: ['abc123']
-				})
-			}),
-			headers: t.Object({
-				secret: t.String({
-					description: 'The document secret',
-					examples: ['aaaaa-bbbbb-ccccc-ddddd']
-				})
-			}),
-			response: {
-				200: t.Object(
-					{
-						edited: t.Boolean({
-							description: 'A boolean indicating if the edit was successful'
-						})
-					},
-					{ description: 'A response object with a boolean' }
-				),
-				400: JSPError.schema,
-				403: JSPError.schema,
-				404: JSPError.schema
-			},
-			detail: { summary: 'Edit document', tags: ['v2'] }
-		};
-
+	protected override run(): void {
 		this.server.getElysia.patch(
-			prefix.concat('/:key'),
+			this.prefix.concat('/:key'),
 			async ({ set, headers, body, params }) => {
 				return this.server.getDocumentHandler.setContext(set).edit({
 					key: params.key,
@@ -49,7 +18,36 @@ export class EditV2 extends AbstractEndpoint {
 					secret: headers.secret
 				});
 			},
-			hook
+			{
+				type: 'arrayBuffer',
+				body: t.Any({ description: 'The new file' }),
+				params: t.Object({
+					key: t.String({
+						description: 'The document key',
+						examples: ['abc123']
+					})
+				}),
+				headers: t.Object({
+					secret: t.String({
+						description: 'The document secret',
+						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					})
+				}),
+				response: {
+					200: t.Object(
+						{
+							edited: t.Boolean({
+								description: 'A boolean indicating if the edit was successful'
+							})
+						},
+						{ description: 'A response object with a boolean' }
+					),
+					400: JSPError.schema,
+					403: JSPError.schema,
+					404: JSPError.schema
+				},
+				detail: { summary: 'Edit document', tags: ['v2'] }
+			}
 		);
 	}
 }

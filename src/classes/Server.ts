@@ -137,7 +137,7 @@ export class Server {
 
 		Server.config.versions.toReversed().forEach((version, i) => {
 			routes[version].endpoints.forEach((endpoint) =>
-				routes[version].prefixes.forEach((prefix) => endpoint.register(prefix))
+				routes[version].prefixes.forEach((prefix) => endpoint.setPrefix(prefix).register())
 			);
 
 			console.info(

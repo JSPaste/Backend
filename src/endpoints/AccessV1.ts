@@ -9,43 +9,41 @@ export class AccessV1 extends AbstractEndpoint {
 		super(server);
 	}
 
-	public override register(prefix: string): void {
-		const hook = {
-			params: t.Object({
-				key: t.String({
-					description: 'The document key',
-					examples: ['abc123']
-				})
-			}),
-			response: {
-				200: t.Object(
-					{
-						key: t.String({
-							description: 'The key of the document',
-							examples: ['abc123']
-						}),
-						data: t.String({
-							description: 'The document',
-							examples: ['Hello world']
-						})
-					},
-					{ description: 'The document object' }
-				),
-				400: JSPError.schema,
-				404: JSPError.schema
-			},
-			detail: { summary: 'Get document', tags: ['v1'] }
-		};
-
+	protected override run(): void {
 		this.server.getElysia.get(
-			prefix.concat('/:key'),
+			this.prefix.concat('/:key'),
 			async ({ set, params }) => {
 				return this.server.getDocumentHandler
 					.setContext(set)
 					.setVersion(ServerEndpointVersion.v1)
 					.access({ key: params.key });
 			},
-			hook
+			{
+				params: t.Object({
+					key: t.String({
+						description: 'The document key',
+						examples: ['abc123']
+					})
+				}),
+				response: {
+					200: t.Object(
+						{
+							key: t.String({
+								description: 'The key of the document',
+								examples: ['abc123']
+							}),
+							data: t.String({
+								description: 'The document',
+								examples: ['Hello world']
+							})
+						},
+						{ description: 'The document object' }
+					),
+					400: JSPError.schema,
+					404: JSPError.schema
+				},
+				detail: { summary: 'Get document', tags: ['v1'] }
+			}
 		);
 	}
 }
