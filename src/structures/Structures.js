@@ -1,4 +1,3 @@
-/*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
 import * as $protobuf from "protobufjs/minimal";
 
 // Common aliases
@@ -15,7 +14,7 @@ export const DocumentDataStruct = $root.DocumentDataStruct = (() => {
      * @interface IDocumentDataStruct
      * @property {Uint8Array|null} [rawFileData] DocumentDataStruct rawFileData
      * @property {string|null} [secret] DocumentDataStruct secret
-     * @property {number|Long|null} [expirationTimestamp] DocumentDataStruct expirationTimestamp
+     * @property {Long|null} [expirationTimestamp] DocumentDataStruct expirationTimestamp
      * @property {string|null} [password] DocumentDataStruct password
      */
 
@@ -52,7 +51,7 @@ export const DocumentDataStruct = $root.DocumentDataStruct = (() => {
 
     /**
      * DocumentDataStruct expirationTimestamp.
-     * @member {number|Long|null|undefined} expirationTimestamp
+     * @member {Long|null|undefined} expirationTimestamp
      * @memberof DocumentDataStruct
      * @instance
      */
@@ -115,19 +114,6 @@ export const DocumentDataStruct = $root.DocumentDataStruct = (() => {
     };
 
     /**
-     * Encodes the specified DocumentDataStruct message, length delimited. Does not implicitly {@link DocumentDataStruct.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof DocumentDataStruct
-     * @static
-     * @param {IDocumentDataStruct} message DocumentDataStruct message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    DocumentDataStruct.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
      * Decodes a DocumentDataStruct message from the specified reader or buffer.
      * @function decode
      * @memberof DocumentDataStruct
@@ -167,22 +153,6 @@ export const DocumentDataStruct = $root.DocumentDataStruct = (() => {
             }
         }
         return message;
-    };
-
-    /**
-     * Decodes a DocumentDataStruct message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof DocumentDataStruct
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {DocumentDataStruct} DocumentDataStruct
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    DocumentDataStruct.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
     };
 
     /**
