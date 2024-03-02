@@ -1,0 +1,25 @@
+services:
+  jspaste_backend:
+    # Recommended: Use specific image tags instead of latest
+    image: ghcr.io/jspaste/backend:latest
+    container_name: jspaste_backend
+
+    # <local_ip>:<local_port>:<container_port>
+    ports:
+      - "127.0.0.1:4000:4000"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+    # Copy .env.example to .env.backend
+    environment:
+      - .env.backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+    logging:
+      driver: journald
