@@ -1,20 +1,20 @@
-import { Elysia } from 'elysia';
 import swagger from '@elysiajs/swagger';
-import { IndexV1 } from '../endpoints/IndexV1.ts';
+import { Elysia } from 'elysia';
+import * as env from 'env-var';
 import { AccessV1 } from '../endpoints/AccessV1.ts';
-import { PublishV1 } from '../endpoints/PublishV1.ts';
-import { RemoveV1 } from '../endpoints/RemoveV1.ts';
+import { AccessV2 } from '../endpoints/AccessV2.ts';
 import { EditV2 } from '../endpoints/EditV2.ts';
 import { ExistsV2 } from '../endpoints/ExistsV2.ts';
+import { IndexV1 } from '../endpoints/IndexV1.ts';
 import { IndexV2 } from '../endpoints/IndexV2.ts';
+import { PublishV1 } from '../endpoints/PublishV1.ts';
 import { PublishV2 } from '../endpoints/PublishV2.ts';
+import { RemoveV1 } from '../endpoints/RemoveV1.ts';
 import { RemoveV2 } from '../endpoints/RemoveV2.ts';
-import { AccessV2 } from '../endpoints/AccessV2.ts';
-import * as env from 'env-var';
-import { DocumentHandler } from './DocumentHandler.ts';
-import { type ServerConfig, ServerEndpointVersion } from '../types/Server.ts';
-import { JSPError } from './JSPError.ts';
 import { JSPErrorCode } from '../types/JSPError.ts';
+import { type ServerConfig, ServerEndpointVersion } from '../types/Server.ts';
+import { DocumentHandler } from './DocumentHandler.ts';
+import { JSPError } from './JSPError.ts';
 
 export class Server {
 	public static readonly config: Required<ServerConfig> = {

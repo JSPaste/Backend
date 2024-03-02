@@ -1,9 +1,9 @@
-import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { JSPError } from '../classes/JSPError.ts';
 import { Server } from '../classes/Server.ts';
 import type { KeyRange } from '../types/Range.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class PublishV2 extends AbstractEndpoint {
 	public constructor(server: Server) {

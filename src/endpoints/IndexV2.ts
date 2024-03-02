@@ -1,5 +1,5 @@
-import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import type { Server } from '../classes/Server.ts';
 
 export class IndexV2 extends AbstractEndpoint {

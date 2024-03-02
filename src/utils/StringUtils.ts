@@ -1,12 +1,11 @@
-import type { KeyRange, Range } from '../types/Range.ts';
 import { Server } from '../classes/Server.ts';
+import type { KeyRange, Range } from '../types/Range.ts';
 
 export class StringUtils {
 	public static readonly base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
 
 	public static random(length: number, base: Range<2, 64> = 62): string {
 		const baseSet = StringUtils.base64URL.slice(0, base);
-
 		let string = '';
 
 		while (length--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
@@ -28,7 +27,7 @@ export class StringUtils {
 		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as KeyRange) : key;
 	}
 
-	public static createSecret(chunkLength: number = 5, chunks: number = 4): string {
+	public static createSecret(chunkLength = 5, chunks = 4): string {
 		return Array.from({ length: chunks }, () => StringUtils.random(chunkLength)).join('-');
 	}
 }

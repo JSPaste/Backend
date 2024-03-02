@@ -1,14 +1,14 @@
-import type { Parameters } from '../types/DocumentHandler.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
-import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
-import { JSPError } from './JSPError.ts';
-import { JSPErrorCode } from '../types/JSPError.ts';
-import { Server } from './Server.ts';
-import { DocumentManager } from './DocumentManager.ts';
 import { unlink } from 'node:fs/promises';
-import { StringUtils } from '../utils/StringUtils.ts';
-import type { IDocumentDataStruct } from '../structures/Structures';
 import type { BunFile } from 'bun';
+import type { IDocumentDataStruct } from '../structures/Structures';
+import type { Parameters } from '../types/DocumentHandler.ts';
+import { JSPErrorCode } from '../types/JSPError.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
+import { StringUtils } from '../utils/StringUtils.ts';
+import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
+import { DocumentManager } from './DocumentManager.ts';
+import { JSPError } from './JSPError.ts';
+import { Server } from './Server.ts';
 
 export class DocumentHandler {
 	private context: any;

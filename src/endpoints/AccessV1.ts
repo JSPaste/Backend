@@ -1,8 +1,8 @@
-import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { t } from 'elysia';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { JSPError } from '../classes/JSPError.ts';
 import type { Server } from '../classes/Server.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class AccessV1 extends AbstractEndpoint {
 	public constructor(server: Server) {

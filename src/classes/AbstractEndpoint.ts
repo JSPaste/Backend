@@ -2,7 +2,7 @@ import type { Server } from './Server.ts';
 
 export abstract class AbstractEndpoint {
 	protected readonly server: Server;
-	protected prefix: string = '';
+	protected prefix = '';
 
 	protected constructor(server: Server) {
 		this.server = server;

@@ -1,6 +1,7 @@
 # Backend
 
-This repository contains the backend code for [JSPaste](https://jspaste.eu). It is built using [Bun](https://bun.sh) and [ElysiaJS](https://elysiajs.com)
+This repository contains the backend code for [JSPaste](https://jspaste.eu). It is built using [Bun](https://bun.sh)
+and [ElysiaJS](https://elysiajs.com)
 
 ## License
 

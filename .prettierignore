@@ -1,7 +1,0 @@
-**/node_modules/
-documents/
-src/structures/
-!src/structures/proto/
-.prettierrc.json
-LICENSE
-tsconfig.json

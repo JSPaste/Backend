@@ -1,38 +1,34 @@
 {
-	"$schema": "https://json.schemastore.org/package.json",
-	"name": "@jspaste/backend",
-	"private": true,
-	"license": "EUPL-1.2",
-	"type": "module",
-	"scripts": {
-		"build": "bun run build:structures && bun run build:structures:dts && bun run build:bundle",
-		"build:bundle": "bun build --target bun --minify --outdir ./dist/ ./src/index.ts",
-		"build:standalone": "bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
-		"build:structures": "bunx --bun pbjs -t static-module -w es6 -l --force-long --no-create --no-delimited --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/proto/**/*.proto",
-		"build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
-		"fix": "bun run fix:prettier",
-		"fix:prettier": "bunx prettier --write .",
-		"lint": "bun run lint:tsc",
-		"lint:tsc": "bunx --bun tsc --noEmit",
-		"prepare": "bunx --bun husky",
-		"production:build": "bun run build:structures && bun run build:structures:dts && bun run build:standalone",
-		"start": "bun run build && bun --bun ./dist/index.js",
-		"start:dev": "bun --bun --watch ./src/index.ts"
-	},
-	"dependencies": {
-		"@elysiajs/swagger": "1.0.0-beta.2",
-		"@types/bun": "^1.0.8",
-		"elysia": "1.0.0-beta.14",
-		"env-var": "^7.4.1",
-		"protobufjs": "~7.2.6",
-		"protobufjs-cli": "^1.1.2",
-		"typescript": "~5.3.3"
-	},
-	"devDependencies": {
-		"husky": "^9.0.11",
-		"lint-staged": "^15.2.2",
-		"prettier": "^3.2.5",
-		"prettier-plugin-jsdoc": "^1.3.0",
-		"prettier-plugin-packagejson": "^2.4.12"
-	}
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@jspaste/backend",
+  "private": true,
+  "license": "EUPL-1.2",
+  "type": "module",
+  "scripts": {
+    "build": "bun run build:structures && bun run build:structures:dts && bun run build:bundle",
+    "build:bundle": "bun build --target bun --minify --outdir ./dist/ ./src/index.ts",
+    "build:standalone": "bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
+    "build:structures": "bunx --bun pbjs -t static-module -w es6 -l --force-long --no-create --no-delimited --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/proto/**/*.proto",
+    "build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
+    "fix": "bun run lint:biome",
+    "lint": "bun run lint:tsc",
+    "lint:biome": "bunx --bun biome check --apply .",
+    "lint:tsc": "bunx --bun tsc --noEmit",
+    "production:build": "bun run build:structures && bun run build:structures:dts && bun run build:standalone",
+    "start": "bun run build && bun --bun ./dist/index.js",
+    "start:dev": "bun --bun --watch ./src/index.ts"
+  },
+  "dependencies": {
+    "@elysiajs/swagger": "1.0.0-beta.2",
+    "@types/bun": "^1.0.8",
+    "elysia": "1.0.0-beta.14",
+    "env-var": "^7.4.1",
+    "protobufjs": "~7.2.6",
+    "protobufjs-cli": "^1.1.2",
+    "typescript": "~5.3.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.3",
+    "lefthook": "^1.6.4"
+  }
 }
