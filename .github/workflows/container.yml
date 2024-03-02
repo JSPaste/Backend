@@ -56,7 +56,7 @@ jobs:
         uses: redhat-actions/buildah-build@c79846fb306beeba490e89fb75d2d1af95831e79 # master
         with:
           archs: amd64, arm64
-          containerfiles: Containerfile
+          containerfiles: ./container/Containerfile
           image: ${{ env.IMAGE_NAME }}
           layers: true
           oci: true
