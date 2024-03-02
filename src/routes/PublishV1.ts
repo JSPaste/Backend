@@ -1,15 +1,15 @@
-import { AbstractRoute } from '../classes/AbstractRoute.ts';
+import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { type Elysia, t } from 'elysia';
 import { DocumentHandler } from '../classes/DocumentHandler.ts';
-import { ErrorSender } from '../classes/ErrorSender.ts';
-import { ServerVersion } from '../utils/constants.ts';
+import { ServerVersion } from '../types/Server.ts';
+import { JSPError } from '../classes/JSPError.ts';
 
-export class PublishV1 extends AbstractRoute {
+export class PublishV1 extends AbstractEndpoint {
 	public constructor(server: Elysia) {
 		super(server);
 	}
 
-	public override register(path: string): void {
+	public override register(prefix: string): void {
 		const hook = {
 			type: 'arrayBuffer',
 			body: t.Any({ description: 'The file to be uploaded' }),
@@ -25,14 +25,14 @@ export class PublishV1 extends AbstractRoute {
 					},
 					{ description: 'An object with a key and a secret for the document' }
 				),
-				400: ErrorSender.errorType()
+				400: JSPError.errorSchema
 			},
 			detail: { summary: 'Publish document', tags: ['v1'] }
 		};
 
 		this.server.post(
-			path,
-			async ({ errorSender, body }) => DocumentHandler.handlePublish({ errorSender, body }, ServerVersion.v1),
+			prefix,
+			async ({ set, body }) => DocumentHandler.handlePublish(set, { body }, ServerVersion.v1),
 			hook
 		);
 	}
