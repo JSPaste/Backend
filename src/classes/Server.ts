@@ -124,7 +124,7 @@ export class Server {
 
 				default:
 					console.error(error);
-					return JSPError.send(set, 400, JSPError.message[ErrorCode.unknown]);
+					return JSPError.send(set, 500, JSPError.message[ErrorCode.unknown]);
 			}
 		});
 	}
