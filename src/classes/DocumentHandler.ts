@@ -27,7 +27,7 @@ export class DocumentHandler {
 	public async access(params: Parameters['access']) {
 		this.validateKey(params.key);
 
-		const file = await this.validateKeyExistance(params.key);
+		const file = await this.retrieveDocument(params.key);
 		const document = await DocumentManager.read(file);
 
 		this.validateTimestamp(params.key, document.expirationTimestamp);
@@ -50,7 +50,7 @@ export class DocumentHandler {
 			}
 
 			default: {
-				return JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
+				throw JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
 			}
 		}
 	}
@@ -58,7 +58,7 @@ export class DocumentHandler {
 	public async edit(params: Parameters['edit']) {
 		this.validateKey(params.key);
 
-		const file = await this.validateKeyExistance(params.key);
+		const file = await this.retrieveDocument(params.key);
 		const document = await DocumentManager.read(file);
 
 		this.validateSecret(params.secret, document.secret);
@@ -132,7 +132,7 @@ export class DocumentHandler {
 			}
 
 			default: {
-				return JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
+				throw JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ export class DocumentHandler {
 	public async remove(params: Parameters['remove']) {
 		this.validateKey(params.key);
 
-		const file = await this.validateKeyExistance(params.key);
+		const file = await this.retrieveDocument(params.key);
 		const document = await DocumentManager.read(file);
 
 		this.validateSecret(params.secret, document.secret);
@@ -152,13 +152,7 @@ export class DocumentHandler {
 		};
 	}
 
-	private validateKey(key: string): void {
-		if (!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isStringLengthWithinRange(key, 2, 32)) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
-		}
-	}
-
-	private async validateKeyExistance(key: string): Promise<BunFile> {
+	private async retrieveDocument(key: string): Promise<BunFile> {
 		const file = Bun.file(Server.config.documents.documentPath + key);
 
 		if (!(await file.exists())) {
@@ -168,26 +162,41 @@ export class DocumentHandler {
 		return file;
 	}
 
-	private validateSecret(secret: string | undefined, documentSecret: string): void {
+	private validateKey(key: string): void {
+		if (!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isLengthWithinRange(Bun.stringWidth(key), 2, 32)) {
+			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
+		}
+	}
+
+	private validateSecret(secret: string, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
 			throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidSecret]);
 		}
 	}
 
 	private validateSecretLength(secret: string): void {
-		if (!ValidatorUtils.isStringLengthWithinRange(secret || '', 1, 255)) {
+		if (
+			ValidatorUtils.isEmptyString(secret) ||
+			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
+		) {
 			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidSecretLength]);
 		}
 	}
 
-	private validatePassword(password: undefined | string, documentPassword: undefined | null | string): void {
-		if (password && documentPassword && documentPassword !== password) {
-			throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidPassword]);
+	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
+		if (password) {
+			if (documentPassword && password !== documentPassword) {
+				throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidPassword]);
+			}
 		}
 	}
 
 	private validatePasswordLength(password: string | undefined): void {
-		if (password && !ValidatorUtils.isStringLengthWithinRange(password, 0, 255)) {
+		if (
+			password &&
+			(ValidatorUtils.isEmptyString(password) ||
+				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
+		) {
 			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidPasswordLength]);
 		}
 	}
@@ -207,7 +216,10 @@ export class DocumentHandler {
 	}
 
 	private validateSelectedKey(key: string | undefined): void {
-		if (key && (!ValidatorUtils.isStringLengthWithinRange(key, 2, 32) || !ValidatorUtils.isBase64URL(key))) {
+		if (
+			key &&
+			(!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isLengthWithinRange(Bun.stringWidth(key), 2, 32))
+		) {
 			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
 		}
 	}

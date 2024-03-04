@@ -1,5 +1,3 @@
-import { stringWidth } from 'bun';
-
 export class ValidatorUtils {
 	public static isInstanceOf<T>(value: unknown, type: new (...args: any[]) => T): value is T {
 		return value instanceof type;
@@ -28,11 +26,7 @@ export class ValidatorUtils {
 		return /^[\w-]+$/.test(value);
 	}
 
-	public static isLengthWithinRange(value: number | bigint, min: number, max: number): boolean {
+	public static isLengthWithinRange(value: number, min: number, max: number): boolean {
 		return value >= min && value <= max;
-	}
-
-	public static isStringLengthWithinRange(value: string, min: number, max: number): boolean {
-		return ValidatorUtils.isLengthWithinRange(stringWidth(value), min, max);
 	}
 }
