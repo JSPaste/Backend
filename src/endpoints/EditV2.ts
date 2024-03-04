@@ -1,13 +1,13 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { MessageHandler } from '../classes/MessageHandler.ts';
 
 export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.patch(
 			this.prefix.concat('/:key'),
-			async ({ set, headers, body, params }) => {
-				return this.server.getDocumentHandler.setContext(set).edit({
+			async ({ headers, body, params }) => {
+				return this.server.getDocumentHandler.edit({
 					key: params.key,
 					body: body,
 					secret: headers.secret
@@ -37,9 +37,9 @@ export class EditV2 extends AbstractEndpoint {
 						},
 						{ description: 'A response object with a boolean' }
 					),
-					400: JSPError.schema,
-					403: JSPError.schema,
-					404: JSPError.schema
+					400: MessageHandler.schema,
+					403: MessageHandler.schema,
+					404: MessageHandler.schema
 				},
 				detail: { summary: 'Edit document', tags: ['v2'] }
 			}

@@ -1,17 +1,14 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { MessageHandler } from '../classes/MessageHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class AccessV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.get(
 			this.prefix.concat('/:key'),
-			async ({ set, params }) => {
-				return this.server.getDocumentHandler
-					.setContext(set)
-					.setVersion(ServerEndpointVersion.v1)
-					.access({ key: params.key });
+			async ({ params }) => {
+				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v1).access({ key: params.key });
 			},
 			{
 				params: t.Object({
@@ -34,8 +31,8 @@ export class AccessV1 extends AbstractEndpoint {
 						},
 						{ description: 'The document object' }
 					),
-					400: JSPError.schema,
-					404: JSPError.schema
+					400: MessageHandler.schema,
+					404: MessageHandler.schema
 				},
 				detail: { summary: 'Get document', tags: ['v1'] }
 			}

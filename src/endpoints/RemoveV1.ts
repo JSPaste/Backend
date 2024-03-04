@@ -1,13 +1,13 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { MessageHandler } from '../classes/MessageHandler.ts';
 
 export class RemoveV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.delete(
 			this.prefix.concat('/:key'),
-			async ({ set, headers, params }) => {
-				return this.server.getDocumentHandler.setContext(set).remove({
+			async ({ headers, params }) => {
+				return this.server.getDocumentHandler.remove({
 					key: params.key,
 					secret: headers.secret
 				});
@@ -34,9 +34,9 @@ export class RemoveV1 extends AbstractEndpoint {
 						},
 						{ description: 'A response object with a boolean' }
 					),
-					400: JSPError.schema,
-					403: JSPError.schema,
-					404: JSPError.schema
+					400: MessageHandler.schema,
+					403: MessageHandler.schema,
+					404: MessageHandler.schema
 				},
 				detail: { summary: 'Remove document', tags: ['v1'] }
 			}

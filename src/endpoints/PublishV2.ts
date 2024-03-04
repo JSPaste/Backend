@@ -1,6 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { MessageHandler } from '../classes/MessageHandler.ts';
 import { Server } from '../classes/Server.ts';
 import type { KeyRange } from '../types/Range.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
@@ -9,18 +9,15 @@ export class PublishV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.post(
 			this.prefix,
-			async ({ set, headers, body }) => {
-				return this.server.getDocumentHandler
-					.setContext(set)
-					.setVersion(ServerEndpointVersion.v2)
-					.publish({
-						body: body,
-						selectedKey: headers.key,
-						selectedKeyLength: headers.keyLength as KeyRange | undefined,
-						selectedSecret: headers.secret,
-						lifetime: headers.lifetime,
-						password: headers.password
-					});
+			async ({ headers, body }) => {
+				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v2).publish({
+					body: body,
+					selectedKey: headers.key,
+					selectedKeyLength: headers.keyLength as KeyRange | undefined,
+					selectedSecret: headers.secret,
+					lifetime: headers.lifetime,
+					password: headers.password
+				});
 			},
 			{
 				type: 'arrayBuffer',
@@ -92,7 +89,7 @@ export class PublishV2 extends AbstractEndpoint {
 								'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 						}
 					),
-					400: JSPError.schema
+					400: MessageHandler.schema
 				},
 				detail: { summary: 'Publish document', tags: ['v2'] }
 			}

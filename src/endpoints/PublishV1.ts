@@ -1,17 +1,14 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { MessageHandler } from '../classes/MessageHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class PublishV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.post(
 			this.prefix,
-			async ({ set, body }) => {
-				return this.server.getDocumentHandler
-					.setContext(set)
-					.setVersion(ServerEndpointVersion.v1)
-					.publish({ body });
+			async ({ body }) => {
+				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v1).publish({ body });
 			},
 			{
 				type: 'arrayBuffer',
@@ -30,7 +27,7 @@ export class PublishV1 extends AbstractEndpoint {
 							description: 'An object with a key and a secret for the document'
 						}
 					),
-					400: JSPError.schema
+					400: MessageHandler.schema
 				},
 				detail: { summary: 'Publish document', tags: ['v1'] }
 			}

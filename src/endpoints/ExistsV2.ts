@@ -1,13 +1,13 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { JSPError } from '../classes/JSPError.ts';
+import { MessageHandler } from '../classes/MessageHandler.ts';
 
 export class ExistsV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.get(
 			this.prefix.concat('/:key/exists'),
-			async ({ set, params }) => {
-				return this.server.getDocumentHandler.setContext(set).exists(params);
+			async ({ params }) => {
+				return this.server.getDocumentHandler.exists(params);
 			},
 			{
 				params: t.Object({
@@ -20,7 +20,7 @@ export class ExistsV2 extends AbstractEndpoint {
 					200: t.Boolean({
 						description: 'A boolean indicating if the document exists'
 					}),
-					400: JSPError.schema
+					400: MessageHandler.schema
 				},
 				detail: { summary: 'Check document', tags: ['v2'] }
 			}

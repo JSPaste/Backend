@@ -2,22 +2,16 @@ import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
 import type { IDocumentDataStruct } from '../structures/Structures';
 import type { Parameters } from '../types/DocumentHandler.ts';
-import { JSPErrorCode } from '../types/JSPError.ts';
+import { ErrorCode } from '../types/MessageHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { DocumentManager } from './DocumentManager.ts';
-import { JSPError } from './JSPError.ts';
+import { MessageHandler } from './MessageHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
-	private context: any;
 	private version: ServerEndpointVersion | undefined;
-
-	public setContext(value: any): this {
-		this.context = value;
-		return this;
-	}
 
 	public setVersion(value: ServerEndpointVersion): this {
 		this.version = value;
@@ -50,7 +44,7 @@ export class DocumentHandler {
 			}
 
 			default: {
-				throw JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
+				return MessageHandler.get(ErrorCode.serverError);
 			}
 		}
 	}
@@ -105,8 +99,9 @@ export class DocumentHandler {
 
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength ?? 8));
 
-		if (params.selectedKey && (await StringUtils.keyExists(key)))
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentKeyAlreadyExists]);
+		if (params.selectedKey && (await StringUtils.keyExists(key))) {
+			MessageHandler.send(ErrorCode.document_KeyAlreadyExists);
+		}
 
 		const document: IDocumentDataStruct = {
 			rawFileData: bodyBuffer,
@@ -132,7 +127,7 @@ export class DocumentHandler {
 			}
 
 			default: {
-				throw JSPError.send(this.context, 500, JSPError.message[JSPErrorCode.internalServerError]);
+				return MessageHandler.get(ErrorCode.serverError);
 			}
 		}
 	}
@@ -156,7 +151,7 @@ export class DocumentHandler {
 		const file = Bun.file(Server.config.documents.documentPath + key);
 
 		if (!(await file.exists())) {
-			throw JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
+			MessageHandler.send(ErrorCode.document_NotFound);
 		}
 
 		return file;
@@ -164,13 +159,13 @@ export class DocumentHandler {
 
 	private validateKey(key: string): void {
 		if (!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isLengthWithinRange(Bun.stringWidth(key), 2, 32)) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
+			MessageHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
 	private validateSecret(secret: string, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
-			throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidSecret]);
+			MessageHandler.send(ErrorCode.document_InvalidSecret);
 		}
 	}
 
@@ -179,14 +174,14 @@ export class DocumentHandler {
 			ValidatorUtils.isEmptyString(secret) ||
 			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
 		) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidSecretLength]);
+			MessageHandler.send(ErrorCode.document_InvalidSecretLength);
 		}
 	}
 
 	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
 		if (password) {
 			if (documentPassword && password !== documentPassword) {
-				throw JSPError.send(this.context, 403, JSPError.message[JSPErrorCode.documentInvalidPassword]);
+				MessageHandler.send(ErrorCode.document_InvalidPassword);
 			}
 		}
 	}
@@ -197,7 +192,7 @@ export class DocumentHandler {
 			(ValidatorUtils.isEmptyString(password) ||
 				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
 		) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidPasswordLength]);
+			MessageHandler.send(ErrorCode.document_InvalidPasswordLength);
 		}
 	}
 
@@ -205,13 +200,13 @@ export class DocumentHandler {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
 			unlink(Server.config.documents.documentPath + key);
 
-			throw JSPError.send(this.context, 404, JSPError.message[JSPErrorCode.documentNotFound]);
+			MessageHandler.send(ErrorCode.document_NotFound);
 		}
 	}
 
 	private validateSizeBetweenLimits(body: Buffer): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.config.documents.maxLength)) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidLength]);
+			MessageHandler.send(ErrorCode.document_InvalidLength);
 		}
 	}
 
@@ -220,13 +215,13 @@ export class DocumentHandler {
 			key &&
 			(!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isLengthWithinRange(Bun.stringWidth(key), 2, 32))
 		) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.inputInvalid]);
+			MessageHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
 	private validateSelectedKeyLength(length: number | undefined): void {
 		if (length && ValidatorUtils.isLengthWithinRange(length, 2, 32)) {
-			throw JSPError.send(this.context, 400, JSPError.message[JSPErrorCode.documentInvalidKeyLength]);
+			MessageHandler.send(ErrorCode.document_InvalidKeyLength);
 		}
 	}
 }
