@@ -4,7 +4,7 @@ export abstract class AbstractEndpoint {
 	protected readonly server: Server;
 	protected prefix = '';
 
-	protected constructor(server: Server) {
+	public constructor(server: Server) {
 		this.server = server;
 	}
 

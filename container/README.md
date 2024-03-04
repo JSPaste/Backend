@@ -11,6 +11,6 @@ Get your backend up and running quickly using container images.
 
 ## Docker Compose
 
-* Copy `.env.example` to `.env.backend` and edit it.
+* Copy `.env.example` to `.env.backend`.
 * Adapt your `docker-compose.yml` to your needs.
 * Run: `docker-compose up -d --pull --remove-orphans docker-compose.yml`

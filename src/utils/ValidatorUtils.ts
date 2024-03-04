@@ -6,6 +6,7 @@ export class ValidatorUtils {
 	}
 
 	public static isTypeOf<T>(value: unknown, type: string): value is T {
+		// biome-ignore lint/suspicious/useValidTypeof: We are checking the type of the value
 		return typeof value === type;
 	}
 

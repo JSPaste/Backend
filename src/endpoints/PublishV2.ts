@@ -6,10 +6,6 @@ import type { KeyRange } from '../types/Range.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class PublishV2 extends AbstractEndpoint {
-	public constructor(server: Server) {
-		super(server);
-	}
-
 	protected override run(): void {
 		this.server.getElysia.post(
 			this.prefix,

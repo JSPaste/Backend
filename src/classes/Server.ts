@@ -135,10 +135,10 @@ export class Server {
 			}
 		};
 
-		Server.config.versions.toReversed().forEach((version, i) => {
-			routes[version].endpoints.forEach((endpoint) =>
-				routes[version].prefixes.forEach((prefix) => endpoint.setPrefix(prefix).register())
-			);
+		for (const [i, version] of Server.config.versions.toReversed().entries()) {
+			for (const endpoint of routes[version].endpoints) {
+				for (const prefix of routes[version].prefixes) endpoint.setPrefix(prefix).register();
+			}
 
 			console.info(
 				'Registered',
@@ -147,6 +147,6 @@ export class Server {
 				version,
 				i === 0 ? '(latest)' : ''
 			);
-		});
+		}
 	}
 }

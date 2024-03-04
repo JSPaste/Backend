@@ -1,13 +1,8 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { JSPError } from '../classes/JSPError.ts';
-import type { Server } from '../classes/Server.ts';
 
 export class EditV2 extends AbstractEndpoint {
-	public constructor(server: Server) {
-		super(server);
-	}
-
 	protected override run(): void {
 		this.server.getElysia.patch(
 			this.prefix.concat('/:key'),

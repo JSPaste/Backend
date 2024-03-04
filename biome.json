@@ -31,9 +31,13 @@
 		}
 	},
 	"linter": {
-		"enabled": false,
+		"enabled": true,
 		"ignore": ["**/node_modules/", "documents/", "src/structures/", "dist/"],
-		"rules": {}
+		"rules": {
+			"recommended": true,
+			"complexity": { "noStaticOnlyClass": "off" },
+			"suspicious": { "noExplicitAny": "off" }
+		}
 	},
 	"organizeImports": {
 		"enabled": true

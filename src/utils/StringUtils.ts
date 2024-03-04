@@ -6,9 +6,10 @@ export class StringUtils {
 
 	public static random(length: number, base: Range<2, 64> = 62): string {
 		const baseSet = StringUtils.base64URL.slice(0, base);
+		let i = length;
 		let string = '';
 
-		while (length--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
+		while (i--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
 
 		return string;
 	}

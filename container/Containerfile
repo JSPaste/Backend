@@ -9,6 +9,7 @@ RUN bun run production:build
 
 # Runner
 FROM gcr.io/distroless/base-nossl-debian12:nonroot AS runner
+USER 65532:65532
 
 COPY --chown=65532:65532 --from=builder /build/dist/jspaste ./
 
