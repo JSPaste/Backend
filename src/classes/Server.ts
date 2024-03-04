@@ -11,8 +11,10 @@ import { PublishV1 } from '../endpoints/PublishV1.ts';
 import { PublishV2 } from '../endpoints/PublishV2.ts';
 import { RemoveV1 } from '../endpoints/RemoveV1.ts';
 import { RemoveV2 } from '../endpoints/RemoveV2.ts';
+import { JSPErrorCode } from '../types/JSPError.ts';
 import { type ServerConfig, ServerEndpointVersion } from '../types/Server.ts';
 import { DocumentHandler } from './DocumentHandler.ts';
+import { JSPError } from './JSPError.ts';
 
 export class Server {
 	public static readonly config: Required<ServerConfig> = {
@@ -42,8 +44,7 @@ export class Server {
 
 	public constructor() {
 		Server.config.docs.enabled && this.initDocs();
-		// FIXME: When error is thrown, it will get into default case
-		//this.initErrorListener();
+		this.initErrorListener();
 		this.initEndpoints();
 
 		this.elysia.listen(Server.config.port, ({ port }) =>
@@ -92,30 +93,32 @@ export class Server {
 		);
 	}
 
-	/*
 	private initErrorListener(): void {
 		this.elysia.onError(({ set, code, error }) => {
 			switch (code) {
-				case 'NOT_FOUND':
-					return '';
-
-				case 'VALIDATION':
-					return JSPError.send(set, 400, JSPError.message[JSPErrorCode.validation]);
-
-				case 'INTERNAL_SERVER_ERROR':
+				case 'INTERNAL_SERVER_ERROR': {
 					console.error(error);
 					return JSPError.send(set, 500, JSPError.message[JSPErrorCode.internalServerError]);
+				}
 
-				case 'PARSE':
+				case 'NOT_FOUND': {
+					return '';
+				}
+
+				case 'PARSE': {
 					return JSPError.send(set, 400, JSPError.message[JSPErrorCode.parseFailed]);
+				}
 
-				default:
-					console.error(error);
-					return JSPError.send(set, 500, JSPError.message[JSPErrorCode.unknown]);
+				case 'VALIDATION': {
+					return JSPError.send(set, 400, JSPError.message[JSPErrorCode.validation]);
+				}
+
+				default: {
+					return error;
+				}
 			}
 		});
 	}
-	*/
 
 	private initEndpoints(): void {
 		const routes = {
