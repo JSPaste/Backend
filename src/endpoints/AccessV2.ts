@@ -54,7 +54,7 @@ export class AccessV2 extends AbstractEndpoint {
 								})
 							),
 							expirationTimestamp: t.Optional(
-								t.Integer({
+								t.Numeric({
 									description:
 										'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
 									examples: [60, 0]

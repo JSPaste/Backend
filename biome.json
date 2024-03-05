@@ -35,8 +35,15 @@
 		"ignore": ["**/node_modules/", "documents/", "src/structures/", "dist/"],
 		"rules": {
 			"recommended": true,
-			"complexity": { "noStaticOnlyClass": "off" },
-			"suspicious": { "noExplicitAny": "off" }
+			"style": {
+				"noParameterAssign": "off"
+			},
+			"complexity": {
+				"noStaticOnlyClass": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off"
+			}
 		}
 	},
 	"organizeImports": {

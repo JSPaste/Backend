@@ -2,7 +2,6 @@ import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { MessageHandler } from '../classes/MessageHandler.ts';
 import { Server } from '../classes/Server.ts';
-import type { KeyRange } from '../types/Range.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class PublishV2 extends AbstractEndpoint {
@@ -13,7 +12,7 @@ export class PublishV2 extends AbstractEndpoint {
 				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v2).publish({
 					body: body,
 					selectedKey: headers.key,
-					selectedKeyLength: headers.keyLength as KeyRange | undefined,
+					selectedKeyLength: headers.keyLength,
 					selectedSecret: headers.secret,
 					lifetime: headers.lifetime,
 					password: headers.password
@@ -31,9 +30,10 @@ export class PublishV2 extends AbstractEndpoint {
 							examples: ['abc123']
 						})
 					),
-					// TODO: TypeBox should allow KeyRange...
 					keyLength: t.Optional(
-						t.Integer({
+						t.Numeric({
+							minimum: Server.config.documents.minKeyLength,
+							maximum: Server.config.documents.maxKeyLength,
 							description:
 								'If a custom key is not set, this will determine the key length of the automatically generated key',
 							examples: ['20', '4']
@@ -53,7 +53,7 @@ export class PublishV2 extends AbstractEndpoint {
 						})
 					),
 					lifetime: t.Optional(
-						t.Integer({
+						t.Numeric({
 							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.config.documents.maxTime}`,
 							examples: ['60', '0']
 						})
@@ -77,7 +77,7 @@ export class PublishV2 extends AbstractEndpoint {
 								})
 							),
 							expirationTimestamp: t.Optional(
-								t.Integer({
+								t.Numeric({
 									description:
 										'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
 									examples: [60, 0]

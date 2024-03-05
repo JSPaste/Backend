@@ -23,6 +23,8 @@ export class Server {
 		port: env.get('PORT').default(4000).asPortNumber(),
 		versions: [ServerEndpointVersion.v1, ServerEndpointVersion.v2],
 		documents: {
+			minKeyLength: 2,
+			maxKeyLength: 32,
 			defaultKeyLength: 8,
 			documentPath: 'documents/',
 			maxLength: env.get('DOCUMENTS_MAXLENGTH').default(2000000).asIntPositive(),

@@ -1,5 +1,3 @@
-import type { KeyRange } from './Range.ts';
-
 type Parameters = {
 	access: {
 		key: string;
@@ -18,7 +16,7 @@ type Parameters = {
 		selectedSecret?: string;
 		lifetime?: number;
 		password?: string;
-		selectedKeyLength?: KeyRange;
+		selectedKeyLength?: number;
 		selectedKey?: string;
 	};
 	remove: {

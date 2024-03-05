@@ -97,7 +97,7 @@ export class DocumentHandler {
 		const msLifetime = lifetime * 1000;
 		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
 
-		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength ?? 8));
+		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
 		if (params.selectedKey && (await StringUtils.keyExists(key))) {
 			MessageHandler.send(ErrorCode.document_KeyAlreadyExists);
@@ -158,7 +158,14 @@ export class DocumentHandler {
 	}
 
 	private validateKey(key: string): void {
-		if (!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isLengthWithinRange(Bun.stringWidth(key), 2, 32)) {
+		if (
+			!ValidatorUtils.isBase64URL(key) ||
+			!ValidatorUtils.isLengthWithinRange(
+				Bun.stringWidth(key),
+				Server.config.documents.minKeyLength,
+				Server.config.documents.maxKeyLength
+			)
+		) {
 			MessageHandler.send(ErrorCode.validation_invalid);
 		}
 	}
@@ -213,14 +220,26 @@ export class DocumentHandler {
 	private validateSelectedKey(key: string | undefined): void {
 		if (
 			key &&
-			(!ValidatorUtils.isBase64URL(key) || !ValidatorUtils.isLengthWithinRange(Bun.stringWidth(key), 2, 32))
+			(!ValidatorUtils.isBase64URL(key) ||
+				!ValidatorUtils.isLengthWithinRange(
+					Bun.stringWidth(key),
+					Server.config.documents.minKeyLength,
+					Server.config.documents.maxKeyLength
+				))
 		) {
 			MessageHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
 	private validateSelectedKeyLength(length: number | undefined): void {
-		if (length && ValidatorUtils.isLengthWithinRange(length, 2, 32)) {
+		if (
+			length &&
+			ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.config.documents.minKeyLength,
+				Server.config.documents.maxKeyLength
+			)
+		) {
 			MessageHandler.send(ErrorCode.document_InvalidKeyLength);
 		}
 	}

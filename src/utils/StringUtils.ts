@@ -1,20 +1,30 @@
 import { Server } from '../classes/Server.ts';
-import type { KeyRange, Range } from '../types/Range.ts';
+import type { Range } from '../types/Range.ts';
+import { ValidatorUtils } from './ValidatorUtils.ts';
 
 export class StringUtils {
 	public static readonly base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
 
 	public static random(length: number, base: Range<2, 64> = 62): string {
 		const baseSet = StringUtils.base64URL.slice(0, base);
-		let i = length;
 		let string = '';
 
-		while (i--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
+		while (length--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
 
 		return string;
 	}
 
-	public static generateKey(length: KeyRange = Server.config.documents.defaultKeyLength): string {
+	public static generateKey(length: number): string {
+		if (
+			ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.config.documents.minKeyLength,
+				Server.config.documents.maxKeyLength
+			)
+		) {
+			length = Server.config.documents.defaultKeyLength;
+		}
+
 		return StringUtils.random(length, 64);
 	}
 
@@ -22,10 +32,21 @@ export class StringUtils {
 		return Bun.file(Server.config.documents.documentPath + key).exists();
 	}
 
-	public static async createKey(length: KeyRange = Server.config.documents.defaultKeyLength): Promise<string> {
+	public static async createKey(length: number | undefined): Promise<string> {
+		if (
+			!length ||
+			ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.config.documents.minKeyLength,
+				Server.config.documents.maxKeyLength
+			)
+		) {
+			length = Server.config.documents.defaultKeyLength;
+		}
+
 		const key = StringUtils.generateKey(length);
 
-		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as KeyRange) : key;
+		return (await StringUtils.keyExists(key)) ? StringUtils.createKey(length + 1) : key;
 	}
 
 	public static createSecret(chunkLength = 5, chunks = 4): string {
