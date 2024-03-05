@@ -14,9 +14,9 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateKey(length: number): string {
+	public static generateKey(length: number = Server.config.documents.defaultKeyLength): string {
 		if (
-			ValidatorUtils.isLengthWithinRange(
+			!ValidatorUtils.isLengthWithinRange(
 				length,
 				Server.config.documents.minKeyLength,
 				Server.config.documents.maxKeyLength
@@ -32,10 +32,9 @@ export class StringUtils {
 		return Bun.file(Server.config.documents.documentPath + key).exists();
 	}
 
-	public static async createKey(length: number | undefined): Promise<string> {
+	public static async createKey(length: number = Server.config.documents.defaultKeyLength): Promise<string> {
 		if (
-			!length ||
-			ValidatorUtils.isLengthWithinRange(
+			!ValidatorUtils.isLengthWithinRange(
 				length,
 				Server.config.documents.minKeyLength,
 				Server.config.documents.maxKeyLength
