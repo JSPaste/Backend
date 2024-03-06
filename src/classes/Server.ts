@@ -47,6 +47,7 @@ export class Server {
 	public constructor() {
 		Server.config.docs.enabled && this.initDocs();
 		this.initMessageListener();
+		this.initRequestListener();
 		this.initEndpoints();
 
 		this.elysia.listen(Server.config.port, ({ port }) =>
@@ -93,6 +94,13 @@ export class Server {
 				exclude: [Server.config.docs.path, Server.config.docs.path.concat('/json'), /^\/documents/]
 			})
 		);
+	}
+
+	// TODO
+	private initRequestListener(): void {
+		this.elysia.onRequest(({ set }) => {
+			set.headers['X-Global'] = 'global';
+		});
 	}
 
 	private initMessageListener(): void {

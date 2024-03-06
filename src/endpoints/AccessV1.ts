@@ -5,9 +5,12 @@ import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class AccessV1 extends AbstractEndpoint {
 	protected override run(): void {
+		this.setHeader({ 'X-Test1': '1' }).setHeader({ 'X-Test2': '2' });
+
 		this.server.getElysia.get(
 			this.prefix.concat('/:key'),
-			async ({ params }) => {
+			async ({ params, set }) => {
+				for (const header of this.headers) set.headers = { ...set.headers, ...header };
 				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v1).access({ key: params.key });
 			},
 			{
