@@ -1,6 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { MessageHandler } from '../classes/MessageHandler.ts';
+import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
@@ -89,7 +89,7 @@ export class PublishV2 extends AbstractEndpoint {
 								'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 						}
 					),
-					400: MessageHandler.schema
+					400: ErrorHandler.schema
 				},
 				detail: { summary: 'Publish document', tags: ['v2'] }
 			}

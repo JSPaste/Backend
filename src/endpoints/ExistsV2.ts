@@ -1,6 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { MessageHandler } from '../classes/MessageHandler.ts';
+import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class ExistsV2 extends AbstractEndpoint {
 	protected override run(): void {
@@ -20,7 +20,7 @@ export class ExistsV2 extends AbstractEndpoint {
 					200: t.Boolean({
 						description: 'A boolean indicating if the document exists'
 					}),
-					400: MessageHandler.schema
+					400: ErrorHandler.schema
 				},
 				detail: { summary: 'Check document', tags: ['v2'] }
 			}

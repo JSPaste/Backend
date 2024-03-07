@@ -1,6 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { MessageHandler } from '../classes/MessageHandler.ts';
+import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class AccessV2 extends AbstractEndpoint {
@@ -66,8 +66,8 @@ export class AccessV2 extends AbstractEndpoint {
 								'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
 						}
 					),
-					400: MessageHandler.schema,
-					404: MessageHandler.schema
+					400: ErrorHandler.schema,
+					404: ErrorHandler.schema
 				},
 				detail: { summary: 'Get document', tags: ['v2'] }
 			}

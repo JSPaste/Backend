@@ -2,12 +2,12 @@ import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
 import type { IDocumentDataStruct } from '../structures/Structures';
 import type { Parameters } from '../types/DocumentHandler.ts';
-import { ErrorCode } from '../types/MessageHandler.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { DocumentManager } from './DocumentManager.ts';
-import { MessageHandler } from './MessageHandler.ts';
+import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
@@ -44,7 +44,7 @@ export class DocumentHandler {
 			}
 
 			default: {
-				return MessageHandler.get(ErrorCode.serverError);
+				return ErrorHandler.get(ErrorCode.crash);
 			}
 		}
 	}
@@ -100,7 +100,7 @@ export class DocumentHandler {
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
 		if (params.selectedKey && (await StringUtils.keyExists(key))) {
-			MessageHandler.send(ErrorCode.document_KeyAlreadyExists);
+			ErrorHandler.send(ErrorCode.document_KeyAlreadyExists);
 		}
 
 		const document: IDocumentDataStruct = {
@@ -127,7 +127,7 @@ export class DocumentHandler {
 			}
 
 			default: {
-				return MessageHandler.get(ErrorCode.serverError);
+				return ErrorHandler.get(ErrorCode.crash);
 			}
 		}
 	}
@@ -151,7 +151,7 @@ export class DocumentHandler {
 		const file = Bun.file(Server.config.documents.documentPath + key);
 
 		if (!(await file.exists())) {
-			MessageHandler.send(ErrorCode.document_NotFound);
+			ErrorHandler.send(ErrorCode.document_NotFound);
 		}
 
 		return file;
@@ -166,13 +166,13 @@ export class DocumentHandler {
 				Server.config.documents.maxKeyLength
 			)
 		) {
-			MessageHandler.send(ErrorCode.validation_invalid);
+			ErrorHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
 	private validateSecret(secret: string, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
-			MessageHandler.send(ErrorCode.document_InvalidSecret);
+			ErrorHandler.send(ErrorCode.document_InvalidSecret);
 		}
 	}
 
@@ -181,14 +181,14 @@ export class DocumentHandler {
 			ValidatorUtils.isEmptyString(secret) ||
 			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
 		) {
-			MessageHandler.send(ErrorCode.document_InvalidSecretLength);
+			ErrorHandler.send(ErrorCode.document_InvalidSecretLength);
 		}
 	}
 
 	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
 		if (password) {
 			if (documentPassword && password !== documentPassword) {
-				MessageHandler.send(ErrorCode.document_InvalidPassword);
+				ErrorHandler.send(ErrorCode.document_InvalidPassword);
 			}
 		}
 	}
@@ -199,7 +199,7 @@ export class DocumentHandler {
 			(ValidatorUtils.isEmptyString(password) ||
 				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
 		) {
-			MessageHandler.send(ErrorCode.document_InvalidPasswordLength);
+			ErrorHandler.send(ErrorCode.document_InvalidPasswordLength);
 		}
 	}
 
@@ -207,13 +207,13 @@ export class DocumentHandler {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
 			unlink(Server.config.documents.documentPath + key);
 
-			MessageHandler.send(ErrorCode.document_NotFound);
+			ErrorHandler.send(ErrorCode.document_NotFound);
 		}
 	}
 
 	private validateSizeBetweenLimits(body: Buffer): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.config.documents.maxLength)) {
-			MessageHandler.send(ErrorCode.document_InvalidLength);
+			ErrorHandler.send(ErrorCode.document_InvalidLength);
 		}
 	}
 
@@ -227,7 +227,7 @@ export class DocumentHandler {
 					Server.config.documents.maxKeyLength
 				))
 		) {
-			MessageHandler.send(ErrorCode.validation_invalid);
+			ErrorHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
@@ -240,7 +240,7 @@ export class DocumentHandler {
 				Server.config.documents.maxKeyLength
 			)
 		) {
-			MessageHandler.send(ErrorCode.document_InvalidKeyLength);
+			ErrorHandler.send(ErrorCode.document_InvalidKeyLength);
 		}
 	}
 }

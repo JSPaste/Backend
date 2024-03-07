@@ -1,6 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { MessageHandler } from '../classes/MessageHandler.ts';
+import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
@@ -37,9 +37,9 @@ export class EditV2 extends AbstractEndpoint {
 						},
 						{ description: 'A response object with a boolean' }
 					),
-					400: MessageHandler.schema,
-					403: MessageHandler.schema,
-					404: MessageHandler.schema
+					400: ErrorHandler.schema,
+					403: ErrorHandler.schema,
+					404: ErrorHandler.schema
 				},
 				detail: { summary: 'Edit document', tags: ['v2'] }
 			}

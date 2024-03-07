@@ -11,10 +11,10 @@ import { PublishV1 } from '../endpoints/PublishV1.ts';
 import { PublishV2 } from '../endpoints/PublishV2.ts';
 import { RemoveV1 } from '../endpoints/RemoveV1.ts';
 import { RemoveV2 } from '../endpoints/RemoveV2.ts';
-import { ErrorCode } from '../types/MessageHandler.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { type ServerConfig, ServerEndpointVersion } from '../types/Server.ts';
 import { DocumentHandler } from './DocumentHandler.ts';
-import { MessageHandler } from './MessageHandler.ts';
+import { ErrorHandler } from './ErrorHandler.ts';
 
 export class Server {
 	public static readonly config: Required<ServerConfig> = {
@@ -46,13 +46,11 @@ export class Server {
 
 	public constructor() {
 		Server.config.docs.enabled && this.initDocs();
-		this.initMessageListener();
+		this.initErrorListener();
 		this.initRequestListener();
 		this.initEndpoints();
 
-		this.elysia.listen(Server.config.port, ({ port }) =>
-			console.info('Listening on port', port, `-> http://localhost:${port}`)
-		);
+		this.elysia.listen(Server.config.port, ({ port }) => console.info(`Listening on: http://localhost:${port}`));
 	}
 
 	public get getElysia(): Elysia {
@@ -74,7 +72,7 @@ export class Server {
 						},
 						{
 							url: 'http://localhost:'.concat(Server.config.port.toString()),
-							description: 'Instance local API (Only use if you are running an instance locally)'
+							description: 'Local API (Only use if you are running an instance locally)'
 						}
 					],
 					info: {
@@ -102,11 +100,11 @@ export class Server {
 		});
 	}
 
-	private initMessageListener(): void {
+	private initErrorListener(): void {
 		this.elysia.onError(({ code, error }) => {
 			switch (code) {
 				case 'VALIDATION': {
-					return MessageHandler.get(ErrorCode.validation);
+					return ErrorHandler.get(ErrorCode.validation);
 				}
 
 				case 'NOT_FOUND': {
@@ -114,12 +112,12 @@ export class Server {
 				}
 
 				case 'PARSE': {
-					return MessageHandler.get(ErrorCode.parseFailed);
+					return ErrorHandler.get(ErrorCode.parse);
 				}
 
 				case 'INTERNAL_SERVER_ERROR': {
 					console.error(error);
-					return MessageHandler.get(ErrorCode.serverError);
+					return ErrorHandler.get(ErrorCode.crash);
 				}
 
 				default: {
