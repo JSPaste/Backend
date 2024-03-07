@@ -96,10 +96,9 @@ export class Server {
 		);
 	}
 
-	// TODO
 	private initRequestListener(): void {
 		this.elysia.onRequest(({ set }) => {
-			set.headers['X-Global'] = 'global';
+			set.headers['Access-Control-Allow-Origin'] = '*';
 		});
 	}
 
