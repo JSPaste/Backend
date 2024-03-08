@@ -7,7 +7,5 @@ updates:
       interval: weekly
     assignees:
       - inetol
-    commit-message:
-      include: scope
     labels:
       - dependency:gha
