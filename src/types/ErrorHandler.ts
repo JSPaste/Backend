@@ -7,18 +7,18 @@ enum ErrorCode {
 	notFound = 1004,
 
 	// * Validation
-	validation_invalid = 1100,
+	validationInvalid = 1100,
 
 	// * Document
-	document_NotFound = 1200,
-	document_KeyAlreadyExists = 1201,
-	document_PasswordNeeded = 1202,
-	document_InvalidLength = 1203,
-	document_InvalidKeyLength = 1204,
-	document_InvalidPassword = 1205,
-	document_InvalidPasswordLength = 1206,
-	document_InvalidSecret = 1207,
-	document_InvalidSecretLength = 1208
+	documentNotFound = 1200,
+	documentKeyAlreadyExists = 1201,
+	documentPasswordNeeded = 1202,
+	documentInvalidLength = 1203,
+	documentInvalidKeyLength = 1204,
+	documentInvalidPassword = 1205,
+	documentInvalidPasswordLength = 1206,
+	documentInvalidSecret = 1207,
+	documentInvalidSecretLength = 1208
 }
 
 type Type = 'internal' | 'validation' | 'document';

@@ -2,7 +2,7 @@ import { t } from 'elysia';
 import { ErrorCode, type Schema } from '../types/ErrorHandler.ts';
 
 export class ErrorHandler {
-	public static readonly schema = t.Object(
+	public static readonly SCHEMA = t.Object(
 		{
 			type: t.String({ description: 'The message type' }),
 			code: t.Integer({ description: 'The message code' }),
@@ -11,7 +11,7 @@ export class ErrorHandler {
 		{ description: 'An object representing a message' }
 	);
 
-	private static readonly map: Record<ErrorCode, Schema> = {
+	private static readonly MAP: Record<ErrorCode, Schema> = {
 		[ErrorCode.unknown]: { type: 'internal', httpCode: 500, message: 'Unknown error, please try again later' },
 		[ErrorCode.notFound]: {
 			httpCode: 404,
@@ -33,74 +33,74 @@ export class ErrorHandler {
 			type: 'internal',
 			message: 'Failed to parse the request, please try again later'
 		},
-		[ErrorCode.validation_invalid]: {
+		[ErrorCode.validationInvalid]: {
 			httpCode: 400,
 			type: 'validation',
 			message: 'The provided string is not alphanumeric or has an invalid length'
 		},
-		[ErrorCode.document_NotFound]: {
+		[ErrorCode.documentNotFound]: {
 			httpCode: 404,
 			type: 'document',
 			message: 'The requested document does not exist'
 		},
-		[ErrorCode.document_PasswordNeeded]: {
+		[ErrorCode.documentPasswordNeeded]: {
 			httpCode: 403,
 			type: 'document',
 			message: 'This document requires credentials, however none were provided'
 		},
-		[ErrorCode.document_InvalidPasswordLength]: {
+		[ErrorCode.documentInvalidPasswordLength]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The provided password length is invalid'
 		},
-		[ErrorCode.document_InvalidPassword]: {
+		[ErrorCode.documentInvalidPassword]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'Invalid credentials provided for the document'
 		},
-		[ErrorCode.document_InvalidLength]: {
+		[ErrorCode.documentInvalidLength]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The document data length is invalid'
 		},
-		[ErrorCode.document_InvalidSecret]: {
+		[ErrorCode.documentInvalidSecret]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'Invalid secret provided'
 		},
-		[ErrorCode.document_InvalidSecretLength]: {
+		[ErrorCode.documentInvalidSecretLength]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The provided secret length is invalid'
 		},
-		[ErrorCode.document_InvalidKeyLength]: {
+		[ErrorCode.documentInvalidKeyLength]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The provided key length is invalid'
 		},
-		[ErrorCode.document_KeyAlreadyExists]: {
+		[ErrorCode.documentKeyAlreadyExists]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The provided key already exists'
 		}
 	};
 
-	private error: any;
+	private ERROR: any;
 
 	public static get(code: ErrorCode) {
-		const { type, message } = ErrorHandler.map[code];
+		const { type, message } = ErrorHandler.MAP[code];
 
 		return { type, code, message };
 	}
 
 	public setError(error: any): this {
-		this.error = error;
+		this.ERROR = error;
 		return this;
 	}
 
 	public send(code: ErrorCode): void {
-		const { httpCode, type, message } = ErrorHandler.map[code];
+		const { httpCode, type, message } = ErrorHandler.MAP[code];
 
-		throw this.error(httpCode, { type, code, message });
+		throw this.ERROR(httpCode, { type, code, message });
 	}
 }

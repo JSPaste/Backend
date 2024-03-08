@@ -1,15 +1,15 @@
 import type { Server } from './Server.ts';
 
 export abstract class AbstractEndpoint {
-	protected readonly server: Server;
-	protected prefix = '';
+	protected readonly SERVER: Server;
+	protected PREFIX = '';
 
 	public constructor(server: Server) {
-		this.server = server;
+		this.SERVER = server;
 	}
 
 	public setPrefix(prefix: string): this {
-		this.prefix = prefix;
+		this.PREFIX = prefix;
 		return this;
 	}
 

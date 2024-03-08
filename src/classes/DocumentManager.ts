@@ -8,6 +8,9 @@ export class DocumentManager {
 	}
 
 	public static async write(filePath: string, document: IDocumentDataStruct): Promise<void> {
-		await Bun.write(filePath, Bun.deflateSync(DocumentDataStruct.encode(document).finish(), Server.config.zlib));
+		await Bun.write(
+			filePath,
+			Bun.deflateSync(DocumentDataStruct.encode(document).finish(), { level: Server.ZLIB_LEVEL })
+		);
 	}
 }

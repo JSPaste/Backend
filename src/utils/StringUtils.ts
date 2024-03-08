@@ -3,10 +3,10 @@ import type { Range } from '../types/Range.ts';
 import { ValidatorUtils } from './ValidatorUtils.ts';
 
 export class StringUtils {
-	public static readonly base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+	public static readonly BASE64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
 
 	public static random(length: number, base: Range<2, 64> = 62): string {
-		const baseSet = StringUtils.base64URL.slice(0, base);
+		const baseSet = StringUtils.BASE64URL.slice(0, base);
 		let string = '';
 
 		while (length--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
@@ -14,33 +14,25 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateKey(length: number = Server.config.documents.defaultKeyLength): string {
+	public static generateKey(length: number = Server.DOCUMENT_KEY_LENGTH_DEFAULT): string {
 		if (
-			!ValidatorUtils.isLengthWithinRange(
-				length,
-				Server.config.documents.minKeyLength,
-				Server.config.documents.maxKeyLength
-			)
+			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
 		) {
-			length = Server.config.documents.defaultKeyLength;
+			length = Server.DOCUMENT_KEY_LENGTH_DEFAULT;
 		}
 
 		return StringUtils.random(length, 64);
 	}
 
 	public static async keyExists(key: string): Promise<boolean> {
-		return Bun.file(Server.config.documents.documentPath + key).exists();
+		return Bun.file(Server.DOCUMENT_PATH + key).exists();
 	}
 
-	public static async createKey(length: number = Server.config.documents.defaultKeyLength): Promise<string> {
+	public static async createKey(length: number = Server.DOCUMENT_KEY_LENGTH_DEFAULT): Promise<string> {
 		if (
-			!ValidatorUtils.isLengthWithinRange(
-				length,
-				Server.config.documents.minKeyLength,
-				Server.config.documents.maxKeyLength
-			)
+			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
 		) {
-			length = Server.config.documents.defaultKeyLength;
+			length = Server.DOCUMENT_KEY_LENGTH_DEFAULT;
 		}
 
 		const key = StringUtils.generateKey(length);

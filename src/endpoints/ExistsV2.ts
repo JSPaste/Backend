@@ -4,10 +4,10 @@ import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class ExistsV2 extends AbstractEndpoint {
 	protected override run(): void {
-		this.server.getElysia.get(
-			this.prefix.concat('/:key/exists'),
+		this.SERVER.elysia.get(
+			this.PREFIX.concat('/:key/exists'),
 			async ({ params, error }) => {
-				return this.server.getDocumentHandler.setError(error).exists(params);
+				return this.SERVER.documentHandler.setError(error).exists(params);
 			},
 			{
 				params: t.Object({
@@ -20,7 +20,7 @@ export class ExistsV2 extends AbstractEndpoint {
 					200: t.Boolean({
 						description: 'A boolean indicating if the document exists'
 					}),
-					400: ErrorHandler.schema
+					400: ErrorHandler.SCHEMA
 				},
 				detail: { summary: 'Check document', tags: ['v2'] }
 			}

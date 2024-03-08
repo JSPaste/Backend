@@ -11,20 +11,20 @@ import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
-	private readonly server: Server;
-	private version: ServerEndpointVersion | undefined;
+	private readonly SERVER: Server;
+	private VERSION: ServerEndpointVersion | undefined;
 
 	public constructor(server: Server) {
-		this.server = server;
+		this.SERVER = server;
 	}
 
 	public setError(error: any): this {
-		this.server.getErrorHandler.setError(error);
+		this.SERVER.errorHandler.setError(error);
 		return this;
 	}
 
 	public setVersion(version: ServerEndpointVersion): this {
-		this.version = version;
+		this.VERSION = version;
 		return this;
 	}
 
@@ -39,16 +39,16 @@ export class DocumentHandler {
 
 		const data = new TextDecoder().decode(document.rawFileData);
 
-		switch (this.version) {
-			case ServerEndpointVersion.v1: {
+		switch (this.VERSION) {
+			case ServerEndpointVersion.V1: {
 				return { key: params.key, data };
 			}
 
-			case ServerEndpointVersion.v2: {
+			case ServerEndpointVersion.V2: {
 				return {
 					key: params.key,
 					data,
-					url: Server.hostname.concat('/', params.key),
+					url: Server.HOSTNAME.concat('/', params.key),
 					expirationTimestamp: document.expirationTimestamp
 				};
 			}
@@ -74,7 +74,7 @@ export class DocumentHandler {
 		document.rawFileData = buffer;
 
 		return {
-			edited: await DocumentManager.write(Server.config.documents.documentPath + params.key, document)
+			edited: await DocumentManager.write(Server.DOCUMENT_PATH + params.key, document)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -83,7 +83,7 @@ export class DocumentHandler {
 	public async exists(params: Parameters['exists']) {
 		this.validateKey(params.key);
 
-		return Bun.file(Server.config.documents.documentPath + params.key).exists();
+		return Bun.file(Server.DOCUMENT_PATH + params.key).exists();
 	}
 
 	public async publish(params: Parameters['publish']) {
@@ -99,7 +99,7 @@ export class DocumentHandler {
 
 		this.validateSizeBetweenLimits(bodyBuffer);
 
-		let lifetime = params.lifetime ?? Server.config.documents.maxTime;
+		let lifetime = params.lifetime ?? Server.DOCUMENT_MAX_TIME;
 
 		// Make the document permanent if the value exceeds 5 years
 		if (lifetime > 157_784_760) lifetime = 0;
@@ -110,7 +110,7 @@ export class DocumentHandler {
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
 		if (params.selectedKey && (await StringUtils.keyExists(key))) {
-			this.server.getErrorHandler.send(ErrorCode.document_KeyAlreadyExists);
+			this.SERVER.errorHandler.send(ErrorCode.documentKeyAlreadyExists);
 		}
 
 		const document: IDocumentDataStruct = {
@@ -120,18 +120,18 @@ export class DocumentHandler {
 			password: params.password
 		};
 
-		await DocumentManager.write(Server.config.documents.documentPath + key, document);
+		await DocumentManager.write(Server.DOCUMENT_PATH + key, document);
 
-		switch (this.version) {
-			case ServerEndpointVersion.v1: {
+		switch (this.VERSION) {
+			case ServerEndpointVersion.V1: {
 				return { key, secret };
 			}
 
-			case ServerEndpointVersion.v2: {
+			case ServerEndpointVersion.V2: {
 				return {
 					key,
 					secret,
-					url: Server.hostname.concat('/', key),
+					url: Server.HOSTNAME.concat('/', key),
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 			}
@@ -151,17 +151,17 @@ export class DocumentHandler {
 		this.validateSecret(params.secret, document.secret);
 
 		return {
-			removed: await unlink(Server.config.documents.documentPath + params.key)
+			removed: await unlink(Server.DOCUMENT_PATH + params.key)
 				.then(() => true)
 				.catch(() => false)
 		};
 	}
 
 	private async retrieveDocument(key: string): Promise<BunFile> {
-		const file = Bun.file(Server.config.documents.documentPath + key);
+		const file = Bun.file(Server.DOCUMENT_PATH + key);
 
 		if (!(await file.exists())) {
-			this.server.getErrorHandler.send(ErrorCode.document_NotFound);
+			this.SERVER.errorHandler.send(ErrorCode.documentNotFound);
 		}
 
 		return file;
@@ -169,20 +169,20 @@ export class DocumentHandler {
 
 	private validateKey(key: string): void {
 		if (
-			!ValidatorUtils.isBase64URL(key) ||
+			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
 				Bun.stringWidth(key),
-				Server.config.documents.minKeyLength,
-				Server.config.documents.maxKeyLength
+				Server.DOCUMENT_KEY_LENGTH_MIN,
+				Server.DOCUMENT_KEY_LENGTH_MAX
 			)
 		) {
-			this.server.getErrorHandler.send(ErrorCode.validation_invalid);
+			this.SERVER.errorHandler.send(ErrorCode.validationInvalid);
 		}
 	}
 
 	private validateSecret(secret: string, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
-			this.server.getErrorHandler.send(ErrorCode.document_InvalidSecret);
+			this.SERVER.errorHandler.send(ErrorCode.documentInvalidSecret);
 		}
 	}
 
@@ -191,14 +191,14 @@ export class DocumentHandler {
 			ValidatorUtils.isEmptyString(secret) ||
 			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
 		) {
-			this.server.getErrorHandler.send(ErrorCode.document_InvalidSecretLength);
+			this.SERVER.errorHandler.send(ErrorCode.documentInvalidSecretLength);
 		}
 	}
 
 	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
 		if (password) {
 			if (documentPassword && password !== documentPassword) {
-				this.server.getErrorHandler.send(ErrorCode.document_InvalidPassword);
+				this.SERVER.errorHandler.send(ErrorCode.documentInvalidPassword);
 			}
 		}
 	}
@@ -209,48 +209,44 @@ export class DocumentHandler {
 			(ValidatorUtils.isEmptyString(password) ||
 				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
 		) {
-			this.server.getErrorHandler.send(ErrorCode.document_InvalidPasswordLength);
+			this.SERVER.errorHandler.send(ErrorCode.documentInvalidPasswordLength);
 		}
 	}
 
 	private validateTimestamp(key: string, timestamp: number): void {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
-			unlink(Server.config.documents.documentPath + key);
+			unlink(Server.DOCUMENT_PATH + key);
 
-			this.server.getErrorHandler.send(ErrorCode.document_NotFound);
+			this.SERVER.errorHandler.send(ErrorCode.documentNotFound);
 		}
 	}
 
 	private validateSizeBetweenLimits(body: Buffer): void {
-		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.config.documents.maxLength)) {
-			this.server.getErrorHandler.send(ErrorCode.document_InvalidLength);
+		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.DOCUMENT_MAX_LENGTH)) {
+			this.SERVER.errorHandler.send(ErrorCode.documentInvalidLength);
 		}
 	}
 
 	private validateSelectedKey(key: string | undefined): void {
 		if (
 			key &&
-			(!ValidatorUtils.isBase64URL(key) ||
+			(!ValidatorUtils.isValidBase64URL(key) ||
 				!ValidatorUtils.isLengthWithinRange(
 					Bun.stringWidth(key),
-					Server.config.documents.minKeyLength,
-					Server.config.documents.maxKeyLength
+					Server.DOCUMENT_KEY_LENGTH_MIN,
+					Server.DOCUMENT_KEY_LENGTH_MAX
 				))
 		) {
-			this.server.getErrorHandler.send(ErrorCode.validation_invalid);
+			this.SERVER.errorHandler.send(ErrorCode.validationInvalid);
 		}
 	}
 
 	private validateSelectedKeyLength(length: number | undefined): void {
 		if (
 			length &&
-			ValidatorUtils.isLengthWithinRange(
-				length,
-				Server.config.documents.minKeyLength,
-				Server.config.documents.maxKeyLength
-			)
+			ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
 		) {
-			this.server.getErrorHandler.send(ErrorCode.document_InvalidKeyLength);
+			this.SERVER.errorHandler.send(ErrorCode.documentInvalidKeyLength);
 		}
 	}
 }

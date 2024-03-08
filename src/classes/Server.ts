@@ -12,62 +12,53 @@ import { PublishV2 } from '../endpoints/PublishV2.ts';
 import { RemoveV1 } from '../endpoints/RemoveV1.ts';
 import { RemoveV2 } from '../endpoints/RemoveV2.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
-import { type ServerConfig, ServerEndpointVersion } from '../types/Server.ts';
+import { ServerEndpointVersion } from '../types/Server.ts';
 import { DocumentHandler } from './DocumentHandler.ts';
 import { ErrorHandler } from './ErrorHandler.ts';
 
 export class Server {
-	public static readonly config: Required<ServerConfig> = {
-		tls: env.get('TLS').asBoolStrict() ?? false,
-		domain: env.get('DOMAIN').default('localhost').asString(),
-		port: env.get('PORT').default(4000).asPortNumber(),
-		versions: [ServerEndpointVersion.v1, ServerEndpointVersion.v2],
-		documents: {
-			minKeyLength: 2,
-			maxKeyLength: 32,
-			defaultKeyLength: 8,
-			documentPath: 'documents/',
-			maxLength: env.get('DOCUMENTS_MAXLENGTH').default(2000000).asIntPositive(),
-			maxTime: env.get('DOCUMENTS_MAXTIME').default(86400).asIntPositive()
-		},
-		docs: {
-			enabled: env.get('DOCS_ENABLED').asBoolStrict() ?? true,
-			path: env.get('DOCS_PATH').default('/docs').asString()
-		},
-		zlib: {
-			level: 6
-		}
-	};
+	public static readonly TLS = env.get('TLS').asBoolStrict() ?? false;
+	public static readonly DOMAIN = env.get('DOMAIN').default('localhost').asString();
+	public static readonly HOSTNAME = (Server.TLS ? 'https://' : 'http://').concat(Server.DOMAIN);
+	public static readonly PORT = env.get('PORT').default(4000).asPortNumber();
+	public static readonly ENDPOINT_VERSIONS = [ServerEndpointVersion.V1, ServerEndpointVersion.V2];
+	public static readonly DOCUMENT_KEY_LENGTH_MIN = 2;
+	public static readonly DOCUMENT_KEY_LENGTH_MAX = 32;
+	public static readonly DOCUMENT_KEY_LENGTH_DEFAULT = 8;
+	public static readonly DOCUMENT_PATH = 'documents/';
+	public static readonly DOCUMENT_MAX_LENGTH = env.get('DOCUMENTS_MAXLENGTH').default(2000000).asIntPositive();
+	public static readonly DOCUMENT_MAX_TIME = env.get('DOCUMENTS_MAXTIME').default(86400).asIntPositive();
+	public static readonly DOCS_ENABLED = env.get('DOCS_ENABLED').asBoolStrict() ?? true;
+	public static readonly DOCS_PATH = env.get('DOCS_PATH').default('/docs').asString();
+	public static readonly ZLIB_LEVEL = 6;
 
-	public static readonly hostname = (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain);
-
-	private readonly elysia: Elysia = new Elysia({ precompile: true });
-	private readonly documentHandler: DocumentHandler = new DocumentHandler(this);
-	private readonly errorHandler: ErrorHandler = new ErrorHandler();
+	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
+	private readonly DOCUMENT_HANDLER: DocumentHandler = new DocumentHandler(this);
+	private readonly ERROR_HANDLER: ErrorHandler = new ErrorHandler();
 
 	public constructor() {
-		Server.config.docs.enabled && this.initDocs();
-		this.initErrorListener();
+		Server.DOCS_ENABLED && this.initDocs();
 		this.initRequestListener();
+		this.initErrorListener();
 		this.initEndpoints();
 
-		this.elysia.listen(Server.config.port, ({ port }) => console.info(`Listening on: http://localhost:${port}`));
+		this.ELYSIA.listen(Server.PORT, ({ port }) => console.info(`Listening on: http://localhost:${port}`));
 	}
 
-	public get getElysia(): Elysia {
-		return this.elysia;
+	public get elysia(): Elysia {
+		return this.ELYSIA;
 	}
 
-	public get getDocumentHandler(): DocumentHandler {
-		return this.documentHandler;
+	public get documentHandler(): DocumentHandler {
+		return this.DOCUMENT_HANDLER;
 	}
 
-	public get getErrorHandler(): ErrorHandler {
-		return this.errorHandler;
+	public get errorHandler(): ErrorHandler {
+		return this.ERROR_HANDLER;
 	}
 
 	private initDocs(): void {
-		this.elysia.use(
+		this.ELYSIA.use(
 			swagger({
 				documentation: {
 					servers: [
@@ -76,13 +67,13 @@ export class Server {
 							description: 'JSPaste API'
 						},
 						{
-							url: 'http://localhost:'.concat(Server.config.port.toString()),
+							url: 'http://localhost:'.concat(Server.PORT.toString()),
 							description: 'Local API (Only use if you are running an instance locally)'
 						}
 					],
 					info: {
 						title: 'JSPaste documentation',
-						version: Server.config.versions.map((version) => `V${version}`).join(', '),
+						version: Server.ENDPOINT_VERSIONS.map((version) => `V${version}`).join(', '),
 						description: 'Note: The latest API version can be used with the "/documents" alias route.',
 						license: {
 							name: 'EUPL-1.2',
@@ -93,20 +84,20 @@ export class Server {
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
-				path: Server.config.docs.path,
-				exclude: [Server.config.docs.path, Server.config.docs.path.concat('/json'), /^\/documents/]
+				path: Server.DOCS_PATH,
+				exclude: [Server.DOCS_PATH, Server.DOCS_PATH.concat('/json'), /^\/documents/]
 			})
 		);
 	}
 
 	private initRequestListener(): void {
-		this.elysia.onRequest(({ set }) => {
+		this.ELYSIA.onRequest(({ set }) => {
 			set.headers['Access-Control-Allow-Origin'] = '*';
 		});
 	}
 
 	private initErrorListener(): void {
-		this.elysia.onError(({ code, error }) => {
+		this.ELYSIA.onError(({ code, error }) => {
 			switch (code) {
 				case 'VALIDATION': {
 					return ErrorHandler.get(ErrorCode.validation);
@@ -134,11 +125,11 @@ export class Server {
 
 	private initEndpoints(): void {
 		const routes = {
-			[ServerEndpointVersion.v1]: {
+			[ServerEndpointVersion.V1]: {
 				endpoints: [new AccessV1(this), new IndexV1(this), new PublishV1(this), new RemoveV1(this)],
 				prefixes: ['/api/v1/documents']
 			},
-			[ServerEndpointVersion.v2]: {
+			[ServerEndpointVersion.V2]: {
 				endpoints: [
 					new AccessV2(this),
 					new EditV2(this),
@@ -151,7 +142,7 @@ export class Server {
 			}
 		};
 
-		for (const [i, version] of Server.config.versions.toReversed().entries()) {
+		for (const [i, version] of Server.ENDPOINT_VERSIONS.toReversed().entries()) {
 			for (const endpoint of routes[version].endpoints) {
 				for (const prefix of routes[version].prefixes) endpoint.setPrefix(prefix).register();
 			}

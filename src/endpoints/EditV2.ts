@@ -4,10 +4,10 @@ import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
-		this.server.getElysia.patch(
-			this.prefix.concat('/:key'),
+		this.SERVER.elysia.patch(
+			this.PREFIX.concat('/:key'),
 			async ({ headers, body, params, error }) => {
-				return this.server.getDocumentHandler.setError(error).edit({
+				return this.SERVER.documentHandler.setError(error).edit({
 					key: params.key,
 					body: body,
 					secret: headers.secret
@@ -37,9 +37,9 @@ export class EditV2 extends AbstractEndpoint {
 						},
 						{ description: 'A response object with a boolean' }
 					),
-					400: ErrorHandler.schema,
-					403: ErrorHandler.schema,
-					404: ErrorHandler.schema
+					400: ErrorHandler.SCHEMA,
+					403: ErrorHandler.SCHEMA,
+					404: ErrorHandler.SCHEMA
 				},
 				detail: { summary: 'Edit document', tags: ['v2'] }
 			}

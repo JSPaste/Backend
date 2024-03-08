@@ -4,10 +4,10 @@ import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class RemoveV1 extends AbstractEndpoint {
 	protected override run(): void {
-		this.server.getElysia.delete(
-			this.prefix.concat('/:key'),
+		this.SERVER.elysia.delete(
+			this.PREFIX.concat('/:key'),
 			async ({ headers, params, error }) => {
-				return this.server.getDocumentHandler.setError(error).remove({
+				return this.SERVER.documentHandler.setError(error).remove({
 					key: params.key,
 					secret: headers.secret
 				});
@@ -34,9 +34,9 @@ export class RemoveV1 extends AbstractEndpoint {
 						},
 						{ description: 'A response object with a boolean' }
 					),
-					400: ErrorHandler.schema,
-					403: ErrorHandler.schema,
-					404: ErrorHandler.schema
+					400: ErrorHandler.SCHEMA,
+					403: ErrorHandler.SCHEMA,
+					404: ErrorHandler.SCHEMA
 				},
 				detail: { summary: 'Remove document', tags: ['v1'] }
 			}

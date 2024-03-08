@@ -6,10 +6,10 @@ import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class PublishV2 extends AbstractEndpoint {
 	protected override run(): void {
-		this.server.getElysia.post(
-			this.prefix,
+		this.SERVER.elysia.post(
+			this.PREFIX,
 			async ({ headers, body, error }) => {
-				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v2).setError(error).publish({
+				return this.SERVER.documentHandler.setVersion(ServerEndpointVersion.V2).setError(error).publish({
 					body: body,
 					selectedKey: headers.key,
 					selectedKeyLength: headers.keyLength,
@@ -32,8 +32,8 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					keyLength: t.Optional(
 						t.Numeric({
-							minimum: Server.config.documents.minKeyLength,
-							maximum: Server.config.documents.maxKeyLength,
+							minimum: Server.DOCUMENT_KEY_LENGTH_MIN,
+							maximum: Server.DOCUMENT_KEY_LENGTH_MAX,
 							description:
 								'If a custom key is not set, this will determine the key length of the automatically generated key',
 							examples: ['20', '4']
@@ -54,7 +54,7 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					lifetime: t.Optional(
 						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.config.documents.maxTime}`,
+							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.DOCUMENT_MAX_TIME}`,
 							examples: ['60', '0']
 						})
 					)
@@ -89,7 +89,7 @@ export class PublishV2 extends AbstractEndpoint {
 								'An object with a key, a secret, the display URL and an expiration timestamp for the document'
 						}
 					),
-					400: ErrorHandler.schema
+					400: ErrorHandler.SCHEMA
 				},
 				detail: { summary: 'Publish document', tags: ['v2'] }
 			}

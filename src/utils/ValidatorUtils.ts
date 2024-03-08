@@ -13,7 +13,7 @@ export class ValidatorUtils {
 	}
 
 	public static isValidArray<T>(value: T[], validator: (value: T) => boolean): boolean {
-		return ValidatorUtils.isInstanceOf(value, Array) && value.every(validator);
+		return Array.isArray(value) && value.every(validator);
 	}
 
 	public static isValidDomain(value: string): boolean {
@@ -22,7 +22,7 @@ export class ValidatorUtils {
 		return /\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b/.test(value);
 	}
 
-	public static isBase64URL(value: string): boolean {
+	public static isValidBase64URL(value: string): boolean {
 		return /^[\w-]+$/.test(value);
 	}
 

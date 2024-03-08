@@ -5,11 +5,11 @@ import { ServerEndpointVersion } from '../types/Server.ts';
 
 export class PublishV1 extends AbstractEndpoint {
 	protected override run(): void {
-		this.server.getElysia.post(
-			this.prefix,
+		this.SERVER.elysia.post(
+			this.PREFIX,
 			async ({ body, error }) => {
-				return this.server.getDocumentHandler
-					.setVersion(ServerEndpointVersion.v1)
+				return this.SERVER.documentHandler
+					.setVersion(ServerEndpointVersion.V1)
 					.setError(error)
 					.publish({ body });
 			},
@@ -30,7 +30,7 @@ export class PublishV1 extends AbstractEndpoint {
 							description: 'An object with a key and a secret for the document'
 						}
 					),
-					400: ErrorHandler.schema
+					400: ErrorHandler.SCHEMA
 				},
 				detail: { summary: 'Publish document', tags: ['v1'] }
 			}
