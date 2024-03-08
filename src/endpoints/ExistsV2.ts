@@ -6,8 +6,8 @@ export class ExistsV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.get(
 			this.prefix.concat('/:key/exists'),
-			async ({ params }) => {
-				return this.server.getDocumentHandler.exists(params);
+			async ({ params, error }) => {
+				return this.server.getDocumentHandler.setError(error).exists(params);
 			},
 			{
 				params: t.Object({

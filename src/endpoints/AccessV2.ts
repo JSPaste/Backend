@@ -7,9 +7,10 @@ export class AccessV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.get(
 			this.prefix.concat('/:key'),
-			async ({ query, headers, params }) => {
+			async ({ query, headers, params, error }) => {
 				return this.server.getDocumentHandler
 					.setVersion(ServerEndpointVersion.v2)
+					.setError(error)
 					.access({ key: params.key, password: headers.password || query.p });
 			},
 			{

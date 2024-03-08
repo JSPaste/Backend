@@ -7,8 +7,11 @@ export class PublishV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.post(
 			this.prefix,
-			async ({ body }) => {
-				return this.server.getDocumentHandler.setVersion(ServerEndpointVersion.v1).publish({ body });
+			async ({ body, error }) => {
+				return this.server.getDocumentHandler
+					.setVersion(ServerEndpointVersion.v1)
+					.setError(error)
+					.publish({ body });
 			},
 			{
 				type: 'arrayBuffer',

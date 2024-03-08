@@ -42,7 +42,8 @@ export class Server {
 	public static readonly hostname = (Server.config.tls ? 'https://' : 'http://').concat(Server.config.domain);
 
 	private readonly elysia: Elysia = new Elysia({ precompile: true });
-	private readonly documentHandler: DocumentHandler = new DocumentHandler();
+	private readonly documentHandler: DocumentHandler = new DocumentHandler(this);
+	private readonly errorHandler: ErrorHandler = new ErrorHandler();
 
 	public constructor() {
 		Server.config.docs.enabled && this.initDocs();
@@ -59,6 +60,10 @@ export class Server {
 
 	public get getDocumentHandler(): DocumentHandler {
 		return this.documentHandler;
+	}
+
+	public get getErrorHandler(): ErrorHandler {
+		return this.errorHandler;
 	}
 
 	private initDocs(): void {

@@ -1,35 +1,35 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
-  "name": "@jspaste/backend",
-  "private": true,
-  "license": "EUPL-1.2",
-  "type": "module",
-  "scripts": {
-    "build": "bun run build:structures && bun run build:structures:dts && bun run build:bundle",
-    "build:bundle": "bun build --target bun --minify --outdir ./dist/ ./src/index.ts",
-    "build:standalone": "bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
-    "build:structures": "bunx --bun pbjs -t static-module -w es6 -l --force-long --no-create --no-delimited --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/proto/**/*.proto",
-    "build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
-    "fix": "bun run fix:biome",
-    "fix:biome": "bunx --bun @biomejs/biome check --apply .",
-    "lint": "bun run lint:biome && bun run lint:tsc",
-    "lint:biome": "bunx --bun @biomejs/biome lint .",
-    "lint:tsc": "bunx --bun tsc --noEmit",
-    "production:build": "bun run build:structures && bun run build:structures:dts && bun run build:standalone",
-    "start": "bun run build && bun --bun ./dist/index.js",
-    "start:dev": "bun --bun --watch ./src/index.ts"
-  },
-  "dependencies": {
-    "@elysiajs/swagger": "1.0.0-rc.0",
-    "@types/bun": "~1.0.8",
-    "elysia": "1.0.0-rc.6",
-    "env-var": "~7.4.1",
-    "protobufjs": "~7.2.6",
-    "protobufjs-cli": "~1.1.2",
-    "typescript": "~5.4.2"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "~1.5.3",
-    "lefthook": "~1.6.5"
-  }
+	"$schema": "https://json.schemastore.org/package.json",
+	"name": "@jspaste/backend",
+	"private": true,
+	"license": "EUPL-1.2",
+	"type": "module",
+	"scripts": {
+		"build": "bun run build:structures && bun run build:structures:dts && bun run build:bundle",
+		"build:bundle": "bun build --target bun --minify --outdir ./dist/ ./src/index.ts",
+		"build:standalone": "bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
+		"build:structures": "bunx --bun pbjs -t static-module -w es6 -l --force-long --no-create --no-delimited --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/proto/**/*.proto",
+		"build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
+		"fix": "bun run fix:biome",
+		"fix:biome": "bunx --bun @biomejs/biome check --apply .",
+		"lint": "bun run lint:biome && bun run lint:tsc",
+		"lint:biome": "bunx --bun @biomejs/biome lint .",
+		"lint:tsc": "bunx --bun tsc --noEmit",
+		"production:build": "bun run build:structures && bun run build:structures:dts && bun run build:standalone",
+		"start": "bun run build && bun --bun ./dist/index.js",
+		"start:dev": "bun --bun --watch ./src/index.ts"
+	},
+	"dependencies": {
+		"@elysiajs/swagger": "1.0.0-rc.0",
+		"@types/bun": "~1.0.8",
+		"elysia": "1.0.0-rc.11",
+		"env-var": "~7.4.1",
+		"protobufjs": "~7.2.6",
+		"protobufjs-cli": "~1.1.2",
+		"typescript": "~5.4.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "~1.6.0",
+		"lefthook": "~1.6.5"
+	}
 }

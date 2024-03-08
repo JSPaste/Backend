@@ -6,8 +6,8 @@ export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.patch(
 			this.prefix.concat('/:key'),
-			async ({ headers, body, params }) => {
-				return this.server.getDocumentHandler.edit({
+			async ({ headers, body, params, error }) => {
+				return this.server.getDocumentHandler.setError(error).edit({
 					key: params.key,
 					body: body,
 					secret: headers.secret

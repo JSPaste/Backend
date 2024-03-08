@@ -11,10 +11,20 @@ import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
+	private readonly server: Server;
 	private version: ServerEndpointVersion | undefined;
 
-	public setVersion(value: ServerEndpointVersion): this {
-		this.version = value;
+	public constructor(server: Server) {
+		this.server = server;
+	}
+
+	public setError(error: any): this {
+		this.server.getErrorHandler.setError(error);
+		return this;
+	}
+
+	public setVersion(version: ServerEndpointVersion): this {
+		this.version = version;
 		return this;
 	}
 
@@ -100,7 +110,7 @@ export class DocumentHandler {
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
 		if (params.selectedKey && (await StringUtils.keyExists(key))) {
-			ErrorHandler.send(ErrorCode.document_KeyAlreadyExists);
+			this.server.getErrorHandler.send(ErrorCode.document_KeyAlreadyExists);
 		}
 
 		const document: IDocumentDataStruct = {
@@ -151,7 +161,7 @@ export class DocumentHandler {
 		const file = Bun.file(Server.config.documents.documentPath + key);
 
 		if (!(await file.exists())) {
-			ErrorHandler.send(ErrorCode.document_NotFound);
+			this.server.getErrorHandler.send(ErrorCode.document_NotFound);
 		}
 
 		return file;
@@ -166,13 +176,13 @@ export class DocumentHandler {
 				Server.config.documents.maxKeyLength
 			)
 		) {
-			ErrorHandler.send(ErrorCode.validation_invalid);
+			this.server.getErrorHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
 	private validateSecret(secret: string, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
-			ErrorHandler.send(ErrorCode.document_InvalidSecret);
+			this.server.getErrorHandler.send(ErrorCode.document_InvalidSecret);
 		}
 	}
 
@@ -181,14 +191,14 @@ export class DocumentHandler {
 			ValidatorUtils.isEmptyString(secret) ||
 			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
 		) {
-			ErrorHandler.send(ErrorCode.document_InvalidSecretLength);
+			this.server.getErrorHandler.send(ErrorCode.document_InvalidSecretLength);
 		}
 	}
 
 	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
 		if (password) {
 			if (documentPassword && password !== documentPassword) {
-				ErrorHandler.send(ErrorCode.document_InvalidPassword);
+				this.server.getErrorHandler.send(ErrorCode.document_InvalidPassword);
 			}
 		}
 	}
@@ -199,7 +209,7 @@ export class DocumentHandler {
 			(ValidatorUtils.isEmptyString(password) ||
 				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
 		) {
-			ErrorHandler.send(ErrorCode.document_InvalidPasswordLength);
+			this.server.getErrorHandler.send(ErrorCode.document_InvalidPasswordLength);
 		}
 	}
 
@@ -207,13 +217,13 @@ export class DocumentHandler {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
 			unlink(Server.config.documents.documentPath + key);
 
-			ErrorHandler.send(ErrorCode.document_NotFound);
+			this.server.getErrorHandler.send(ErrorCode.document_NotFound);
 		}
 	}
 
 	private validateSizeBetweenLimits(body: Buffer): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.config.documents.maxLength)) {
-			ErrorHandler.send(ErrorCode.document_InvalidLength);
+			this.server.getErrorHandler.send(ErrorCode.document_InvalidLength);
 		}
 	}
 
@@ -227,7 +237,7 @@ export class DocumentHandler {
 					Server.config.documents.maxKeyLength
 				))
 		) {
-			ErrorHandler.send(ErrorCode.validation_invalid);
+			this.server.getErrorHandler.send(ErrorCode.validation_invalid);
 		}
 	}
 
@@ -240,7 +250,7 @@ export class DocumentHandler {
 				Server.config.documents.maxKeyLength
 			)
 		) {
-			ErrorHandler.send(ErrorCode.document_InvalidKeyLength);
+			this.server.getErrorHandler.send(ErrorCode.document_InvalidKeyLength);
 		}
 	}
 }

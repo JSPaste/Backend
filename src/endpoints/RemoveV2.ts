@@ -6,8 +6,8 @@ export class RemoveV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.server.getElysia.delete(
 			this.prefix.concat('/:key'),
-			async ({ headers, params }) => {
-				return this.server.getDocumentHandler.remove({
+			async ({ headers, params, error }) => {
+				return this.server.getDocumentHandler.setError(error).remove({
 					key: params.key,
 					secret: headers.secret
 				});
