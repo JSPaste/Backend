@@ -4,11 +4,8 @@ updates:
       directory: '/'
       target-branch: dev
       schedule:
-          interval: weekly
+          interval: daily
       assignees:
           - inetol
-      commit-message:
-          prefix: GHA
-          include: scope
       labels:
-          - dependency
+          - dependency:gha
