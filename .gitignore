@@ -10,10 +10,10 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Husky
-.husky/
+# VSCode IDE
+.vscode/
 
-# IntelliJ based IDEs
+# Jetbrains IDEs
 .idea/
 
 # Finder (MacOS) folder config
