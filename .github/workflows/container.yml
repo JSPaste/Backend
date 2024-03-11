@@ -54,7 +54,7 @@ jobs:
 
             - name: 'Build image'
               id: build-image
-              uses: redhat-actions/buildah-build@c79846fb306beeba490e89fb75d2d1af95831e79 # master
+              uses: redhat-actions/buildah-build@1ec5690277b99c0f314e62c7e28dcc6074507706 # master
               with:
                   archs: amd64, arm64
                   containerfiles: Containerfile
