@@ -1,1 +1,6 @@
-./container/.dockerignore
+*
+!src/
+!bun.lockb
+!bunfig.toml
+!package.json
+!tsconfig.json
