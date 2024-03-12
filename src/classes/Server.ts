@@ -33,8 +33,7 @@ export class Server {
 	public static readonly ZLIB_LEVEL = 6;
 
 	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
-	private readonly DOCUMENT_HANDLER: DocumentHandler = new DocumentHandler(this);
-	private readonly ERROR_HANDLER: ErrorHandler = new ErrorHandler();
+	private readonly DOCUMENT_HANDLER: DocumentHandler = new DocumentHandler();
 
 	public constructor() {
 		Server.DOCS_ENABLED && this.initDocs();
@@ -51,10 +50,6 @@ export class Server {
 
 	public get documentHandler(): DocumentHandler {
 		return this.DOCUMENT_HANDLER;
-	}
-
-	public get errorHandler(): ErrorHandler {
-		return this.ERROR_HANDLER;
 	}
 
 	private initDocs(): void {

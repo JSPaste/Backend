@@ -91,7 +91,7 @@ export class ErrorHandler {
 		return { type, code, message };
 	}
 
-	public send(code: ErrorCode): void {
+	public static send(code: ErrorCode): void {
 		const { httpCode, type, message } = ErrorHandler.MAP[code];
 
 		throw error(httpCode, { type, code, message });
