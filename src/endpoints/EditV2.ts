@@ -1,5 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class EditV2 extends AbstractEndpoint {
@@ -7,7 +8,7 @@ export class EditV2 extends AbstractEndpoint {
 		this.SERVER.elysia.patch(
 			this.PREFIX.concat('/:key'),
 			async ({ headers, body, params }) => {
-				return this.SERVER.documentHandler.edit({
+				return DocumentHandler.edit({
 					key: params.key,
 					body: body,
 					secret: headers.secret

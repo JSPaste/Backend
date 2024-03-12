@@ -1,5 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class RemoveV2 extends AbstractEndpoint {
@@ -7,7 +8,7 @@ export class RemoveV2 extends AbstractEndpoint {
 		this.SERVER.elysia.delete(
 			this.PREFIX.concat('/:key'),
 			async ({ headers, params }) => {
-				return this.SERVER.documentHandler.remove({
+				return DocumentHandler.remove({
 					key: params.key,
 					secret: headers.secret
 				});

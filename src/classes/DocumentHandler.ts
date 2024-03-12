@@ -11,25 +11,18 @@ import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
-	private VERSION: ServerEndpointVersion | undefined;
+	public static async access(params: Parameters['access'], version: ServerEndpointVersion) {
+		DocumentHandler.validateKey(params.key);
 
-	public setVersion(version: ServerEndpointVersion): this {
-		this.VERSION = version;
-		return this;
-	}
-
-	public async access(params: Parameters['access']) {
-		this.validateKey(params.key);
-
-		const file = await this.retrieveDocument(params.key);
+		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentManager.read(file);
 
-		this.validateTimestamp(params.key, document.expirationTimestamp);
-		this.validatePassword(params.password, document.password);
+		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
+		DocumentHandler.validatePassword(params.password, document.password);
 
 		const data = new TextDecoder().decode(document.rawFileData);
 
-		switch (this.VERSION) {
+		switch (version) {
 			case ServerEndpointVersion.V1: {
 				return { key: params.key, data };
 			}
@@ -42,24 +35,20 @@ export class DocumentHandler {
 					expirationTimestamp: document.expirationTimestamp
 				};
 			}
-
-			default: {
-				return ErrorHandler.get(ErrorCode.crash);
-			}
 		}
 	}
 
-	public async edit(params: Parameters['edit']) {
-		this.validateKey(params.key);
+	public static async edit(params: Parameters['edit']) {
+		DocumentHandler.validateKey(params.key);
 
-		const file = await this.retrieveDocument(params.key);
+		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentManager.read(file);
 
-		this.validateSecret(params.secret, document.secret);
+		DocumentHandler.validateSecret(params.secret, document.secret);
 
 		const buffer = Buffer.from(params.body as ArrayBuffer);
 
-		this.validateSizeBetweenLimits(buffer);
+		DocumentHandler.validateSizeBetweenLimits(buffer);
 
 		document.rawFileData = buffer;
 
@@ -70,24 +59,24 @@ export class DocumentHandler {
 		};
 	}
 
-	public async exists(params: Parameters['exists']) {
-		this.validateKey(params.key);
+	public static async exists(params: Parameters['exists']) {
+		DocumentHandler.validateKey(params.key);
 
 		return Bun.file(Server.DOCUMENT_PATH + params.key).exists();
 	}
 
-	public async publish(params: Parameters['publish']) {
-		this.validateSelectedKey(params.selectedKey);
-		this.validateSelectedKeyLength(params.selectedKeyLength);
-		this.validatePasswordLength(params.password);
+	public static async publish(params: Parameters['publish'], version: ServerEndpointVersion) {
+		DocumentHandler.validateSelectedKey(params.selectedKey);
+		DocumentHandler.validateSelectedKeyLength(params.selectedKeyLength);
+		DocumentHandler.validatePasswordLength(params.password);
 
 		const secret = params.selectedSecret || StringUtils.createSecret();
 
-		this.validateSecretLength(secret);
+		DocumentHandler.validateSecretLength(secret);
 
 		const bodyBuffer = Buffer.from(params.body as ArrayBuffer);
 
-		this.validateSizeBetweenLimits(bodyBuffer);
+		DocumentHandler.validateSizeBetweenLimits(bodyBuffer);
 
 		let lifetime = params.lifetime ?? Server.DOCUMENT_MAX_TIME;
 
@@ -112,7 +101,7 @@ export class DocumentHandler {
 
 		await DocumentManager.write(Server.DOCUMENT_PATH + key, document);
 
-		switch (this.VERSION) {
+		switch (version) {
 			case ServerEndpointVersion.V1: {
 				return { key, secret };
 			}
@@ -125,20 +114,16 @@ export class DocumentHandler {
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 			}
-
-			default: {
-				return ErrorHandler.get(ErrorCode.crash);
-			}
 		}
 	}
 
-	public async remove(params: Parameters['remove']) {
-		this.validateKey(params.key);
+	public static async remove(params: Parameters['remove']) {
+		DocumentHandler.validateKey(params.key);
 
-		const file = await this.retrieveDocument(params.key);
+		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentManager.read(file);
 
-		this.validateSecret(params.secret, document.secret);
+		DocumentHandler.validateSecret(params.secret, document.secret);
 
 		return {
 			removed: await unlink(Server.DOCUMENT_PATH + params.key)
@@ -147,7 +132,7 @@ export class DocumentHandler {
 		};
 	}
 
-	private async retrieveDocument(key: string): Promise<BunFile> {
+	private static async retrieveDocument(key: string): Promise<BunFile> {
 		const file = Bun.file(Server.DOCUMENT_PATH + key);
 
 		if (!(await file.exists())) {
@@ -157,7 +142,7 @@ export class DocumentHandler {
 		return file;
 	}
 
-	private validateKey(key: string): void {
+	private static validateKey(key: string): void {
 		if (
 			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
@@ -170,13 +155,13 @@ export class DocumentHandler {
 		}
 	}
 
-	private validateSecret(secret: string, documentSecret: string): void {
+	private static validateSecret(secret: string, documentSecret: string): void {
 		if (documentSecret && documentSecret !== secret) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);
 		}
 	}
 
-	private validateSecretLength(secret: string): void {
+	private static validateSecretLength(secret: string): void {
 		if (
 			ValidatorUtils.isEmptyString(secret) ||
 			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
@@ -185,7 +170,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
+	private static validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
 		if (password) {
 			if (documentPassword && password !== documentPassword) {
 				ErrorHandler.send(ErrorCode.documentInvalidPassword);
@@ -193,7 +178,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private validatePasswordLength(password: string | undefined): void {
+	private static validatePasswordLength(password: string | undefined): void {
 		if (
 			password &&
 			(ValidatorUtils.isEmptyString(password) ||
@@ -203,7 +188,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private validateTimestamp(key: string, timestamp: number): void {
+	private static validateTimestamp(key: string, timestamp: number): void {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
 			unlink(Server.DOCUMENT_PATH + key);
 
@@ -211,13 +196,13 @@ export class DocumentHandler {
 		}
 	}
 
-	private validateSizeBetweenLimits(body: Buffer): void {
+	private static validateSizeBetweenLimits(body: Buffer): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.DOCUMENT_MAX_LENGTH)) {
 			ErrorHandler.send(ErrorCode.documentInvalidLength);
 		}
 	}
 
-	private validateSelectedKey(key: string | undefined): void {
+	private static validateSelectedKey(key: string | undefined): void {
 		if (
 			key &&
 			(!ValidatorUtils.isValidBase64URL(key) ||
@@ -231,7 +216,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private validateSelectedKeyLength(length: number | undefined): void {
+	private static validateSelectedKeyLength(length: number | undefined): void {
 		if (
 			length &&
 			ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)

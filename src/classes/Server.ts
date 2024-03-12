@@ -13,7 +13,6 @@ import { RemoveV1 } from '../endpoints/RemoveV1.ts';
 import { RemoveV2 } from '../endpoints/RemoveV2.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
-import { DocumentHandler } from './DocumentHandler.ts';
 import { ErrorHandler } from './ErrorHandler.ts';
 
 export class Server {
@@ -33,7 +32,6 @@ export class Server {
 	public static readonly ZLIB_LEVEL = 6;
 
 	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
-	private readonly DOCUMENT_HANDLER: DocumentHandler = new DocumentHandler();
 
 	public constructor() {
 		Server.DOCS_ENABLED && this.initDocs();
@@ -46,10 +44,6 @@ export class Server {
 
 	public get elysia(): Elysia {
 		return this.ELYSIA;
-	}
-
-	public get documentHandler(): DocumentHandler {
-		return this.DOCUMENT_HANDLER;
 	}
 
 	private initDocs(): void {

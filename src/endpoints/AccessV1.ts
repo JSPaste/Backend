@@ -1,5 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
@@ -8,7 +9,7 @@ export class AccessV1 extends AbstractEndpoint {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key'),
 			async ({ params }) => {
-				return this.SERVER.documentHandler.setVersion(ServerEndpointVersion.V1).access({ key: params.key });
+				return DocumentHandler.access({ key: params.key }, ServerEndpointVersion.V1);
 			},
 			{
 				params: t.Object({

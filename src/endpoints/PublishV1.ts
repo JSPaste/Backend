@@ -1,5 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 
@@ -8,7 +9,7 @@ export class PublishV1 extends AbstractEndpoint {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ body }) => {
-				return this.SERVER.documentHandler.setVersion(ServerEndpointVersion.V1).publish({ body });
+				return DocumentHandler.publish({ body }, ServerEndpointVersion.V1);
 			},
 			{
 				type: 'arrayBuffer',

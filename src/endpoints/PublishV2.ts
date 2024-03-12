@@ -1,5 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
+import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
@@ -9,14 +10,17 @@ export class PublishV2 extends AbstractEndpoint {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ headers, body }) => {
-				return this.SERVER.documentHandler.setVersion(ServerEndpointVersion.V2).publish({
-					body: body,
-					selectedKey: headers.key,
-					selectedKeyLength: headers.keyLength,
-					selectedSecret: headers.secret,
-					lifetime: headers.lifetime,
-					password: headers.password
-				});
+				return DocumentHandler.publish(
+					{
+						body: body,
+						selectedKey: headers.key,
+						selectedKeyLength: headers.keyLength,
+						selectedSecret: headers.secret,
+						lifetime: headers.lifetime,
+						password: headers.password
+					},
+					ServerEndpointVersion.V2
+				);
 			},
 			{
 				type: 'arrayBuffer',
