@@ -9,7 +9,7 @@ and [ElysiaJS](https://elysiajs.com)
 
 * Copy `.env.example` to `.env.local`.
 * Run: `bun install --production`
-* Run: `bun start`
+* Run: `bun run start`
 
 ### Docker
 

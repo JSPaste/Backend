@@ -8,8 +8,8 @@ export class PublishV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.post(
 			this.PREFIX,
-			async ({ headers, body, error }) => {
-				return this.SERVER.documentHandler.setVersion(ServerEndpointVersion.V2).setError(error).publish({
+			async ({ headers, body }) => {
+				return this.SERVER.documentHandler.setVersion(ServerEndpointVersion.V2).publish({
 					body: body,
 					selectedKey: headers.key,
 					selectedKeyLength: headers.keyLength,

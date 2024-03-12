@@ -1,4 +1,4 @@
-import { t } from 'elysia';
+import { error, t } from 'elysia';
 import { ErrorCode, type Schema } from '../types/ErrorHandler.ts';
 
 export class ErrorHandler {
@@ -85,22 +85,15 @@ export class ErrorHandler {
 		}
 	};
 
-	private ERROR: any;
-
 	public static get(code: ErrorCode) {
 		const { type, message } = ErrorHandler.MAP[code];
 
 		return { type, code, message };
 	}
 
-	public setError(error: any): this {
-		this.ERROR = error;
-		return this;
-	}
-
 	public send(code: ErrorCode): void {
 		const { httpCode, type, message } = ErrorHandler.MAP[code];
 
-		throw this.ERROR(httpCode, { type, code, message });
+		throw error(httpCode, { type, code, message });
 	}
 }

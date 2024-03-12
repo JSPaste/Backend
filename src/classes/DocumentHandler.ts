@@ -18,11 +18,6 @@ export class DocumentHandler {
 		this.SERVER = server;
 	}
 
-	public setError(error: any): this {
-		this.SERVER.errorHandler.setError(error);
-		return this;
-	}
-
 	public setVersion(version: ServerEndpointVersion): this {
 		this.VERSION = version;
 		return this;

@@ -22,14 +22,14 @@
 	"dependencies": {
 		"@elysiajs/swagger": "1.0.0-rc.0",
 		"@types/bun": "~1.0.8",
-		"elysia": "1.0.0-rc.11",
+		"elysia": "1.0.0-rc.15",
 		"env-var": "~7.4.1",
 		"protobufjs": "~7.2.6",
 		"protobufjs-cli": "~1.1.2",
 		"typescript": "~5.4.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "~1.6.0",
+		"@biomejs/biome": "~1.6.1",
 		"lefthook": "~1.6.5"
 	}
 }
