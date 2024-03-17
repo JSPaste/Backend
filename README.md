@@ -13,13 +13,7 @@ and [ElysiaJS](https://elysiajs.com)
 
 ### Docker
 
-* Run: `docker run -d -p 4000:4000 ghcr.io/jspaste/backend:latest`
-
-### Docker Compose
-
-* Copy `.env.example` to `.env.backend`.
-* Adapt your `docker-compose.yml` to your needs.
-* Run: `docker-compose up -d --pull --remove-orphans docker-compose.yml`
+* Run: `docker run -e DOCS_ENABLED=true -d -p 4000:4000 ghcr.io/jspaste/backend:latest`
 
 ## License
 

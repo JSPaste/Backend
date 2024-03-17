@@ -14,27 +14,25 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateKey(length: number = Server.DOCUMENT_KEY_LENGTH_DEFAULT): string {
+	public static generateKey(length: number = Server.CONFIG.DOCUMENT_KEY_LENGTH_DEFAULT): string {
 		if (
-			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
+			!ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
+				Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX
+			)
 		) {
-			length = Server.DOCUMENT_KEY_LENGTH_DEFAULT;
+			length = Server.CONFIG.DOCUMENT_KEY_LENGTH_DEFAULT;
 		}
 
 		return StringUtils.random(length, 64);
 	}
 
 	public static async keyExists(key: string): Promise<boolean> {
-		return Bun.file(Server.DOCUMENT_PATH + key).exists();
+		return Bun.file(Server.CONFIG.DOCUMENT_PATH + key).exists();
 	}
 
-	public static async createKey(length: number = Server.DOCUMENT_KEY_LENGTH_DEFAULT): Promise<string> {
-		if (
-			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
-		) {
-			length = Server.DOCUMENT_KEY_LENGTH_DEFAULT;
-		}
-
+	public static async createKey(length: number = Server.CONFIG.DOCUMENT_KEY_LENGTH_DEFAULT): Promise<string> {
 		const key = StringUtils.generateKey(length);
 
 		return (await StringUtils.keyExists(key)) ? StringUtils.createKey(length + 1) : key;
