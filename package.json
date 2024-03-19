@@ -33,5 +33,7 @@
 		"lefthook": "~1.6.7",
 		"sort-package-json": "~2.8.0"
 	},
-	"trustedDependencies": ["@biomejs/biome"]
+	"trustedDependencies": [
+		"@biomejs/biome"
+	]
 }

@@ -1,4 +1,0 @@
-pre-commit:
-  commands:
-    fix:
-      run: ./node_modules/.bin/biome check --apply . && git update-index --again
