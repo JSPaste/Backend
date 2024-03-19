@@ -1,21 +1,40 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
-import type { IDocumentDataStruct } from '../structures/Structures';
+import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/Structures';
 import type { Parameters } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
-import { DocumentManager } from './DocumentManager.ts';
 import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
+	public static async documentRead(file: BunFile): Promise<DocumentDataStruct> {
+		return DocumentDataStruct.decode(Bun.inflateSync(Buffer.from(await file.arrayBuffer())));
+	}
+
+	public static async documentWrite(filePath: string, document: IDocumentDataStruct): Promise<void> {
+		await Bun.write(filePath, Bun.deflateSync(DocumentDataStruct.encode(document).finish()));
+	}
+
+	public static async accessRaw(params: Parameters['access']) {
+		DocumentHandler.validateKey(params.key);
+
+		const file = await DocumentHandler.retrieveDocument(params.key);
+		const document = await DocumentHandler.documentRead(file);
+
+		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
+		DocumentHandler.validatePassword(params.password, document.password);
+
+		return new TextDecoder().decode(document.rawFileData);
+	}
+
 	public static async access(params: Parameters['access'], version: ServerEndpointVersion) {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentManager.read(file);
+		const document = await DocumentHandler.documentRead(file);
 
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
 		DocumentHandler.validatePassword(params.password, document.password);
@@ -42,7 +61,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentManager.read(file);
+		const document = await DocumentHandler.documentRead(file);
 
 		DocumentHandler.validateSecret(params.secret, document.secret);
 
@@ -53,7 +72,7 @@ export class DocumentHandler {
 		document.rawFileData = buffer;
 
 		return {
-			edited: await DocumentManager.write(Server.CONFIG.DOCUMENT_PATH + params.key, document)
+			edited: await DocumentHandler.documentWrite(Server.CONFIG.DOCUMENT_PATH + params.key, document)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -99,7 +118,7 @@ export class DocumentHandler {
 			password: params.password
 		};
 
-		await DocumentManager.write(Server.CONFIG.DOCUMENT_PATH + key, document);
+		await DocumentHandler.documentWrite(Server.CONFIG.DOCUMENT_PATH + key, document);
 
 		switch (version) {
 			case ServerEndpointVersion.V1: {
@@ -121,7 +140,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentManager.read(file);
+		const document = await DocumentHandler.documentRead(file);
 
 		DocumentHandler.validateSecret(params.secret, document.secret);
 
