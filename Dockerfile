@@ -4,15 +4,14 @@ WORKDIR /build/
 
 COPY . ./
 
-RUN bun install --production --frozen-lockfile --ignore-scripts
-RUN bun run production:build
+RUN bun install --production --frozen-lockfile
+RUN bun run build:standalone
 
 # Runner
 FROM gcr.io/distroless/base-nossl-debian12:nonroot AS runner
+USER 65532:65532
 
 COPY --chown=65532:65532 --from=builder /build/dist/jspaste ./
-
-ENV DOCS_ENABLED=false
 
 LABEL org.opencontainers.image.url="https://jspaste.eu"
 LABEL org.opencontainers.image.source="https://github.com/jspaste/backend"

@@ -1,0 +1,13 @@
+{
+	"$schema": "https://json.schemastore.org/lefthook.json",
+	"pre-commit": {
+		"commands": {
+			"fix": {
+				"env": {
+					"PATH": "$PATH:$HOME/.bun/bin"
+				},
+				"run": "bun run fix && git update-index --again"
+			}
+		}
+	}
+}

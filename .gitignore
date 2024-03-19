@@ -10,7 +10,10 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# IntelliJ based IDEs
+# VSCode IDE
+.vscode/
+
+# Jetbrains IDEs
 .idea/
 
 # Finder (MacOS) folder config

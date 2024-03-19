@@ -10,7 +10,7 @@ export interface IDocumentDataStruct {
     secret?: (string|null);
 
     /** DocumentDataStruct expirationTimestamp */
-    expirationTimestamp?: (number|Long|null);
+    expirationTimestamp?: (Long|null);
 
     /** DocumentDataStruct password */
     password?: (string|null);
@@ -32,7 +32,7 @@ export class DocumentDataStruct implements IDocumentDataStruct {
     public secret: string;
 
     /** DocumentDataStruct expirationTimestamp. */
-    public expirationTimestamp?: (number|Long|null);
+    public expirationTimestamp?: (Long|null);
 
     /** DocumentDataStruct password. */
     public password?: (string|null);
@@ -52,14 +52,6 @@ export class DocumentDataStruct implements IDocumentDataStruct {
     public static encode(message: IDocumentDataStruct, writer?: $protobuf.Writer): $protobuf.Writer;
 
     /**
-     * Encodes the specified DocumentDataStruct message, length delimited. Does not implicitly {@link DocumentDataStruct.verify|verify} messages.
-     * @param message DocumentDataStruct message or plain object to encode
-     * @param [writer] Writer to encode to
-     * @returns Writer
-     */
-    public static encodeDelimited(message: IDocumentDataStruct, writer?: $protobuf.Writer): $protobuf.Writer;
-
-    /**
      * Decodes a DocumentDataStruct message from the specified reader or buffer.
      * @param reader Reader or buffer to decode from
      * @param [length] Message length if known beforehand
@@ -68,15 +60,6 @@ export class DocumentDataStruct implements IDocumentDataStruct {
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
     public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): DocumentDataStruct;
-
-    /**
-     * Decodes a DocumentDataStruct message from the specified reader or buffer, length delimited.
-     * @param reader Reader or buffer to decode from
-     * @returns DocumentDataStruct
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): DocumentDataStruct;
 
     /**
      * Verifies a DocumentDataStruct message.

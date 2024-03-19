@@ -1,12 +1,12 @@
-import type { Range } from '../types/Range.ts';
 import { Server } from '../classes/Server.ts';
+import type { Range } from '../types/Range.ts';
+import { ValidatorUtils } from './ValidatorUtils.ts';
 
 export class StringUtils {
-	public static readonly base64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+	public static readonly BASE64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
 
 	public static random(length: number, base: Range<2, 64> = 62): string {
-		const baseSet = StringUtils.base64URL.slice(0, base);
-
+		const baseSet = StringUtils.BASE64URL.slice(0, base);
 		let string = '';
 
 		while (length--) string += baseSet.charAt(Math.floor(Math.random() * baseSet.length));
@@ -14,21 +14,31 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateKey(length: Range<2, 32> = 8): string {
+	public static generateKey(length: number = Server.CONFIG.DOCUMENT_KEY_LENGTH_DEFAULT): string {
+		if (
+			!ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
+				Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX
+			)
+		) {
+			length = Server.CONFIG.DOCUMENT_KEY_LENGTH_DEFAULT;
+		}
+
 		return StringUtils.random(length, 64);
 	}
 
 	public static async keyExists(key: string): Promise<boolean> {
-		return Bun.file(Server.config.documents.documentPath + key).exists();
+		return Bun.file(Server.CONFIG.DOCUMENT_PATH + key).exists();
 	}
 
-	public static async createKey(length: Range<2, 32> = 8): Promise<string> {
+	public static async createKey(length: number = Server.CONFIG.DOCUMENT_KEY_LENGTH_DEFAULT): Promise<string> {
 		const key = StringUtils.generateKey(length);
 
-		return (await StringUtils.keyExists(key)) ? StringUtils.createKey((length + 1) as Range<2, 32>) : key;
+		return (await StringUtils.keyExists(key)) ? StringUtils.createKey(length + 1) : key;
 	}
 
-	public static createSecret(chunkLength: number = 5, chunks: number = 4): string {
+	public static createSecret(chunkLength = 5, chunks = 4): string {
 		return Array.from({ length: chunks }, () => StringUtils.random(chunkLength)).join('-');
 	}
 }
