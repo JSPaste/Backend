@@ -1,3 +1,4 @@
+import cors from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import * as env from 'env-var';
@@ -41,7 +42,7 @@ export class Server {
 
 	public constructor() {
 		Server.ENV.DOCS_ENABLED && this.initDocs();
-		this.initRequestListener();
+		this.initCORS();
 		this.initErrorListener();
 		this.initEndpoints();
 
@@ -85,10 +86,13 @@ export class Server {
 		);
 	}
 
-	private initRequestListener(): void {
-		this.ELYSIA.onRequest(({ set }) => {
-			set.headers['Access-Control-Allow-Origin'] = '*';
-		});
+	private initCORS(): void {
+		this.ELYSIA.use(
+			cors({
+				origin: true,
+				credentials: false
+			})
+		);
 	}
 
 	private initErrorListener(): void {
