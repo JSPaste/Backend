@@ -19,34 +19,32 @@ import { ServerEndpointVersion } from '../types/Server.ts';
 import { ErrorHandler } from './ErrorHandler.ts';
 
 export class Server {
-	public static readonly ENV = {
-		PORT: env.get('PORT').default(4000).asPortNumber(),
-		DOCUMENT_TLS: env.get('DOCUMENT_TLS').asBoolStrict() ?? false,
-		DOCUMENT_DOMAIN: env.get('DOCUMENT_DOMAIN').default('localhost').asString(),
-		DOCUMENT_MAXLENGTH: env.get('DOCUMENT_MAXLENGTH').default(2000000).asIntPositive(),
-		DOCUMENT_MAXTIME: env.get('DOCUMENT_MAXTIME').default(86400).asIntPositive(),
-		DOCS_ENABLED: env.get('DOCS_ENABLED').asBoolStrict() ?? false,
-		DOCS_PATH: env.get('DOCS_PATH').default('/docs').asString()
-	};
+	// ENV
+	public static readonly PORT = env.get('PORT').default(4000).asPortNumber();
+	public static readonly DOCUMENT_TLS = env.get('DOCUMENT_TLS').asBoolStrict() ?? false;
+	public static readonly DOCUMENT_DOMAIN = env.get('DOCUMENT_DOMAIN').default('localhost').asString();
+	public static readonly DOCUMENT_MAXLENGTH = env.get('DOCUMENT_MAXLENGTH').default(2000000).asIntPositive();
+	public static readonly DOCUMENT_MAXTIME = env.get('DOCUMENT_MAXTIME').default(86400).asIntPositive();
+	public static readonly DOCS_ENABLED = env.get('DOCS_ENABLED').asBoolStrict() ?? false;
+	public static readonly DOCS_PATH = env.get('DOCS_PATH').default('/docs').asString();
 
-	public static readonly CONFIG = {
-		HOSTNAME: (Server.ENV.DOCUMENT_TLS ? 'https://' : 'http://').concat(Server.ENV.DOCUMENT_DOMAIN),
-		ENDPOINT_VERSIONS: [ServerEndpointVersion.V1, ServerEndpointVersion.V2],
-		DOCUMENT_PATH: 'documents/',
-		DOCUMENT_KEY_LENGTH_MIN: 2,
-		DOCUMENT_KEY_LENGTH_MAX: 32,
-		DOCUMENT_KEY_LENGTH_DEFAULT: 8
-	};
+	// CONFIG
+	public static readonly HOSTNAME = (Server.DOCUMENT_TLS ? 'https://' : 'http://').concat(Server.DOCUMENT_DOMAIN);
+	public static readonly ENDPOINT_VERSIONS = [ServerEndpointVersion.V1, ServerEndpointVersion.V2];
+	public static readonly DOCUMENT_PATH = 'documents/';
+	public static readonly DOCUMENT_KEY_LENGTH_MIN = 2;
+	public static readonly DOCUMENT_KEY_LENGTH_MAX = 32;
+	public static readonly DOCUMENT_KEY_LENGTH_DEFAULT = 8;
 
 	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
 
 	public constructor() {
-		Server.ENV.DOCS_ENABLED && this.initDocs();
+		Server.DOCS_ENABLED && this.initDocs();
 		this.initCORS();
 		this.initErrorListener();
 		this.initEndpoints();
 
-		this.ELYSIA.listen(Server.ENV.PORT, ({ port }) => console.info(`Listening on: http://localhost:${port}`));
+		this.ELYSIA.listen(Server.PORT, ({ port }) => console.info(`Listening on: http://localhost:${port}`));
 	}
 
 	public get elysia(): Elysia {
@@ -63,13 +61,13 @@ export class Server {
 							description: 'JSPaste API'
 						},
 						{
-							url: 'http://localhost:'.concat(Server.ENV.PORT.toString()),
+							url: 'http://localhost:'.concat(Server.PORT.toString()),
 							description: 'Local API (Only use if you are running an instance locally)'
 						}
 					],
 					info: {
 						title: 'JSPaste documentation',
-						version: Server.CONFIG.ENDPOINT_VERSIONS.map((version) => `V${version}`).join(', '),
+						version: Server.ENDPOINT_VERSIONS.map((version) => `V${version}`).join(', '),
 						description: 'Note: The latest API version can be used with the "/documents" alias route.',
 						license: {
 							name: 'EUPL-1.2',
@@ -80,8 +78,8 @@ export class Server {
 				swaggerOptions: {
 					syntaxHighlight: { activate: true, theme: 'monokai' }
 				},
-				path: Server.ENV.DOCS_PATH,
-				exclude: [Server.ENV.DOCS_PATH, Server.ENV.DOCS_PATH.concat('/json'), /^\/documents/]
+				path: Server.DOCS_PATH,
+				exclude: [Server.DOCS_PATH, Server.DOCS_PATH.concat('/json'), /^\/documents/]
 			})
 		);
 	}
@@ -148,7 +146,7 @@ export class Server {
 			}
 		};
 
-		for (const [i, version] of Server.CONFIG.ENDPOINT_VERSIONS.toReversed().entries()) {
+		for (const [i, version] of Server.ENDPOINT_VERSIONS.toReversed().entries()) {
 			for (const endpoint of routes[version].endpoints) {
 				for (const prefix of routes[version].prefixes) endpoint.setPrefix(prefix).register();
 			}

@@ -50,7 +50,7 @@ export class DocumentHandler {
 				return {
 					key: params.key,
 					data,
-					url: Server.CONFIG.HOSTNAME.concat('/', params.key),
+					url: Server.HOSTNAME.concat('/', params.key),
 					expirationTimestamp: document.expirationTimestamp
 				};
 			}
@@ -72,7 +72,7 @@ export class DocumentHandler {
 		document.rawFileData = buffer;
 
 		return {
-			edited: await DocumentHandler.documentWrite(Server.CONFIG.DOCUMENT_PATH + params.key, document)
+			edited: await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + params.key, document)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -81,7 +81,7 @@ export class DocumentHandler {
 	public static async exists(params: Parameters['exists']) {
 		DocumentHandler.validateKey(params.key);
 
-		return Bun.file(Server.CONFIG.DOCUMENT_PATH + params.key).exists();
+		return Bun.file(Server.DOCUMENT_PATH + params.key).exists();
 	}
 
 	public static async publish(params: Parameters['publish'], version: ServerEndpointVersion) {
@@ -97,7 +97,7 @@ export class DocumentHandler {
 
 		DocumentHandler.validateSizeBetweenLimits(bodyBuffer);
 
-		let lifetime = params.lifetime ?? Server.ENV.DOCUMENT_MAXTIME;
+		let lifetime = params.lifetime ?? Server.DOCUMENT_MAXTIME;
 
 		// Make the document permanent if the value exceeds 5 years
 		if (lifetime > 157_784_760) lifetime = 0;
@@ -118,7 +118,7 @@ export class DocumentHandler {
 			password: params.password
 		};
 
-		await DocumentHandler.documentWrite(Server.CONFIG.DOCUMENT_PATH + key, document);
+		await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + key, document);
 
 		switch (version) {
 			case ServerEndpointVersion.V1: {
@@ -129,7 +129,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: Server.CONFIG.HOSTNAME.concat('/', key),
+					url: Server.HOSTNAME.concat('/', key),
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 			}
@@ -145,14 +145,14 @@ export class DocumentHandler {
 		DocumentHandler.validateSecret(params.secret, document.secret);
 
 		return {
-			removed: await unlink(Server.CONFIG.DOCUMENT_PATH + params.key)
+			removed: await unlink(Server.DOCUMENT_PATH + params.key)
 				.then(() => true)
 				.catch(() => false)
 		};
 	}
 
 	private static async retrieveDocument(key: string): Promise<BunFile> {
-		const file = Bun.file(Server.CONFIG.DOCUMENT_PATH + key);
+		const file = Bun.file(Server.DOCUMENT_PATH + key);
 
 		if (!(await file.exists())) {
 			ErrorHandler.send(ErrorCode.documentNotFound);
@@ -166,8 +166,8 @@ export class DocumentHandler {
 			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
 				Bun.stringWidth(key),
-				Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
-				Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX
+				Server.DOCUMENT_KEY_LENGTH_MIN,
+				Server.DOCUMENT_KEY_LENGTH_MAX
 			)
 		) {
 			ErrorHandler.send(ErrorCode.validationInvalid);
@@ -209,14 +209,14 @@ export class DocumentHandler {
 
 	private static validateTimestamp(key: string, timestamp: number): void {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
-			unlink(Server.CONFIG.DOCUMENT_PATH + key);
+			unlink(Server.DOCUMENT_PATH + key);
 
 			ErrorHandler.send(ErrorCode.documentNotFound);
 		}
 	}
 
 	private static validateSizeBetweenLimits(body: Buffer): void {
-		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.ENV.DOCUMENT_MAXLENGTH)) {
+		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.DOCUMENT_MAXLENGTH)) {
 			ErrorHandler.send(ErrorCode.documentInvalidLength);
 		}
 	}
@@ -227,8 +227,8 @@ export class DocumentHandler {
 			(!ValidatorUtils.isValidBase64URL(key) ||
 				!ValidatorUtils.isLengthWithinRange(
 					Bun.stringWidth(key),
-					Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
-					Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX
+					Server.DOCUMENT_KEY_LENGTH_MIN,
+					Server.DOCUMENT_KEY_LENGTH_MAX
 				))
 		) {
 			ErrorHandler.send(ErrorCode.validationInvalid);
@@ -238,11 +238,7 @@ export class DocumentHandler {
 	private static validateSelectedKeyLength(length: number | undefined): void {
 		if (
 			length &&
-			ValidatorUtils.isLengthWithinRange(
-				length,
-				Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
-				Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX
-			)
+			ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidKeyLength);
 		}
