@@ -20,7 +20,6 @@
 		"start:dev": "bun --bun --watch ./src/index.ts"
 	},
 	"dependencies": {
-		"@elysiajs/cors": "~1.0.2",
 		"@elysiajs/swagger": "~1.0.3",
 		"@types/bun": "~1.0.10",
 		"elysia": "~1.0.7",

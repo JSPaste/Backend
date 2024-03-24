@@ -1,4 +1,3 @@
-import cors from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import * as env from 'env-var';
@@ -85,12 +84,20 @@ export class Server {
 	}
 
 	private initCORS(): void {
-		this.ELYSIA.use(
-			cors({
-				origin: true,
-				credentials: false
-			})
-		);
+		const globalHeaders: Record<string, string> = {
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': '*'
+		};
+
+		this.ELYSIA.headers(globalHeaders).options('*', ({ set }) => {
+			set.headers['Access-Control-Max-Age'] = (5).toString();
+
+			return new Response(null, {
+				status: 204
+			});
+		});
+
+		this.ELYSIA.headers(globalHeaders).onRequest(() => undefined);
 	}
 
 	private initErrorListener(): void {
