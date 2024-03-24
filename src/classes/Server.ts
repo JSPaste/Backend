@@ -90,7 +90,7 @@ export class Server {
 		};
 
 		this.ELYSIA.headers(globalHeaders).options('*', ({ set }) => {
-			set.headers['Access-Control-Max-Age'] = (5).toString();
+			set.headers['Access-Control-Max-Age'] = (300).toString();
 
 			return new Response(null, {
 				status: 204
