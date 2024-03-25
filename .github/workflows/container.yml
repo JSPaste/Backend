@@ -1,4 +1,4 @@
-name: 'CD -> Container'
+name: "CD -> Container"
 on:
   workflow_dispatch:
   push:
@@ -6,7 +6,7 @@ on:
       - stable
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: false
 
 permissions:
@@ -15,7 +15,7 @@ permissions:
 jobs:
   build:
     if: ${{ github.repository_owner == 'jspaste' }}
-    name: 'Build container image'
+    name: "Build container image"
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -25,33 +25,33 @@ jobs:
       IMAGE_NAME: ${{ github.repository }}
 
     steps:
-      - name: 'Harden Runner'
+      - name: "Harden Runner"
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
           egress-policy: audit
 
-      - name: 'Checkout'
+      - name: "Checkout"
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
-      - name: 'Setup QEMU'
+      - name: "Setup QEMU"
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
 
-      - name: 'Setup tags'
+      - name: "Setup tags"
         id: setup-tags
         run: |
           TIMESTAMP="$(date +%Y.%m.%d)"
           SHA_SHORT="${GITHUB_SHA::7}"
-          
+
           TAGS=()
           TAGS+=("latest")
           TAGS+=("${GITHUB_SHA}")
           TAGS+=("${TIMESTAMP}-${SHA_SHORT}")
-          
+
           echo "build-tags=${TAGS[*]}" >> $GITHUB_OUTPUT
 
-      - name: 'Build image'
+      - name: "Build image"
         id: build-image
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
@@ -62,7 +62,7 @@ jobs:
           oci: true
           tags: ${{ steps.setup-tags.outputs.build-tags }}
 
-      - name: 'Push to GHCR'
+      - name: "Push to GHCR"
         uses: redhat-actions/push-to-registry@9986a6552bc4571882a4a67e016b17361412b4df # v2.7.1
         env:
           REGISTRY_USER: ${{ github.actor }}
