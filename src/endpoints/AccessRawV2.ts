@@ -8,10 +8,13 @@ export class AccessRawV2 extends AbstractEndpoint {
 		// FIXME: Implicit "any" type on "set" & "params", careful...
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key/raw'),
-			async ({ set, params }) => {
+			async ({ set, query, headers, params }) => {
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
 
-				return DocumentHandler.accessRaw({ key: params.key });
+				return DocumentHandler.accessRaw({
+					key: params.key,
+					password: headers.password || query.p
+				});
 			},
 			{
 				params: t.Object(

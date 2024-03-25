@@ -24,13 +24,13 @@
 		"@types/bun": "~1.0.10",
 		"elysia": "~1.0.7",
 		"env-var": "~7.4.1",
-		"protobufjs": "~7.2.6",
-		"protobufjs-cli": "~1.1.2",
+		"protobufjs": "^7.2.6",
 		"typescript": "~5.4.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "~1.6.2",
 		"lefthook": "~1.6.7",
+		"protobufjs-cli": "^1.1.2",
 		"sort-package-json": "~2.8.0"
 	},
 	"trustedDependencies": [

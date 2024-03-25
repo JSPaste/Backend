@@ -27,7 +27,7 @@ export class DocumentHandler {
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
 		DocumentHandler.validatePassword(params.password, document.password);
 
-		return new TextDecoder().decode(document.rawFileData);
+		return new Response(document.rawFileData);
 	}
 
 	public static async access(params: Parameters['access'], version: ServerEndpointVersion) {
@@ -51,7 +51,7 @@ export class DocumentHandler {
 					key: params.key,
 					data,
 					url: Server.HOSTNAME.concat('/', params.key),
-					expirationTimestamp: document.expirationTimestamp
+					expirationTimestamp: document.expirationTimestamp.toNumber()
 				};
 			}
 		}
@@ -103,7 +103,7 @@ export class DocumentHandler {
 		if (lifetime > 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
-		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
+		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : undefined;
 
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
@@ -129,7 +129,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: Server.HOSTNAME.concat('/', key),
+					url: Server.HOSTNAME.concat('/', key) + (params.password ? `/?p=${params.password}` : ''),
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 			}
@@ -238,7 +238,7 @@ export class DocumentHandler {
 	private static validateSelectedKeyLength(length: number | undefined): void {
 		if (
 			length &&
-			ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
+			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidKeyLength);
 		}
