@@ -14,7 +14,7 @@ export class PublishV2 extends AbstractEndpoint {
 					{
 						body: body,
 						selectedKey: headers.key,
-						selectedKeyLength: headers.keyLength,
+						selectedKeyLength: headers.keylength,
 						selectedSecret: headers.secret,
 						lifetime: headers.lifetime,
 						password: headers.password
@@ -34,7 +34,7 @@ export class PublishV2 extends AbstractEndpoint {
 							examples: ['abc123']
 						})
 					),
-					keyLength: t.Optional(
+					keylength: t.Optional(
 						t.Numeric({
 							minimum: Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
 							maximum: Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX,

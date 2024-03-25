@@ -238,7 +238,7 @@ export class DocumentHandler {
 	private static validateSelectedKeyLength(length: number | undefined): void {
 		if (
 			length &&
-			ValidatorUtils.isLengthWithinRange(
+			!ValidatorUtils.isLengthWithinRange(
 				length,
 				Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
 				Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX
