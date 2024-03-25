@@ -129,7 +129,7 @@ export class DocumentHandler {
 				return {
 					key,
 					secret,
-					url: Server.CONFIG.HOSTNAME.concat('/', key),
+					url: Server.CONFIG.HOSTNAME.concat('/', key) + (params.password ? `/?p=${params.password}` : ''),
 					expirationTimestamp: Number(expirationTimestamp ?? 0)
 				};
 			}
