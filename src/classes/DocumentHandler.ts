@@ -27,7 +27,7 @@ export class DocumentHandler {
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
 		DocumentHandler.validatePassword(params.password, document.password);
 
-		return new TextDecoder().decode(document.rawFileData);
+		return new Response(document.rawFileData);
 	}
 
 	public static async access(params: Parameters['access'], version: ServerEndpointVersion) {
@@ -51,7 +51,7 @@ export class DocumentHandler {
 					key: params.key,
 					data,
 					url: Server.CONFIG.HOSTNAME.concat('/', params.key),
-					expirationTimestamp: document.expirationTimestamp
+					expirationTimestamp: document.expirationTimestamp.toNumber()
 				};
 			}
 		}
@@ -103,7 +103,7 @@ export class DocumentHandler {
 		if (lifetime > 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
-		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
+		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : undefined;
 
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
