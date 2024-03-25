@@ -12,7 +12,11 @@ export class ErrorHandler {
 	);
 
 	private static readonly MAP: Record<ErrorCode, Schema> = {
-		[ErrorCode.unknown]: { type: 'internal', httpCode: 500, message: 'Unknown error, please try again later' },
+		[ErrorCode.unknown]: {
+			type: 'internal',
+			httpCode: 500,
+			message: 'Unknown error, please try again later'
+		},
 		[ErrorCode.notFound]: {
 			httpCode: 404,
 			type: 'internal',

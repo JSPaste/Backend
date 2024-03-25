@@ -1,27 +1,27 @@
-name: 'CI -> Security'
+name: "CI -> Security"
 on:
   schedule:
-    - cron: '33 3 * * 1'
+    - cron: "33 3 * * 1"
 
   push:
     branches:
       - dev
     paths-ignore:
-      - '*.md'
-      - '.*ignore'
+      - "*.md"
+      - ".*ignore"
 
   pull_request:
     branches:
       - dev
     paths-ignore:
-      - '*.md'
-      - '.*ignore'
+      - "*.md"
+      - ".*ignore"
 
 permissions: read-all
 
 jobs:
   codeql:
-    name: 'CodeQL'
+    name: "CodeQL"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -33,50 +33,50 @@ jobs:
       security-events: write
 
     steps:
-      - name: 'Harden Runner'
+      - name: "Harden Runner"
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
           egress-policy: audit
 
-      - name: 'Checkout'
+      - name: "Checkout"
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
-      - name: 'Setup CodeQL'
-        uses: github/codeql-action/init@05963f47d870e2cb19a537396c1f668a348c7d8f # v3.24.8
+      - name: "Setup CodeQL"
+        uses: github/codeql-action/init@1b1aada464948af03b950897e5eb522f92603cc2 # v3.24.9
         with:
           languages: ${{ matrix.language }}
 
-      - name: 'Run analysis'
-        uses: github/codeql-action/analyze@05963f47d870e2cb19a537396c1f668a348c7d8f # v3.24.8
+      - name: "Run analysis"
+        uses: github/codeql-action/analyze@1b1aada464948af03b950897e5eb522f92603cc2 # v3.24.9
         with:
-          category: '/language:${{ matrix.language }}'
+          category: "/language:${{ matrix.language }}"
 
   scoreboard:
-    name: 'Scorecard'
+    name: "Scorecard"
     runs-on: ubuntu-latest
     permissions:
       security-events: write
       id-token: write
 
     steps:
-      - name: 'Harden Runner'
+      - name: "Harden Runner"
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
           egress-policy: audit
 
-      - name: 'Checkout'
+      - name: "Checkout"
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           persist-credentials: false
 
-      - name: 'Run analysis'
+      - name: "Run analysis"
         uses: ossf/scorecard-action@0864cf19026789058feabb7e87baa5f140aac736 # v2.3.1
         with:
           results_file: scoreboard.sarif
           results_format: sarif
           publish_results: true
 
-      - name: 'Upload to code-scanning'
-        uses: github/codeql-action/upload-sarif@05963f47d870e2cb19a537396c1f668a348c7d8f # v3.24.8
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@1b1aada464948af03b950897e5eb522f92603cc2 # v3.24.9
         with:
           sarif_file: scoreboard.sarif
