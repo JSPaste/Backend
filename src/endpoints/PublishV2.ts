@@ -14,7 +14,7 @@ export class PublishV2 extends AbstractEndpoint {
 					{
 						body: body,
 						selectedKey: headers.key,
-						selectedKeyLength: headers.keyLength,
+						selectedKeyLength: headers.keylength,
 						selectedSecret: headers.secret,
 						lifetime: headers.lifetime,
 						password: headers.password
@@ -34,10 +34,10 @@ export class PublishV2 extends AbstractEndpoint {
 							examples: ['abc123']
 						})
 					),
-					keyLength: t.Optional(
+					keylength: t.Optional(
 						t.Numeric({
-							minimum: Server.CONFIG.DOCUMENT_KEY_LENGTH_MIN,
-							maximum: Server.CONFIG.DOCUMENT_KEY_LENGTH_MAX,
+							minimum: Server.DOCUMENT_KEY_LENGTH_MIN,
+							maximum: Server.DOCUMENT_KEY_LENGTH_MAX,
 							description:
 								'If a custom key is not set, this will determine the key length of the automatically generated key',
 							examples: ['20', '4']
@@ -58,7 +58,7 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					lifetime: t.Optional(
 						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.ENV.DOCUMENT_MAXTIME}`,
+							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.DOCUMENT_MAXTIME}`,
 							examples: ['60', '0']
 						})
 					)
