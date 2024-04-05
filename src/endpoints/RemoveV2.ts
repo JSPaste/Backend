@@ -7,10 +7,10 @@ export class RemoveV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.delete(
 			this.PREFIX.concat('/:key'),
-			async ({ headers, params }) => {
+			async ({ query, headers, params }) => {
 				return DocumentHandler.remove({
 					key: params.key,
-					secret: headers.secret
+					secret: headers.secret || query.secret
 				});
 			},
 			{

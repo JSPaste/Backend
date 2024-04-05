@@ -100,7 +100,7 @@ export class DocumentHandler {
 		let lifetime = params.lifetime ?? Server.DOCUMENT_MAXTIME;
 
 		// Make the document permanent if the value exceeds 5 years
-		if (lifetime > 157_784_760) lifetime = 0;
+		if (lifetime >= 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
 		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : undefined;
