@@ -51,7 +51,7 @@ export class DocumentHandler {
 					key: params.key,
 					data,
 					url: Server.HOSTNAME.concat('/', params.key),
-					expirationTimestamp: document.expirationTimestamp.toNumber()
+					expirationTimestamp: document.expirationTimestamp?.toNumber()
 				};
 			}
 		}
