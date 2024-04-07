@@ -21,17 +21,17 @@
 	},
 	"dependencies": {
 		"@elysiajs/swagger": "~1.0.3",
-		"@types/bun": "~1.0.10",
-		"elysia": "~1.0.9",
+		"@types/bun": "~1.0.12",
+		"elysia": "~1.0.13",
 		"env-var": "~7.4.1",
 		"protobufjs": "~7.2.6",
 		"protobufjs-cli": "~1.1.2",
-		"typescript": "~5.4.3"
+		"typescript": "~5.4.4"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "~1.6.3",
-		"lefthook": "~1.6.7",
-		"sort-package-json": "~2.8.0"
+		"@biomejs/biome": "~1.6.4",
+		"lefthook": "~1.6.8",
+		"sort-package-json": "~2.10.0"
 	},
 	"trustedDependencies": [
 		"@biomejs/biome"
