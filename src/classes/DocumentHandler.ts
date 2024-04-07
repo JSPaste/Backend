@@ -51,7 +51,7 @@ export class DocumentHandler {
 					key: params.key,
 					data,
 					url: Server.HOSTNAME.concat('/', params.key),
-					expirationTimestamp: document.expirationTimestamp.toNumber()
+					expirationTimestamp: document.expirationTimestamp?.toNumber()
 				};
 			}
 		}
@@ -59,11 +59,12 @@ export class DocumentHandler {
 
 	public static async edit(params: Parameters['edit']) {
 		DocumentHandler.validateKey(params.key);
+		DocumentHandler.validateSecretLength(params.secret);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
 
-		DocumentHandler.validateSecret(params.secret, document.secret);
+		DocumentHandler.validateSecret(params.secret ?? '', document.secret);
 
 		const buffer = Buffer.from(params.body as ArrayBuffer);
 
@@ -138,11 +139,12 @@ export class DocumentHandler {
 
 	public static async remove(params: Parameters['remove']) {
 		DocumentHandler.validateKey(params.key);
+		DocumentHandler.validateSecretLength(params.secret);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
 
-		DocumentHandler.validateSecret(params.secret, document.secret);
+		DocumentHandler.validateSecret(params.secret ?? '', document.secret);
 
 		return {
 			removed: await unlink(Server.DOCUMENT_PATH + params.key)
@@ -180,10 +182,10 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validateSecretLength(secret: string): void {
+	private static validateSecretLength(secret?: string): void {
 		if (
-			ValidatorUtils.isEmptyString(secret) ||
-			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)
+			ValidatorUtils.isEmptyString(secret ?? '') ||
+			!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret ?? ''), 1, 255)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecretLength);
 		}

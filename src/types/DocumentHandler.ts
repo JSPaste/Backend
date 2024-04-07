@@ -6,7 +6,7 @@ type Parameters = {
 	edit: {
 		body: any;
 		key: string;
-		secret: string;
+		secret?: string;
 	};
 	exists: {
 		key: string;
@@ -21,7 +21,7 @@ type Parameters = {
 	};
 	remove: {
 		key: string;
-		secret: string;
+		secret?: string;
 	};
 };
 
