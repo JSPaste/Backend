@@ -9,15 +9,15 @@ export class PublishV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.post(
 			this.PREFIX,
-			async ({ query, headers, body }) => {
+			async ({ headers, body }) => {
 				return DocumentHandler.publish(
 					{
 						body: body,
-						selectedKey: headers.key || query.key,
-						selectedKeyLength: headers.keylength || query.keylength,
-						selectedSecret: headers.secret || query.secret,
-						lifetime: headers.lifetime || query.lifetime,
-						password: headers.password || query.password
+						selectedKey: headers.key,
+						selectedKeyLength: headers.keylength,
+						selectedSecret: headers.secret,
+						lifetime: headers.lifetime,
+						password: headers.password
 					},
 					ServerEndpointVersion.V2
 				);
@@ -28,42 +28,6 @@ export class PublishV2 extends AbstractEndpoint {
 					description: 'The file to be uploaded'
 				}),
 				headers: t.Object({
-					key: t.Optional(
-						t.String({
-							description: 'A custom key, if null, a new key will be generated',
-							examples: ['abc123']
-						})
-					),
-					keylength: t.Optional(
-						t.Numeric({
-							minimum: Server.DOCUMENT_KEY_LENGTH_MIN,
-							maximum: Server.DOCUMENT_KEY_LENGTH_MAX,
-							description:
-								'If a custom key is not set, this will determine the key length of the automatically generated key',
-							examples: ['20', '4']
-						})
-					),
-					secret: t.Optional(
-						t.String({
-							description: 'A custom secret, if null, a new secret will be generated',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
-						})
-					),
-					password: t.Optional(
-						t.String({
-							description:
-								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
-							examples: ['abc123']
-						})
-					),
-					lifetime: t.Optional(
-						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.DOCUMENT_MAXTIME}`,
-							examples: ['60', '0']
-						})
-					)
-				}),
-				query: t.Object({
 					key: t.Optional(
 						t.String({
 							description: 'A custom key, if null, a new key will be generated',
