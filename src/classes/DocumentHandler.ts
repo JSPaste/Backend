@@ -190,8 +190,8 @@ export class DocumentHandler {
 	}
 
 	private static validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
-		if (password) {
-			if (documentPassword && password !== documentPassword) {
+		if (documentPassword) {
+			if (!password || password !== documentPassword) {
 				ErrorHandler.send(ErrorCode.documentInvalidPassword);
 			}
 		}
