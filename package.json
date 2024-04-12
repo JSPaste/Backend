@@ -7,12 +7,12 @@
 	"scripts": {
 		"build": "bun run build:bundle",
 		"build:bundle": "bun build --target bun --minify --outfile ./dist/backend.js ./src/index.ts",
-		"build:standalone": "bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
+		"build:standalone": "bun build --compile --target bun --minify --outfile ./dist/backend ./src/index.ts",
 		"fix": "bun run fix:biome && bun run fix:package",
 		"fix:biome": "bun --bun biome check --apply .",
 		"fix:package": "bun --bun sort-package-json --quiet",
 		"lint": "bun run lint:biome && bun run lint:tsc",
-		"lint:biome": "bun --bun @biomejs/biome lint .",
+		"lint:biome": "bun --bun biome lint .",
 		"lint:tsc": "bun --bun tsc --noEmit",
 		"start": "bun run build && bun --bun ./dist/backend.js",
 		"start:dev": "bun --bun --watch ./src/index.ts"
