@@ -1,6 +1,7 @@
 import { unlink } from 'node:fs/promises';
-import type { BunFile } from 'bun';
+import { type BunFile, password } from 'bun';
 
+import { bundlerModuleNameResolver } from 'typescript';
 import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/documentStruct';
 import type { Parameters } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
@@ -26,7 +27,7 @@ export class DocumentHandler {
 		const document = await DocumentHandler.documentRead(file);
 
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
-		DocumentHandler.validatePassword(params.password, document.password);
+		await DocumentHandler.validatePassword(params.password, document.password);
 
 		return new Response(document.rawFileData);
 	}
@@ -37,8 +38,10 @@ export class DocumentHandler {
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
 
+		console.log(document);
+
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
-		DocumentHandler.validatePassword(params.password, document.password);
+		await DocumentHandler.validatePassword(params.password, document.password);
 
 		const data = new TextDecoder().decode(document.rawFileData);
 
@@ -116,7 +119,7 @@ export class DocumentHandler {
 			rawFileData: bodyBuffer,
 			secret,
 			expirationTimestamp,
-			password: params.password
+			password: params.password ? await Bun.password.hash(params.password) : null
 		};
 
 		await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + key, document);
@@ -190,9 +193,12 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
+	private static async validatePassword(
+		password: string | undefined,
+		documentPassword: string | null | undefined
+	): Promise<void> {
 		if (documentPassword) {
-			if (!password || password !== documentPassword) {
+			if (!password || !(await Bun.password.verify(password, documentPassword))) {
 				ErrorHandler.send(ErrorCode.documentInvalidPassword);
 			}
 		}
