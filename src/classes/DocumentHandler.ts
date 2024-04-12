@@ -25,7 +25,7 @@ export class DocumentHandler {
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
 
-		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
+		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
 		DocumentHandler.validatePassword(params.password, document.password);
 
 		return new Response(document.rawFileData);
@@ -37,7 +37,7 @@ export class DocumentHandler {
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
 
-		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
+		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
 		DocumentHandler.validatePassword(params.password, document.password);
 
 		const data = new TextDecoder().decode(document.rawFileData);
@@ -209,7 +209,7 @@ export class DocumentHandler {
 	}
 
 	private static validateTimestamp(key: string, timestamp: number): void {
-		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
+		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 1, Date.now())) {
 			unlink(Server.DOCUMENT_PATH + key);
 
 			ErrorHandler.send(ErrorCode.documentNotFound);
