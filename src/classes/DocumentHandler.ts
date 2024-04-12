@@ -1,7 +1,7 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
-import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/documentStruct';
-import type { Parameters } from '../types/DocumentHandler.ts';
+import { decode, encode } from 'cbor-x';
+import type { CompatDocumentStruct, Parameters } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -10,19 +10,19 @@ import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
-	public static async documentRead(file: BunFile): Promise<DocumentDataStruct> {
-		return DocumentDataStruct.decode(Bun.inflateSync(await file.arrayBuffer()));
+	public static async compatDocumentRead(file: BunFile): Promise<CompatDocumentStruct> {
+		return decode(Bun.inflateSync(await file.arrayBuffer()));
 	}
 
-	public static async documentWrite(filePath: string, document: IDocumentDataStruct): Promise<void> {
-		await Bun.write(filePath, Bun.deflateSync(DocumentDataStruct.encode(document)));
+	public static async compatDocumentWrite(filePath: string, document: CompatDocumentStruct): Promise<void> {
+		await Bun.write(filePath, Bun.deflateSync(encode(document)));
 	}
 
 	public static async accessRaw(params: Parameters['access']) {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
 		await DocumentHandler.validatePassword(params.password, document.password);
@@ -34,7 +34,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
 		await DocumentHandler.validatePassword(params.password, document.password);
@@ -61,7 +61,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateSecret(params.secret, document.secret);
 
@@ -72,7 +72,7 @@ export class DocumentHandler {
 		document.rawFileData = buffer;
 
 		return {
-			edited: await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + params.key, document)
+			edited: await DocumentHandler.compatDocumentWrite(Server.DOCUMENT_PATH + params.key, document)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -111,14 +111,14 @@ export class DocumentHandler {
 			ErrorHandler.send(ErrorCode.documentKeyAlreadyExists);
 		}
 
-		const document: IDocumentDataStruct = {
+		const document: CompatDocumentStruct = {
 			rawFileData: bodyArray,
 			secret,
 			expirationTimestamp,
 			password: params.password ? await Bun.password.hash(params.password) : null
 		};
 
-		await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + key, document);
+		await DocumentHandler.compatDocumentWrite(Server.DOCUMENT_PATH + key, document);
 
 		switch (version) {
 			case ServerEndpointVersion.V1: {
@@ -140,7 +140,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateSecret(params.secret, document.secret);
 

@@ -1,5 +1,5 @@
 # Builder
-FROM docker.io/imbios/bun-node:1-21-alpine AS builder
+FROM cgr.dev/chainguard/bun:latest AS builder
 WORKDIR /build
 
 COPY . ./

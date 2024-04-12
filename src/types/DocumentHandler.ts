@@ -1,3 +1,10 @@
+type CompatDocumentStruct = {
+	rawFileData: Uint8Array;
+	secret: string;
+	expirationTimestamp: number;
+	password: string | null;
+};
+
 type Parameters = {
 	access: {
 		key: string;
@@ -25,4 +32,4 @@ type Parameters = {
 	};
 };
 
-export type { Parameters };
+export type { CompatDocumentStruct, Parameters };

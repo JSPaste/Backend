@@ -6,33 +6,32 @@
 	"type": "module",
 	"scripts": {
 		"build": "bun run build:bundle",
-		"build:bundle": "bun run build:structures && bun run build:structures:dts && bun build --target bun --minify --outfile ./dist/backend.js ./src/index.ts",
-		"build:standalone": "bun run build:structures && bun run build:structures:dts && bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
-		"build:structures": "bunx --bun pbjs -t static-module -w es6 -l --force-long --no-create --no-delimited --no-typeurl --no-service -o ./src/structures/Structures.js ./src/structures/proto/**/*.proto",
-		"build:structures:dts": "bunx pbts -o ./src/structures/Structures.d.ts ./src/structures/Structures.js",
+		"build:bundle": "bun build --target bun --minify --outfile ./dist/backend.js ./src/index.ts",
+		"build:standalone": "bun build --compile --target bun --minify --outfile ./dist/jspaste ./src/index.ts",
 		"fix": "bun run fix:biome && bun run fix:package",
-		"fix:biome": "bunx --bun @biomejs/biome check --apply .",
-		"fix:package": "bunx --bun sort-package-json --quiet",
+		"fix:biome": "bun --bun biome check --apply .",
+		"fix:package": "bun --bun sort-package-json --quiet",
 		"lint": "bun run lint:biome && bun run lint:tsc",
-		"lint:biome": "bunx --bun @biomejs/biome lint .",
-		"lint:tsc": "bunx --bun tsc --noEmit",
+		"lint:biome": "bun --bun @biomejs/biome lint .",
+		"lint:tsc": "bun --bun tsc --noEmit",
 		"start": "bun run build && bun --bun ./dist/backend.js",
 		"start:dev": "bun --bun --watch ./src/index.ts"
 	},
 	"dependencies": {
 		"@elysiajs/swagger": "~1.0.3",
 		"@types/bun": "~1.0.12",
-		"cbor-x": "^1.5.9",
+		"cbor-x": "~1.5.9",
 		"elysia": "~1.0.13",
 		"env-var": "~7.4.1",
-		"typescript": "~5.4.4"
+		"typescript": "~5.4.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "~1.6.4",
-		"lefthook": "~1.6.8",
+		"lefthook": "~1.6.10",
 		"sort-package-json": "~2.10.0"
 	},
 	"trustedDependencies": [
-		"@biomejs/biome"
+		"@biomejs/biome",
+		"lefthook"
 	]
 }
