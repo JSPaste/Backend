@@ -1,6 +1,7 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
-import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/Structures';
+
+import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/documentStruct';
 import type { Parameters } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
@@ -11,11 +12,11 @@ import { Server } from './Server.ts';
 
 export class DocumentHandler {
 	public static async documentRead(file: BunFile): Promise<DocumentDataStruct> {
-		return DocumentDataStruct.decode(Bun.inflateSync(Buffer.from(await file.arrayBuffer())));
+		return DocumentDataStruct.decode(Bun.inflateSync(await file.arrayBuffer()));
 	}
 
 	public static async documentWrite(filePath: string, document: IDocumentDataStruct): Promise<void> {
-		await Bun.write(filePath, Bun.deflateSync(DocumentDataStruct.encode(document).finish()));
+		await Bun.write(filePath, Bun.deflateSync(DocumentDataStruct.encode(document)));
 	}
 
 	public static async accessRaw(params: Parameters['access']) {
@@ -103,7 +104,7 @@ export class DocumentHandler {
 		if (lifetime > 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
-		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
+		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : undefined;
 
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
