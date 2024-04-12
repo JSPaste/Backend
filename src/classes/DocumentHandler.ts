@@ -38,8 +38,6 @@ export class DocumentHandler {
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
 
-		console.log(document);
-
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
 		await DocumentHandler.validatePassword(params.password, document.password);
 
