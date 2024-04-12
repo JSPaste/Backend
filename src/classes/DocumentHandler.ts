@@ -1,7 +1,5 @@
 import { unlink } from 'node:fs/promises';
-import { type BunFile, password } from 'bun';
-
-import { bundlerModuleNameResolver } from 'typescript';
+import type { BunFile } from 'bun';
 import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/documentStruct';
 import type { Parameters } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
@@ -105,7 +103,7 @@ export class DocumentHandler {
 		if (lifetime > 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
-		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : undefined;
+		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : 0;
 
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
@@ -132,7 +130,7 @@ export class DocumentHandler {
 					key,
 					secret,
 					url: Server.HOSTNAME.concat('/', key) + (params.password ? `/?p=${params.password}` : ''),
-					expirationTimestamp: Number(expirationTimestamp ?? 0)
+					expirationTimestamp: expirationTimestamp
 				};
 			}
 		}

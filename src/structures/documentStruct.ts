@@ -1,5 +1,4 @@
 import { decode, encode } from 'cbor-x';
-import { unescapeLeadingUnderscores } from 'typescript';
 
 export interface IDocumentDataStruct {
 	rawFileData?: Uint8Array | null;
@@ -9,19 +8,7 @@ export interface IDocumentDataStruct {
 }
 
 export class DocumentDataStruct implements IDocumentDataStruct {
-	constructor(properties?: IDocumentDataStruct) {
-		if (properties) {
-			for (
-				let keys = Object.keys(properties), i = 0;
-				i < keys.length;
-				++i
-			) {
-				if (properties[keys[i]] != null) {
-					this[keys[i]] = properties[keys[i]];
-				}
-			}
-		}
-	}
+
 
 	public rawFileData: Uint8Array = new Uint8Array();
 
