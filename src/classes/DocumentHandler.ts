@@ -1,7 +1,7 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
-import { DocumentDataStruct, type IDocumentDataStruct } from '../structures/Structures';
-import type { Parameters } from '../types/DocumentHandler.ts';
+import { decode, encode } from 'cbor-x';
+import type { CompatDocumentStruct, Parameters } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -10,22 +10,22 @@ import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
-	public static async documentRead(file: BunFile): Promise<DocumentDataStruct> {
-		return DocumentDataStruct.decode(Bun.inflateSync(Buffer.from(await file.arrayBuffer())));
+	public static async compatDocumentRead(file: BunFile): Promise<CompatDocumentStruct> {
+		return decode(Bun.inflateSync(await file.arrayBuffer()));
 	}
 
-	public static async documentWrite(filePath: string, document: IDocumentDataStruct): Promise<void> {
-		await Bun.write(filePath, Bun.deflateSync(DocumentDataStruct.encode(document).finish()));
+	public static async compatDocumentWrite(filePath: string, document: CompatDocumentStruct): Promise<void> {
+		await Bun.write(filePath, Bun.deflateSync(encode(document)));
 	}
 
 	public static async accessRaw(params: Parameters['access']) {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
-		DocumentHandler.validatePassword(params.password, document.password);
+		await DocumentHandler.validatePassword(params.password, document.password);
 
 		return new Response(document.rawFileData);
 	}
@@ -34,10 +34,10 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
-		DocumentHandler.validatePassword(params.password, document.password);
+		await DocumentHandler.validatePassword(params.password, document.password);
 
 		const data = new TextDecoder().decode(document.rawFileData);
 
@@ -61,7 +61,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateSecret(params.secret, document.secret);
 
@@ -72,7 +72,7 @@ export class DocumentHandler {
 		document.rawFileData = buffer;
 
 		return {
-			edited: await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + params.key, document)
+			edited: await DocumentHandler.compatDocumentWrite(Server.DOCUMENT_PATH + params.key, document)
 				.then(() => true)
 				.catch(() => false)
 		};
@@ -93,9 +93,9 @@ export class DocumentHandler {
 
 		DocumentHandler.validateSecretLength(secret);
 
-		const bodyBuffer = Buffer.from(params.body as ArrayBuffer);
+		const bodyArray = new Uint8Array(params.body);
 
-		DocumentHandler.validateSizeBetweenLimits(bodyBuffer);
+		DocumentHandler.validateSizeBetweenLimits(bodyArray);
 
 		let lifetime = params.lifetime ?? Server.DOCUMENT_MAXTIME;
 
@@ -103,7 +103,7 @@ export class DocumentHandler {
 		if (lifetime > 157_784_760) lifetime = 0;
 
 		const msLifetime = lifetime * 1000;
-		const expirationTimestamp = msLifetime > 0 ? BigInt(Date.now() + msLifetime) : undefined;
+		const expirationTimestamp = msLifetime > 0 ? Date.now() + msLifetime : 0;
 
 		const key = params.selectedKey || (await StringUtils.createKey(params.selectedKeyLength));
 
@@ -111,14 +111,14 @@ export class DocumentHandler {
 			ErrorHandler.send(ErrorCode.documentKeyAlreadyExists);
 		}
 
-		const document: IDocumentDataStruct = {
-			rawFileData: bodyBuffer,
+		const document: CompatDocumentStruct = {
+			rawFileData: bodyArray,
 			secret,
 			expirationTimestamp,
-			password: params.password
+			password: params.password ? await Bun.password.hash(params.password) : null
 		};
 
-		await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + key, document);
+		await DocumentHandler.compatDocumentWrite(Server.DOCUMENT_PATH + key, document);
 
 		switch (version) {
 			case ServerEndpointVersion.V1: {
@@ -130,7 +130,7 @@ export class DocumentHandler {
 					key,
 					secret,
 					url: Server.HOSTNAME.concat('/', key) + (params.password ? `/?p=${params.password}` : ''),
-					expirationTimestamp: Number(expirationTimestamp ?? 0)
+					expirationTimestamp: expirationTimestamp
 				};
 			}
 		}
@@ -140,7 +140,7 @@ export class DocumentHandler {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
-		const document = await DocumentHandler.documentRead(file);
+		const document = await DocumentHandler.compatDocumentRead(file);
 
 		DocumentHandler.validateSecret(params.secret, document.secret);
 
@@ -174,7 +174,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validateSecret(secret: string, documentSecret: string): void {
+	private static validateSecret(secret: string, documentSecret: CompatDocumentStruct['secret']): void {
 		if (documentSecret && documentSecret !== secret) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);
 		}
@@ -189,9 +189,12 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validatePassword(password: string | undefined, documentPassword: string | null | undefined): void {
+	private static async validatePassword(
+		password: string | undefined,
+		documentPassword: CompatDocumentStruct['password']
+	): Promise<void> {
 		if (documentPassword) {
-			if (!password || password !== documentPassword) {
+			if (!password || !(await Bun.password.verify(password, documentPassword))) {
 				ErrorHandler.send(ErrorCode.documentInvalidPassword);
 			}
 		}
@@ -207,15 +210,15 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validateTimestamp(key: string, timestamp: number): void {
-		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 0, Date.now())) {
+	private static validateTimestamp(key: string, timestamp: CompatDocumentStruct['expirationTimestamp']): void {
+		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 1, Date.now())) {
 			unlink(Server.DOCUMENT_PATH + key);
 
 			ErrorHandler.send(ErrorCode.documentNotFound);
 		}
 	}
 
-	private static validateSizeBetweenLimits(body: Buffer): void {
+	private static validateSizeBetweenLimits(body: Uint8Array): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.DOCUMENT_MAXLENGTH)) {
 			ErrorHandler.send(ErrorCode.documentInvalidLength);
 		}
