@@ -24,7 +24,7 @@ export class DocumentHandler {
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.compatDocumentRead(file);
 
-		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
+		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
 		await DocumentHandler.validatePassword(params.password, document.password);
 
 		return new Response(document.rawFileData);
@@ -36,7 +36,7 @@ export class DocumentHandler {
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.compatDocumentRead(file);
 
-		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp ?? 0);
+		DocumentHandler.validateTimestamp(params.key, document.expirationTimestamp);
 		await DocumentHandler.validatePassword(params.password, document.password);
 
 		const data = new TextDecoder().decode(document.rawFileData);
@@ -93,7 +93,7 @@ export class DocumentHandler {
 
 		DocumentHandler.validateSecretLength(secret);
 
-		const bodyArray = new Uint8Array(params.body as ArrayBuffer);
+		const bodyArray = new Uint8Array(params.body);
 
 		DocumentHandler.validateSizeBetweenLimits(bodyArray);
 
@@ -174,7 +174,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validateSecret(secret: string, documentSecret: string): void {
+	private static validateSecret(secret: string, documentSecret: CompatDocumentStruct['secret']): void {
 		if (documentSecret && documentSecret !== secret) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);
 		}
@@ -191,7 +191,7 @@ export class DocumentHandler {
 
 	private static async validatePassword(
 		password: string | undefined,
-		documentPassword: string | null | undefined
+		documentPassword: CompatDocumentStruct['password']
 	): Promise<void> {
 		if (documentPassword) {
 			if (!password || !(await Bun.password.verify(password, documentPassword))) {
@@ -210,7 +210,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validateTimestamp(key: string, timestamp: number): void {
+	private static validateTimestamp(key: string, timestamp: CompatDocumentStruct['expirationTimestamp']): void {
 		if (timestamp && ValidatorUtils.isLengthWithinRange(timestamp, 1, Date.now())) {
 			unlink(Server.DOCUMENT_PATH + key);
 
