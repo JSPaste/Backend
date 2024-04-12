@@ -93,9 +93,9 @@ export class DocumentHandler {
 
 		DocumentHandler.validateSecretLength(secret);
 
-		const bodyBuffer = Buffer.from(params.body as ArrayBuffer);
+		const bodyArray = new Uint8Array(params.body as ArrayBuffer);
 
-		DocumentHandler.validateSizeBetweenLimits(bodyBuffer);
+		DocumentHandler.validateSizeBetweenLimits(bodyArray);
 
 		let lifetime = params.lifetime ?? Server.DOCUMENT_MAXTIME;
 
@@ -112,7 +112,7 @@ export class DocumentHandler {
 		}
 
 		const document: IDocumentDataStruct = {
-			rawFileData: bodyBuffer,
+			rawFileData: bodyArray,
 			secret,
 			expirationTimestamp,
 			password: params.password ? await Bun.password.hash(params.password) : null
@@ -218,7 +218,7 @@ export class DocumentHandler {
 		}
 	}
 
-	private static validateSizeBetweenLimits(body: Buffer): void {
+	private static validateSizeBetweenLimits(body: Uint8Array): void {
 		if (!ValidatorUtils.isLengthWithinRange(body.length, 1, Server.DOCUMENT_MAXLENGTH)) {
 			ErrorHandler.send(ErrorCode.documentInvalidLength);
 		}
