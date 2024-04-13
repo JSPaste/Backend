@@ -4,7 +4,6 @@ type DocumentV1 = {
 		dataHash: Uint8Array | null;
 		modHash: Uint8Array;
 		createdAt: number;
-		accessedAt: number;
 	};
 	version: 1;
 };

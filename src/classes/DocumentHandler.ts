@@ -11,14 +11,6 @@ import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
 
 export class DocumentHandler {
-	public static async documentRead(file: BunFile): Promise<DocumentV1> {
-		return decode(new Uint8Array(await file.arrayBuffer()));
-	}
-
-	public static async documentWrite(filePath: string, document: DocumentV1): Promise<void> {
-		await Bun.write(filePath, encode(document));
-	}
-
 	public static async accessRaw(params: Parameters['access']) {
 		DocumentHandler.validateKey(params.key);
 
@@ -56,18 +48,15 @@ export class DocumentHandler {
 
 		data = Bun.inflateSync(data);
 
-		document.header.accessedAt = Date.now();
-		DocumentHandler.documentWrite(Server.DOCUMENT_PATH + params.key, document);
-
 		switch (version) {
 			case ServerEndpointVersion.V1: {
-				return { key: params.key, data };
+				return { key: params.key, data: new TextDecoder().decode(data) };
 			}
 
 			case ServerEndpointVersion.V2: {
 				return {
 					key: params.key,
-					data,
+					data: new TextDecoder().decode(data),
 					url: Server.HOSTNAME.concat('/', params.key),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
@@ -88,7 +77,6 @@ export class DocumentHandler {
 		const bodyPack = Bun.deflateSync(params.body);
 
 		document.data = params.password ? CryptoUtils.encrypt(bodyPack, params.password) : bodyPack;
-		document.header.accessedAt = Date.now();
 
 		return {
 			edited: await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + params.key, document)
@@ -125,8 +113,7 @@ export class DocumentHandler {
 			header: {
 				dataHash: params.password ? CryptoUtils.hash(params.password) : null,
 				modHash: CryptoUtils.hash(secret),
-				createdAt: Date.now(),
-				accessedAt: Date.now()
+				createdAt: Date.now()
 			},
 			version: 1
 		};
@@ -163,6 +150,14 @@ export class DocumentHandler {
 				.then(() => true)
 				.catch(() => false)
 		};
+	}
+
+	private static async documentRead(file: BunFile): Promise<DocumentV1> {
+		return decode(new Uint8Array(await file.arrayBuffer()));
+	}
+
+	private static async documentWrite(filePath: string, document: DocumentV1): Promise<void> {
+		await Bun.write(filePath, encode(document));
 	}
 
 	private static async retrieveDocument(key: string): Promise<BunFile> {
