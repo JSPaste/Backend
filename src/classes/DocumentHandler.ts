@@ -1,7 +1,7 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
 import { decode, encode } from 'cbor-x';
-import type { DocumentV1, Parameters } from '../types/DocumentHandler.ts';
+import type { DocumentV1, Parameters, ResponsesV1, ResponsesV2 } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
@@ -9,6 +9,10 @@ import { StringUtils } from '../utils/StringUtils.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { ErrorHandler } from './ErrorHandler.ts';
 import { Server } from './Server.ts';
+
+type ResponseByVersion<V extends ServerEndpointVersion> = V extends ServerEndpointVersion.V1
+	? ResponsesV1
+	: ResponsesV2;
 
 export class DocumentHandler {
 	public static async accessRaw(params: Parameters['access']) {
@@ -31,7 +35,10 @@ export class DocumentHandler {
 		return new TextDecoder().decode(data);
 	}
 
-	public static async access(params: Parameters['access'], version: ServerEndpointVersion) {
+	public static async access<EndpointVersion extends ServerEndpointVersion>(
+		params: Parameters['access'],
+		version: EndpointVersion
+	): Promise<ResponseByVersion<EndpointVersion>['access']> {
 		DocumentHandler.validateKey(params.key);
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
@@ -62,6 +69,10 @@ export class DocumentHandler {
 					expirationTimestamp: 0
 				};
 			}
+
+			default: {
+				throw new Error(`Unsupported version: ${version}`);
+			}
 		}
 	}
 
@@ -91,7 +102,10 @@ export class DocumentHandler {
 		return Bun.file(Server.DOCUMENT_PATH + params.key).exists();
 	}
 
-	public static async publish(params: Parameters['publish'], version: ServerEndpointVersion) {
+	public static async publish<EndpointVersion extends ServerEndpointVersion>(
+		params: Parameters['publish'],
+		version: EndpointVersion
+	): Promise<ResponseByVersion<EndpointVersion>['publish']> {
 		DocumentHandler.validateSelectedKey(params.selectedKey);
 		DocumentHandler.validateSelectedKeyLength(params.selectedKeyLength);
 		DocumentHandler.validatePasswordLength(params.password);
@@ -133,6 +147,10 @@ export class DocumentHandler {
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
 				};
+			}
+
+			default: {
+				throw new Error(`Unsupported version: ${version}`);
 			}
 		}
 	}

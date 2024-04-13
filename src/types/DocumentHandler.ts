@@ -35,4 +35,24 @@ type Parameters = {
 	};
 };
 
-export type { DocumentV1, Parameters };
+// TODO: Type every response for consistency
+type ResponsesV1 = {
+	access: {
+		key: string;
+		data: string;
+	};
+	publish: {
+		key: string;
+		secret: string;
+	};
+};
+
+type ResponsesV2 = {
+	access: ResponsesV1['access'] & {
+		url: string;
+		expirationTimestamp: number;
+	};
+	publish: ResponsesV1['publish'] & { url: string; expirationTimestamp: number };
+};
+
+export type { DocumentV1, Parameters, ResponsesV1, ResponsesV2 };
