@@ -121,6 +121,7 @@ export class Server {
 				}
 
 				default: {
+					// FIXME: Returns some errors without following error scheme
 					return error;
 				}
 			}

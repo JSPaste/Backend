@@ -7,7 +7,9 @@ export class AccessRawV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key/raw'),
-			async ({ params }) => {
+			async ({ set, params }) => {
+				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
+
 				return DocumentHandler.accessRaw({ key: params.key });
 			},
 			{
@@ -24,7 +26,7 @@ export class AccessRawV1 extends AbstractEndpoint {
 					}
 				),
 				response: {
-					200: t.Any({
+					200: t.String({
 						description: 'The raw document',
 						examples: ['Hello, World!']
 					}),
