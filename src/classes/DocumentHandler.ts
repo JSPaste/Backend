@@ -28,7 +28,7 @@ export class DocumentHandler {
 
 		data = Bun.inflateSync(data);
 
-		return new Response(data);
+		return new Response(data, { status: 200, headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
 	}
 
 	public static async access(params: Parameters['access'], version: ServerEndpointVersion) {

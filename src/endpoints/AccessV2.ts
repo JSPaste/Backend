@@ -47,7 +47,7 @@ export class AccessV2 extends AbstractEndpoint {
 							}),
 							data: t.String({
 								description: 'The document',
-								examples: ['Hello world']
+								examples: ['Hello, World!']
 							}),
 							url: t.String({
 								description: 'The URL for viewing the document on the web',

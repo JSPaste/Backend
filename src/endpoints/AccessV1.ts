@@ -27,7 +27,7 @@ export class AccessV1 extends AbstractEndpoint {
 							}),
 							data: t.String({
 								description: 'The document',
-								examples: ['Hello world']
+								examples: ['Hello, World!']
 							})
 						},
 						{ description: 'The document object' }
