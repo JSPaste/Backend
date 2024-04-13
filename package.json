@@ -15,7 +15,7 @@
 		"lint:biome": "bun --bun biome lint .",
 		"lint:tsc": "bun --bun tsc --noEmit",
 		"start": "bun run build && bun --bun ./dist/backend.js",
-		"start:dev": "bun --bun --watch ./src/index.ts"
+		"start:dev": "bun --bun ./src/index.ts"
 	},
 	"dependencies": {
 		"@elysiajs/swagger": "~1.0.3",

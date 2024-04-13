@@ -5,7 +5,6 @@ import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class AccessRawV2 extends AbstractEndpoint {
 	protected override run(): void {
-		// FIXME: Implicit "any" type on "set" & "params", careful...
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key/raw'),
 			async ({ set, query, headers, params }) => {
@@ -29,29 +28,25 @@ export class AccessRawV2 extends AbstractEndpoint {
 						examples: [{ key: 'abc123' }]
 					}
 				),
-				headers: t.Optional(
-					t.Object({
-						password: t.Optional(
-							t.String({
-								description: 'The document password if aplicable',
-								examples: ['aaaaa-bbbbb-ccccc-ddddd']
-							})
-						)
-					})
-				),
-				query: t.Optional(
-					t.Object({
-						p: t.Optional(
-							t.String({
-								description:
-									'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
-								examples: ['aaaaa-bbbbb-ccccc-ddddd']
-							})
-						)
-					})
-				),
+				headers: t.Object({
+					password: t.Optional(
+						t.String({
+							description: 'The document password if aplicable',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					)
+				}),
+				query: t.Object({
+					p: t.Optional(
+						t.String({
+							description:
+								'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					)
+				}),
 				response: {
-					200: t.Any({
+					200: t.String({
 						description: 'The raw document',
 						examples: ['Hello world']
 					}),

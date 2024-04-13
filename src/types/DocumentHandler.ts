@@ -1,8 +1,11 @@
-type CompatDocumentStruct = {
-	rawFileData: Uint8Array;
-	secret: string;
-	expirationTimestamp: number;
-	password: string | null;
+type DocumentV1 = {
+	data: Uint8Array;
+	header: {
+		dataHash: Uint8Array | null;
+		modHash: Uint8Array;
+		createdAt: number;
+		accessedAt: number;
+	};
 };
 
 type Parameters = {
@@ -11,17 +14,17 @@ type Parameters = {
 		password?: string;
 	};
 	edit: {
-		body: any;
+		body: string;
 		key: string;
 		secret: string;
+		password?: string;
 	};
 	exists: {
 		key: string;
 	};
 	publish: {
-		body: any;
+		body: string;
 		selectedSecret?: string;
-		lifetime?: number;
 		password?: string;
 		selectedKeyLength?: number;
 		selectedKey?: string;
@@ -32,4 +35,4 @@ type Parameters = {
 	};
 };
 
-export type { CompatDocumentStruct, Parameters };
+export type { DocumentV1, Parameters };

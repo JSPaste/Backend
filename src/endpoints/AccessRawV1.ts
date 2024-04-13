@@ -5,7 +5,6 @@ import { ErrorHandler } from '../classes/ErrorHandler.ts';
 
 export class AccessRawV1 extends AbstractEndpoint {
 	protected override run(): void {
-		// FIXME: Implicit "any" type on "set" & "params", careful...
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key/raw'),
 			async ({ set, params }) => {
@@ -27,7 +26,7 @@ export class AccessRawV1 extends AbstractEndpoint {
 					}
 				),
 				response: {
-					200: t.Any({
+					200: t.String({
 						description: 'The raw document',
 						examples: ['Hello world']
 					}),
