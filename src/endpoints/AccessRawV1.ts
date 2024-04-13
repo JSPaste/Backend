@@ -35,7 +35,8 @@ export class AccessRawV1 extends AbstractEndpoint {
 				},
 				detail: {
 					summary: 'Get raw document',
-					tags: ['v1']
+					tags: ['v1'],
+					deprecated: true
 				}
 			}
 		);

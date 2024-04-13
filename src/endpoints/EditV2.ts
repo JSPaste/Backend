@@ -16,7 +16,7 @@ export class EditV2 extends AbstractEndpoint {
 			},
 			{
 				type: 'text',
-				body: t.String({ description: 'The new file' }),
+				body: t.String({ description: 'The new file', default: 'Hello, World!' }),
 				params: t.Object({
 					key: t.String({
 						description: 'The document key',

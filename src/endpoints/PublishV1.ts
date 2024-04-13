@@ -30,7 +30,7 @@ export class PublishV1 extends AbstractEndpoint {
 					),
 					400: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Publish document', tags: ['v1'] }
+				detail: { summary: 'Publish document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}

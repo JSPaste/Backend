@@ -6,6 +6,7 @@ type DocumentV1 = {
 		createdAt: number;
 		accessedAt: number;
 	};
+	version: 1;
 };
 
 type Parameters = {

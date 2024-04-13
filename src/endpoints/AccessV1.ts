@@ -35,7 +35,7 @@ export class AccessV1 extends AbstractEndpoint {
 					400: ErrorHandler.SCHEMA,
 					404: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Get document', tags: ['v1'] }
+				detail: { summary: 'Get document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}

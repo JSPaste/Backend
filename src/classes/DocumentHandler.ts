@@ -127,7 +127,8 @@ export class DocumentHandler {
 				modHash: CryptoUtils.hash(secret),
 				createdAt: Date.now(),
 				accessedAt: Date.now()
-			}
+			},
+			version: 1
 		};
 
 		await DocumentHandler.documentWrite(Server.DOCUMENT_PATH + key, document);

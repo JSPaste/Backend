@@ -24,7 +24,8 @@ export class PublishV2 extends AbstractEndpoint {
 			{
 				type: 'text',
 				body: t.String({
-					description: 'The file to be uploaded'
+					description: 'The file to be uploaded',
+					default: 'Hello, World!'
 				}),
 				headers: t.Object({
 					key: t.Optional(
