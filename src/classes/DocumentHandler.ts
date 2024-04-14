@@ -1,7 +1,6 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
 import { decode, encode } from 'cbor-x';
-import { textSpanContainsPosition } from 'typescript';
 import type { DocumentV1, Parameters, ResponsesV1, ResponsesV2 } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
