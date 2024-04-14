@@ -54,7 +54,7 @@ export class DocumentUtils {
 
 	public static validateSizeBetweenLimits(body: any): void {
 		if (!ValidatorUtils.isLengthWithinRange(Buffer.byteLength(body), 1, Server.DOCUMENT_MAXLENGTH)) {
-			ErrorHandler.send(ErrorCode.documentInvalidLength);
+			ErrorHandler.send(ErrorCode.documentInvalidSize);
 		}
 	}
 

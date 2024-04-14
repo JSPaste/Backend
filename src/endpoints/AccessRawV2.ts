@@ -22,7 +22,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 
 				if (document.header.sse) {
 					if (!options.secret) {
-						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+						throw ErrorHandler.send(ErrorCode.documentSecretNeeded);
 					}
 
 					DocumentUtils.validateSecret(options.secret, document.header.secretHash);

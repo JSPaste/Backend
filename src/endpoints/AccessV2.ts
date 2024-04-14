@@ -19,7 +19,7 @@ export class AccessV2 extends AbstractEndpoint {
 
 				if (document.header.sse) {
 					if (!headers.secret) {
-						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+						throw ErrorHandler.send(ErrorCode.documentSecretNeeded);
 					}
 
 					DocumentUtils.validateSecret(headers.secret, document.header.secretHash);

@@ -16,7 +16,7 @@ export class AccessRawV1 extends AbstractEndpoint {
 
 				// V1 does not support SSE (Server-Side Encryption)
 				if (document.header.sse) {
-					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+					ErrorHandler.send(ErrorCode.documentSecretNeeded);
 				}
 
 				const data = Buffer.from(Bun.inflateSync(document.data)).toString();

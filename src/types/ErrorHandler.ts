@@ -1,5 +1,5 @@
 enum ErrorCode {
-	// * Internal (generic)
+	// * Generic
 	crash = 1000,
 	unknown = 1001,
 	validation = 1002,
@@ -9,8 +9,8 @@ enum ErrorCode {
 	// * Document
 	documentNotFound = 1200,
 	documentKeyAlreadyExists = 1201,
-	documentPasswordNeeded = 1202,
-	documentInvalidLength = 1203,
+	documentSecretNeeded = 1202,
+	documentInvalidSize = 1203,
 	documentInvalidKeyLength = 1204,
 	// DEPRECATED: documentInvalidPassword = 1205,
 	// DEPRECATED: documentInvalidPasswordLength = 1206,
@@ -19,7 +19,7 @@ enum ErrorCode {
 	documentInvalidKey = 1209
 }
 
-type Type = 'internal' | 'document';
+type Type = 'generic' | 'document';
 
 type Schema = {
 	httpCode: number;
