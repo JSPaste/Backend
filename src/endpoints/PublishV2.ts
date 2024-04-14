@@ -26,7 +26,8 @@ export class PublishV2 extends AbstractEndpoint {
 				DocumentUtils.validateSelectedKeyLength(headers.keylength);
 
 				const key = headers.key || (await StringUtils.createKey(headers.keylength));
-				const data = Bun.deflateSync(body);
+				// FIXME: Why?
+				const data = Bun.deflateSync(body as any);
 
 				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
 					data: headers.secret ? CryptoUtils.encrypt(data, secret) : data,
