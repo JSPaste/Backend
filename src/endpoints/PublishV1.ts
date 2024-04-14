@@ -31,8 +31,8 @@ export class PublishV1 extends AbstractEndpoint {
 				return { key, secret };
 			},
 			{
-				type: 'text',
-				body: t.String({ description: 'The file to be uploaded' }),
+				type: 'arrayBuffer',
+				body: t.Any({ description: 'The file to be uploaded' }),
 				response: {
 					200: t.Object(
 						{
