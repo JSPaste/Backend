@@ -1,6 +1,7 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
@@ -10,27 +11,28 @@ export class AccessRawV2 extends AbstractEndpoint {
 			this.PREFIX.concat('/:key/raw'),
 			async ({ set, query, headers, params }) => {
 				const options = {
-					password: headers.password || query.p
+					secret: headers.secret || query.s
 				};
 
 				DocumentUtils.validateKey(params.key);
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentRead(file);
-				let data = document.data;
+				const document = await DocumentUtils.documentReadV1(file);
+				let data: string | Uint8Array = document.data;
 
-				if (document.header.dataHash) {
-					DocumentUtils.validatePassword(options.password, document.header.dataHash);
-
-					if (options.password) {
-						data = CryptoUtils.decrypt(document.data, options.password);
+				if (document.header.sse) {
+					if (!options.secret) {
+						throw ErrorHandler.send(ErrorCode.documentSecretNeeded);
 					}
+
+					DocumentUtils.validateSecret(options.secret, document.header.secretHash);
+					data = CryptoUtils.decrypt(document.data, options.secret);
 				}
 
-				data = Bun.inflateSync(data);
+				data = Buffer.from(Bun.inflateSync(data)).toString();
 
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
-				return new TextDecoder().decode(data);
+				return data;
 			},
 			{
 				params: t.Object(
@@ -46,18 +48,18 @@ export class AccessRawV2 extends AbstractEndpoint {
 					}
 				),
 				headers: t.Object({
-					password: t.Optional(
+					secret: t.Optional(
 						t.String({
-							description: 'The document password if aplicable',
+							description: 'The document secret if aplicable',
 							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					)
 				}),
 				query: t.Object({
-					p: t.Optional(
+					s: t.Optional(
 						t.String({
 							description:
-								'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
+								'The document secret if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
 							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					)

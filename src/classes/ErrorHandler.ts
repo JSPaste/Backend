@@ -13,79 +13,73 @@ export class ErrorHandler {
 
 	private static readonly MAP: Record<ErrorCode, Schema> = {
 		[ErrorCode.unknown]: {
-			type: 'internal',
 			httpCode: 500,
-			message: 'Unknown error, please try again later'
+			type: 'generic',
+			message:
+				'An unknown error occurred. This may be due to an unexpected condition in the server. If it happens again, please report it here: https://github.com/jspaste/backend/issues/new/choose'
 		},
 		[ErrorCode.notFound]: {
 			httpCode: 404,
-			type: 'internal',
-			message: 'The requested resource does not exist'
+			type: 'generic',
+			message: 'The requested resource does not exist.'
 		},
 		[ErrorCode.validation]: {
 			httpCode: 400,
-			type: 'internal',
-			message: 'Validation failed, please check our documentation'
+			type: 'generic',
+			message:
+				'Validation of the request data failed. Check the entered data according to our documentation: https://jspaste.eu/docs'
 		},
 		[ErrorCode.crash]: {
 			httpCode: 500,
-			type: 'internal',
-			message: 'Internal server error. Something went wrong, please try again later'
+			type: 'generic',
+			message:
+				'An internal server error occurred. This may be due to an unhandled exception. If it happens again, please report it here: https://github.com/jspaste/backend/issues/new/choose'
 		},
 		[ErrorCode.parse]: {
 			httpCode: 400,
-			type: 'internal',
-			message: 'Failed to parse the request, please try again later'
-		},
-		[ErrorCode.validationInvalid]: {
-			httpCode: 400,
-			type: 'validation',
-			message: 'The provided string is not alphanumeric or has an invalid length'
+			type: 'generic',
+			message:
+				'The request could not be parsed. This may be due to a malformed input or an unsupported data format. Check the entered data and try again.'
 		},
 		[ErrorCode.documentNotFound]: {
 			httpCode: 404,
 			type: 'document',
-			message: 'The requested document does not exist'
+			message: 'The requested document does not exist. Check the document key and try again.'
 		},
-		[ErrorCode.documentPasswordNeeded]: {
-			httpCode: 403,
+		[ErrorCode.documentSecretNeeded]: {
+			httpCode: 401,
 			type: 'document',
-			message: 'This document requires credentials, however none were provided'
+			message: 'This document is protected. Provide the document secret and try again.'
 		},
-		[ErrorCode.documentInvalidPasswordLength]: {
+		[ErrorCode.documentInvalidSize]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The provided password length is invalid'
-		},
-		[ErrorCode.documentInvalidPassword]: {
-			httpCode: 400,
-			type: 'document',
-			message: 'Invalid credentials provided for the document'
-		},
-		[ErrorCode.documentInvalidLength]: {
-			httpCode: 400,
-			type: 'document',
-			message: 'The document data length is invalid'
+			message: 'The body size provided for the document is too large (or too small).'
 		},
 		[ErrorCode.documentInvalidSecret]: {
-			httpCode: 400,
+			httpCode: 403,
 			type: 'document',
-			message: 'Invalid secret provided'
+			message: 'The credentials provided for the document are invalid.'
 		},
 		[ErrorCode.documentInvalidSecretLength]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The provided secret length is invalid'
+			message: 'The secret length provided for the document is invalid.'
 		},
 		[ErrorCode.documentInvalidKeyLength]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The provided key length is invalid'
+			message: 'The key length provided for the document is out of range.'
 		},
 		[ErrorCode.documentKeyAlreadyExists]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The provided key already exists'
+			message: 'The key provided for the document already exists. Use another one and try again.'
+		},
+		[ErrorCode.documentInvalidKey]: {
+			httpCode: 400,
+			type: 'document',
+			message: 'The key provided for the document is invalid. Use another one and try again.'
 		}
 	};
 

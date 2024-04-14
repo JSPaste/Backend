@@ -1,8 +1,8 @@
 type DocumentV1 = {
 	data: Uint8Array;
 	header: {
-		dataHash: Uint8Array | null;
-		modHash: Uint8Array;
+		secretHash: Uint8Array;
+		sse: boolean;
 		createdAt: number;
 	};
 	version: 1;

@@ -2,6 +2,7 @@ import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
@@ -13,22 +14,23 @@ export class AccessV2 extends AbstractEndpoint {
 				DocumentUtils.validateKey(params.key);
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentRead(file);
-				let data = document.data;
+				const document = await DocumentUtils.documentReadV1(file);
+				let data: string | Uint8Array = document.data;
 
-				if (document.header.dataHash) {
-					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
-
-					if (headers.password) {
-						data = CryptoUtils.decrypt(document.data, headers.password);
+				if (document.header.sse) {
+					if (!headers.secret) {
+						throw ErrorHandler.send(ErrorCode.documentSecretNeeded);
 					}
+
+					DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
+					data = CryptoUtils.decrypt(document.data, headers.secret);
 				}
 
-				data = Bun.inflateSync(data);
+				data = Buffer.from(Bun.inflateSync(data)).toString();
 
 				return {
 					key: params.key,
-					data: new TextDecoder().decode(data),
+					data: data,
 					url: Server.HOSTNAME.concat('/', params.key),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
@@ -42,7 +44,7 @@ export class AccessV2 extends AbstractEndpoint {
 					})
 				}),
 				headers: t.Object({
-					password: t.Optional(
+					secret: t.Optional(
 						t.String({
 							description: 'The document password if aplicable',
 							examples: ['abc123']
@@ -65,8 +67,7 @@ export class AccessV2 extends AbstractEndpoint {
 								examples: ['https://jspaste.eu/abc123']
 							}),
 							expirationTimestamp: t.Numeric({
-								description:
-									'DEPRECATED! UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.'
+								description: 'DEPRECATED! UNIX timestamp with the expiration date in milliseconds.'
 							})
 						},
 						{
