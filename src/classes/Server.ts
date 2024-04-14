@@ -102,29 +102,24 @@ export class Server {
 
 	private initErrorListener(): void {
 		this.ELYSIA.onError(({ code, error }) => {
-			switch (code) {
-				case 'VALIDATION': {
-					return ErrorHandler.get(ErrorCode.validation);
-				}
-
-				case 'NOT_FOUND': {
-					return '';
-				}
-
-				case 'PARSE': {
-					return ErrorHandler.get(ErrorCode.parse);
-				}
-
-				case 'INTERNAL_SERVER_ERROR': {
-					console.error(error);
-					return ErrorHandler.get(ErrorCode.crash);
-				}
-
-				default: {
-					// FIXME: Returns some errors without following error scheme
-					return error;
-				}
+			if (code === 'NOT_FOUND') {
+				return '';
 			}
+
+			if (code === 'VALIDATION') {
+				return ErrorHandler.get(ErrorCode.validation);
+			}
+
+			if (code === 'PARSE') {
+				return ErrorHandler.get(ErrorCode.parse);
+			}
+
+			if (error instanceof Error || code === 'INTERNAL_SERVER_ERROR') {
+				console.error(error);
+				return ErrorHandler.get(ErrorCode.crash);
+			}
+
+			return error;
 		});
 	}
 
