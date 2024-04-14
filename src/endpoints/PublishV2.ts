@@ -23,7 +23,9 @@ export class PublishV2 extends AbstractEndpoint {
 					await DocumentUtils.validateSelectedKey(headers.key);
 				}
 
-				DocumentUtils.validateSelectedKeyLength(headers.keylength);
+				if (!headers.key) {
+					DocumentUtils.validateSelectedKeyLength(headers.keylength);
+				}
 
 				const key = headers.key || (await StringUtils.createKey(headers.keylength));
 				// FIXME: Why?
@@ -61,8 +63,6 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					keylength: t.Optional(
 						t.Numeric({
-							minimum: Server.DOCUMENT_KEY_LENGTH_MIN,
-							maximum: Server.DOCUMENT_KEY_LENGTH_MAX,
 							description:
 								'If a custom key is not set, this will determine the key length of the automatically generated key',
 							examples: ['20', '4']

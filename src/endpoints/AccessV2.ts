@@ -67,8 +67,7 @@ export class AccessV2 extends AbstractEndpoint {
 								examples: ['https://jspaste.eu/abc123']
 							}),
 							expirationTimestamp: t.Numeric({
-								description:
-									'DEPRECATED! UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.'
+								description: 'DEPRECATED! UNIX timestamp with the expiration date in milliseconds.'
 							})
 						},
 						{
