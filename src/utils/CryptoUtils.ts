@@ -2,9 +2,9 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import type { SupportedCryptoAlgorithms } from 'bun';
 
 export class CryptoUtils {
-	private static readonly CIPHER_ALGORITHM = 'aes-256-ctr';
+	private static readonly CIPHER_ALGORITHM = 'aes-256-gcm';
 	private static readonly HASH_ALGORITHM = 'blake2b256';
-	private static readonly IV_LENGTH = 16;
+	private static readonly IV_LENGTH = 12;
 
 	public static encrypt(data: Uint8Array, password: string): Uint8Array {
 		const iv = randomBytes(CryptoUtils.IV_LENGTH);
