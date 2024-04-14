@@ -65,7 +65,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 					)
 				}),
 				response: {
-					200: t.String({
+					200: t.Any({
 						description: 'The raw document',
 						examples: ['Hello, World!']
 					}),

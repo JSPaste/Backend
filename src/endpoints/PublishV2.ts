@@ -46,8 +46,8 @@ export class PublishV2 extends AbstractEndpoint {
 				};
 			},
 			{
-				type: 'text',
-				body: t.String({
+				type: 'arrayBuffer',
+				body: t.Any({
 					description: 'The file to be uploaded',
 					default: 'Hello, World!'
 				}),

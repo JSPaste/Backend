@@ -29,8 +29,8 @@ export class EditV2 extends AbstractEndpoint {
 				};
 			},
 			{
-				type: 'text',
-				body: t.String({ description: 'The new file', default: 'Hello, World!' }),
+				type: 'arrayBuffer',
+				body: t.Any({ description: 'The new file', default: 'Hello, World!' }),
 				params: t.Object({
 					key: t.String({
 						description: 'The document key',
