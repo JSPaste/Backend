@@ -1,25 +1,50 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
+import { CryptoUtils } from '../utils/CryptoUtils.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
+import { StringUtils } from '../utils/StringUtils.ts';
 
 export class PublishV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ headers, body }) => {
-				return DocumentHandler.publish(
-					{
-						body: body,
-						selectedKey: headers.key,
-						selectedKeyLength: headers.keylength,
-						selectedSecret: headers.secret,
-						password: headers.password
+				DocumentUtils.validateSelectedKey(headers.key);
+				DocumentUtils.validateSelectedKeyLength(headers.keylength);
+				DocumentUtils.validatePasswordLength(headers.password);
+
+				const secret = headers.secret || StringUtils.createSecret();
+
+				DocumentUtils.validateSecretLength(secret);
+				DocumentUtils.validateSizeBetweenLimits(body);
+
+				const bodyPack = Bun.deflateSync(body);
+				const key = headers.key || (await StringUtils.createKey(headers.keylength));
+
+				if (headers.key && (await StringUtils.keyExists(key))) {
+					ErrorHandler.send(ErrorCode.documentKeyAlreadyExists);
+				}
+
+				await DocumentUtils.documentWrite(Server.DOCUMENT_PATH + key, {
+					data: headers.password ? CryptoUtils.encrypt(bodyPack, headers.password) : bodyPack,
+					header: {
+						dataHash: headers.password ? CryptoUtils.hash(headers.password) : null,
+						modHash: CryptoUtils.hash(secret),
+						createdAt: Date.now()
 					},
-					ServerEndpointVersion.V2
-				);
+					version: 1
+				});
+
+				return {
+					key,
+					secret,
+					url: Server.HOSTNAME.concat('/', key),
+					// Deprecated, for compatibility reasons will be kept to 0
+					expirationTimestamp: 0
+				};
 			},
 			{
 				type: 'arrayBuffer',

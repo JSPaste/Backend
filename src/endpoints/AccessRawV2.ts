@@ -1,19 +1,36 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { CryptoUtils } from '../utils/CryptoUtils.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class AccessRawV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key/raw'),
 			async ({ set, query, headers, params }) => {
-				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
-
-				return DocumentHandler.accessRaw({
-					key: params.key,
+				const options = {
 					password: headers.password || query.p
-				});
+				};
+
+				DocumentUtils.validateKey(params.key);
+
+				const file = await DocumentUtils.retrieveDocument(params.key);
+				const document = await DocumentUtils.documentRead(file);
+				let data = document.data;
+
+				if (document.header.dataHash) {
+					DocumentUtils.validatePassword(options.password, document.header.dataHash);
+
+					if (options.password) {
+						data = CryptoUtils.decrypt(document.data, options.password);
+					}
+				}
+
+				data = Bun.inflateSync(data);
+
+				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
+				return new TextDecoder().decode(data);
 			},
 			{
 				params: t.Object(

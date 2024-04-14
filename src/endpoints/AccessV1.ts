@@ -1,15 +1,22 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class AccessV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key'),
 			async ({ params }) => {
-				return DocumentHandler.access({ key: params.key }, ServerEndpointVersion.V1);
+				DocumentUtils.validateKey(params.key);
+
+				const file = await DocumentUtils.retrieveDocument(params.key);
+				const document = await DocumentUtils.documentRead(file);
+				let data = document.data;
+
+				data = Bun.inflateSync(data);
+
+				return { key: params.key, data: new TextDecoder().decode(data) };
 			},
 			{
 				params: t.Object({

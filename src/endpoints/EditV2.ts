@@ -1,18 +1,32 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { Server } from '../classes/Server.ts';
+import { CryptoUtils } from '../utils/CryptoUtils.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.patch(
 			this.PREFIX.concat('/:key'),
 			async ({ headers, body, params }) => {
-				return DocumentHandler.edit({
-					key: params.key,
-					body: body,
-					secret: headers.secret
-				});
+				DocumentUtils.validateKey(params.key);
+
+				const file = await DocumentUtils.retrieveDocument(params.key);
+				const document = await DocumentUtils.documentRead(file);
+
+				DocumentUtils.validateSecret(headers.secret, document.header.modHash);
+				DocumentUtils.validateSizeBetweenLimits(body);
+
+				const bodyPack = Bun.deflateSync(body);
+
+				document.data = headers.password ? CryptoUtils.encrypt(bodyPack, headers.password) : bodyPack;
+
+				return {
+					edited: await DocumentUtils.documentWrite(Server.DOCUMENT_PATH + params.key, document)
+						.then(() => true)
+						.catch(() => false)
+				};
 			},
 			{
 				type: 'text',
@@ -27,7 +41,13 @@ export class EditV2 extends AbstractEndpoint {
 					secret: t.String({
 						description: 'The document secret',
 						examples: ['aaaaa-bbbbb-ccccc-ddddd']
-					})
+					}),
+					password: t.Optional(
+						t.String({
+							description: 'The document password if aplicable',
+							examples: ['abc123']
+						})
+					)
 				}),
 				response: {
 					200: t.Object(
