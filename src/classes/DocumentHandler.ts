@@ -1,6 +1,7 @@
 import { unlink } from 'node:fs/promises';
 import type { BunFile } from 'bun';
 import { decode, encode } from 'cbor-x';
+import { textSpanContainsPosition } from 'typescript';
 import type { DocumentV1, Parameters, ResponsesV1, ResponsesV2 } from '../types/DocumentHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ServerEndpointVersion } from '../types/Server.ts';
@@ -32,7 +33,7 @@ export class DocumentHandler {
 
 		data = Bun.inflateSync(data);
 
-		return new TextDecoder().decode(data);
+		return new Response(data);
 	}
 
 	public static async access<EndpointVersion extends ServerEndpointVersion>(
@@ -43,6 +44,7 @@ export class DocumentHandler {
 
 		const file = await DocumentHandler.retrieveDocument(params.key);
 		const document = await DocumentHandler.documentRead(file);
+
 		let data = document.data;
 
 		if (document.header.dataHash) {
@@ -57,7 +59,10 @@ export class DocumentHandler {
 
 		switch (version) {
 			case ServerEndpointVersion.V1: {
-				return { key: params.key, data: new TextDecoder().decode(data) };
+				return {
+					key: params.key,
+					data: new TextDecoder().decode(data)
+				};
 			}
 
 			case ServerEndpointVersion.V2: {
