@@ -1,18 +1,38 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { Server } from '../classes/Server.ts';
+import { CryptoUtils } from '../utils/CryptoUtils.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class AccessV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key'),
-			async ({ query, headers, params }) => {
-				return DocumentHandler.access(
-					{ key: params.key, password: headers.password || query.p },
-					ServerEndpointVersion.V2
-				);
+			async ({ headers, params }) => {
+				DocumentUtils.validateKey(params.key);
+
+				const file = await DocumentUtils.retrieveDocument(params.key);
+				const document = await DocumentUtils.documentRead(file);
+				let data = document.data;
+
+				if (document.header.dataHash) {
+					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
+
+					if (headers.password) {
+						data = CryptoUtils.decrypt(document.data, headers.password);
+					}
+				}
+
+				data = Bun.inflateSync(data);
+
+				return {
+					key: params.key,
+					data: new TextDecoder().decode(data),
+					url: Server.HOSTNAME.concat('/', params.key),
+					// Deprecated, for compatibility reasons will be kept to 0
+					expirationTimestamp: 0
+				};
 			},
 			{
 				params: t.Object({
@@ -26,15 +46,6 @@ export class AccessV2 extends AbstractEndpoint {
 						t.String({
 							description: 'The document password if aplicable',
 							examples: ['abc123']
-						})
-					)
-				}),
-				query: t.Object({
-					p: t.Optional(
-						t.String({
-							description:
-								'The document password if aplicable, It is preferred to pass the password through headers, only use this method for support of web browsers.',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					)
 				}),

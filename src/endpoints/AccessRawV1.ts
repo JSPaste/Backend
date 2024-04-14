@@ -1,16 +1,23 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class AccessRawV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:key/raw'),
 			async ({ set, params }) => {
-				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
+				DocumentUtils.validateKey(params.key);
 
-				return DocumentHandler.accessRaw({ key: params.key });
+				const file = await DocumentUtils.retrieveDocument(params.key);
+				const document = await DocumentUtils.documentRead(file);
+				let data = document.data;
+
+				data = Bun.inflateSync(data);
+
+				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
+				return new TextDecoder().decode(data);
 			},
 			{
 				params: t.Object(

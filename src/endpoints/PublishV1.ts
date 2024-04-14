@@ -1,15 +1,34 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { Server } from '../classes/Server.ts';
+import { CryptoUtils } from '../utils/CryptoUtils.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
+import { StringUtils } from '../utils/StringUtils.ts';
 
 export class PublishV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ body }) => {
-				return DocumentHandler.publish({ body }, ServerEndpointVersion.V1);
+				const secret = StringUtils.createSecret();
+
+				DocumentUtils.validateSizeBetweenLimits(body);
+
+				const bodyPack = Bun.deflateSync(body);
+				const key = await StringUtils.createKey();
+
+				await DocumentUtils.documentWrite(Server.DOCUMENT_PATH + key, {
+					data: bodyPack,
+					header: {
+						dataHash: null,
+						modHash: CryptoUtils.hash(secret),
+						createdAt: Date.now()
+					},
+					version: 1
+				});
+
+				return { key, secret };
 			},
 			{
 				type: 'text',
