@@ -47,21 +47,16 @@ export class AccessV2 extends AbstractEndpoint {
 							}),
 							data: t.String({
 								description: 'The document',
-								examples: ['Hello world']
+								examples: ['Hello, World!']
 							}),
-							url: t.Optional(
-								t.String({
-									description: 'The URL for viewing the document on the web',
-									examples: ['https://jspaste.eu/abc123']
-								})
-							),
-							expirationTimestamp: t.Optional(
-								t.Numeric({
-									description:
-										'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
-									examples: [60, 0]
-								})
-							)
+							url: t.String({
+								description: 'The URL for viewing the document on the web',
+								examples: ['https://jspaste.eu/abc123']
+							}),
+							expirationTimestamp: t.Numeric({
+								description:
+									'DEPRECATED! UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.'
+							})
 						},
 						{
 							description:

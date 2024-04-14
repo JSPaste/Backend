@@ -39,7 +39,7 @@ export class RemoveV1 extends AbstractEndpoint {
 					403: ErrorHandler.SCHEMA,
 					404: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Remove document', tags: ['v1'] }
+				detail: { summary: 'Remove document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}

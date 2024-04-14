@@ -12,8 +12,8 @@ export class PublishV1 extends AbstractEndpoint {
 				return DocumentHandler.publish({ body }, ServerEndpointVersion.V1);
 			},
 			{
-				type: 'arrayBuffer',
-				body: t.Any({ description: 'The file to be uploaded' }),
+				type: 'text',
+				body: t.String({ description: 'The file to be uploaded' }),
 				response: {
 					200: t.Object(
 						{
@@ -30,7 +30,7 @@ export class PublishV1 extends AbstractEndpoint {
 					),
 					400: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Publish document', tags: ['v1'] }
+				detail: { summary: 'Publish document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}

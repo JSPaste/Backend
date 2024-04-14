@@ -16,16 +16,16 @@ export class PublishV2 extends AbstractEndpoint {
 						selectedKey: headers.key,
 						selectedKeyLength: headers.keylength,
 						selectedSecret: headers.secret,
-						lifetime: headers.lifetime,
 						password: headers.password
 					},
 					ServerEndpointVersion.V2
 				);
 			},
 			{
-				type: 'arrayBuffer',
-				body: t.Any({
-					description: 'The file to be uploaded'
+				type: 'text',
+				body: t.String({
+					description: 'The file to be uploaded',
+					default: 'Hello, World!'
 				}),
 				headers: t.Object({
 					key: t.Optional(
@@ -55,12 +55,6 @@ export class PublishV2 extends AbstractEndpoint {
 								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
 							examples: ['abc123']
 						})
-					),
-					lifetime: t.Optional(
-						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.DOCUMENT_MAXTIME}`,
-							examples: ['60', '0']
-						})
 					)
 				}),
 				response: {
@@ -74,19 +68,14 @@ export class PublishV2 extends AbstractEndpoint {
 								description: 'The generated secret to delete the document',
 								examples: ['aaaaa-bbbbb-ccccc-ddddd']
 							}),
-							url: t.Optional(
-								t.String({
-									description: 'The URL for viewing the document on the web',
-									examples: ['https://jspaste.eu/abc123']
-								})
-							),
-							expirationTimestamp: t.Optional(
-								t.Numeric({
-									description:
-										'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
-									examples: [60, 0]
-								})
-							)
+							url: t.String({
+								description: 'The URL for viewing the document on the web',
+								examples: ['https://jspaste.eu/abc123']
+							}),
+							expirationTimestamp: t.Numeric({
+								description:
+									'DEPRECATED! UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.'
+							})
 						},
 						{
 							description:

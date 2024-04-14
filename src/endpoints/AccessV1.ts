@@ -27,7 +27,7 @@ export class AccessV1 extends AbstractEndpoint {
 							}),
 							data: t.String({
 								description: 'The document',
-								examples: ['Hello world']
+								examples: ['Hello, World!']
 							})
 						},
 						{ description: 'The document object' }
@@ -35,7 +35,7 @@ export class AccessV1 extends AbstractEndpoint {
 					400: ErrorHandler.SCHEMA,
 					404: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Get document', tags: ['v1'] }
+				detail: { summary: 'Get document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}
