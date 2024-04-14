@@ -40,7 +40,7 @@ export class DocumentUtils {
 		}
 	}
 
-	public static validateSecret(secret: string, documentSecret: DocumentV1['header']['secret']): void {
+	public static validateSecret(secret: string, documentSecret: DocumentV1['header']['secretHash']): void {
 		if (!CryptoUtils.compare(secret, documentSecret)) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);
 		}

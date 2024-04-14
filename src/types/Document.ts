@@ -1,7 +1,7 @@
 type DocumentV1 = {
 	data: Uint8Array;
 	header: {
-		secret: Uint8Array;
+		secretHash: Uint8Array;
 		sse: boolean;
 		createdAt: number;
 	};

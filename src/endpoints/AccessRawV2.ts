@@ -25,7 +25,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validateSecret(options.secret, document.header.secret);
+					DocumentUtils.validateSecret(options.secret, document.header.secretHash);
 					data = CryptoUtils.decrypt(document.data, options.secret);
 				}
 

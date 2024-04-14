@@ -22,7 +22,7 @@ export class AccessV2 extends AbstractEndpoint {
 						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validateSecret(headers.secret, document.header.secret);
+					DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 					data = CryptoUtils.decrypt(document.data, headers.secret);
 				}
 

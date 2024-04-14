@@ -16,7 +16,7 @@ export class EditV2 extends AbstractEndpoint {
 				const file = await DocumentUtils.retrieveDocument(params.key);
 				const document = await DocumentUtils.documentReadV1(file);
 
-				DocumentUtils.validateSecret(headers.secret, document.header.secret);
+				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 
 				const data = Bun.deflateSync(body);
 

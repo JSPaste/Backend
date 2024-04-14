@@ -20,7 +20,7 @@ export class PublishV1 extends AbstractEndpoint {
 				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
 					data: data,
 					header: {
-						secret: CryptoUtils.hash(secret),
+						secretHash: CryptoUtils.hash(secret),
 						sse: false,
 						createdAt: Date.now()
 					}
