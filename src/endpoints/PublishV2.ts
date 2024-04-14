@@ -2,7 +2,6 @@ import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
-import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -12,35 +11,35 @@ export class PublishV2 extends AbstractEndpoint {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ headers, body }) => {
-				DocumentUtils.validateSelectedKey(headers.key);
-				DocumentUtils.validateSelectedKeyLength(headers.keylength);
-				DocumentUtils.validatePasswordLength(headers.password);
+				DocumentUtils.validateSizeBetweenLimits(body);
+
+				if (headers.secret) {
+					DocumentUtils.validateSecretLength(headers.secret);
+				}
 
 				const secret = headers.secret || StringUtils.createSecret();
 
-				DocumentUtils.validateSecretLength(secret);
-				DocumentUtils.validateSizeBetweenLimits(body);
-
-				const bodyPack = Bun.deflateSync(body);
-				const key = headers.key || (await StringUtils.createKey(headers.keylength));
-
-				if (headers.key && (await StringUtils.keyExists(key))) {
-					ErrorHandler.send(ErrorCode.documentKeyAlreadyExists);
+				if (headers.key) {
+					await DocumentUtils.validateSelectedKey(headers.key);
 				}
 
-				await DocumentUtils.documentWrite(Server.DOCUMENT_PATH + key, {
-					data: headers.password ? CryptoUtils.encrypt(bodyPack, headers.password) : bodyPack,
+				DocumentUtils.validateSelectedKeyLength(headers.keylength);
+
+				const key = headers.key || (await StringUtils.createKey(headers.keylength));
+				const data = Bun.deflateSync(body);
+
+				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
+					data: headers.secret ? CryptoUtils.encrypt(data, secret) : data,
 					header: {
-						dataHash: headers.password ? CryptoUtils.hash(headers.password) : null,
-						modHash: CryptoUtils.hash(secret),
+						secret: CryptoUtils.hash(secret),
+						sse: !!headers.secret,
 						createdAt: Date.now()
-					},
-					version: 1
+					}
 				});
 
 				return {
-					key,
-					secret,
+					key: key,
+					secret: secret,
 					url: Server.HOSTNAME.concat('/', key),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
@@ -70,15 +69,9 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					secret: t.Optional(
 						t.String({
-							description: 'A custom secret, if null, a new secret will be generated',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
-						})
-					),
-					password: t.Optional(
-						t.String({
 							description:
 								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
-							examples: ['abc123']
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
 						})
 					)
 				}),
@@ -98,8 +91,7 @@ export class PublishV2 extends AbstractEndpoint {
 								examples: ['https://jspaste.eu/abc123']
 							}),
 							expirationTimestamp: t.Numeric({
-								description:
-									'DEPRECATED! UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.'
+								description: 'DEPRECATED! UNIX timestamp with the expiration date in milliseconds.'
 							})
 						},
 						{

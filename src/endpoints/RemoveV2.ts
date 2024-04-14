@@ -13,9 +13,9 @@ export class RemoveV2 extends AbstractEndpoint {
 				DocumentUtils.validateKey(params.key);
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentRead(file);
+				const document = await DocumentUtils.documentReadV1(file);
 
-				DocumentUtils.validateSecret(headers.secret, document.header.modHash);
+				DocumentUtils.validateSecret(headers.secret, document.header.secret);
 
 				return {
 					removed: await unlink(Server.DOCUMENT_PATH + params.key)

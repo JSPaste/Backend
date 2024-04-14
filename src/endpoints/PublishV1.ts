@@ -11,21 +11,19 @@ export class PublishV1 extends AbstractEndpoint {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ body }) => {
-				const secret = StringUtils.createSecret();
-
 				DocumentUtils.validateSizeBetweenLimits(body);
 
-				const bodyPack = Bun.deflateSync(body);
 				const key = await StringUtils.createKey();
+				const secret = StringUtils.createSecret();
+				const data = Bun.deflateSync(body);
 
-				await DocumentUtils.documentWrite(Server.DOCUMENT_PATH + key, {
-					data: bodyPack,
+				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
+					data: data,
 					header: {
-						dataHash: null,
-						modHash: CryptoUtils.hash(secret),
+						secret: CryptoUtils.hash(secret),
+						sse: false,
 						createdAt: Date.now()
-					},
-					version: 1
+					}
 				});
 
 				return { key, secret };
@@ -40,7 +38,7 @@ export class PublishV1 extends AbstractEndpoint {
 								description: 'The generated key to access the document'
 							}),
 							secret: t.String({
-								description: 'The generated secret to delete the document'
+								description: 'The document secret to modify the document'
 							})
 						},
 						{

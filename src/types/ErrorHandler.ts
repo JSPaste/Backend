@@ -6,22 +6,20 @@ enum ErrorCode {
 	parse = 1003,
 	notFound = 1004,
 
-	// * Validation
-	validationInvalid = 1100,
-
 	// * Document
 	documentNotFound = 1200,
 	documentKeyAlreadyExists = 1201,
 	documentPasswordNeeded = 1202,
 	documentInvalidLength = 1203,
 	documentInvalidKeyLength = 1204,
-	documentInvalidPassword = 1205,
-	documentInvalidPasswordLength = 1206,
+	// DEPRECATED: documentInvalidPassword = 1205,
+	// DEPRECATED: documentInvalidPasswordLength = 1206,
 	documentInvalidSecret = 1207,
-	documentInvalidSecretLength = 1208
+	documentInvalidSecretLength = 1208,
+	documentInvalidKey = 1209
 }
 
-type Type = 'internal' | 'validation' | 'document';
+type Type = 'internal' | 'document';
 
 type Schema = {
 	httpCode: number;

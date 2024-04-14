@@ -10,20 +10,20 @@ export class EditV2 extends AbstractEndpoint {
 		this.SERVER.elysia.patch(
 			this.PREFIX.concat('/:key'),
 			async ({ headers, body, params }) => {
+				DocumentUtils.validateSizeBetweenLimits(body);
 				DocumentUtils.validateKey(params.key);
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentRead(file);
+				const document = await DocumentUtils.documentReadV1(file);
 
-				DocumentUtils.validateSecret(headers.secret, document.header.modHash);
-				DocumentUtils.validateSizeBetweenLimits(body);
+				DocumentUtils.validateSecret(headers.secret, document.header.secret);
 
-				const bodyPack = Bun.deflateSync(body);
+				const data = Bun.deflateSync(body);
 
-				document.data = headers.password ? CryptoUtils.encrypt(bodyPack, headers.password) : bodyPack;
+				document.data = document.header.sse ? CryptoUtils.encrypt(data, headers.secret) : data;
 
 				return {
-					edited: await DocumentUtils.documentWrite(Server.DOCUMENT_PATH + params.key, document)
+					edited: await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + params.key, document)
 						.then(() => true)
 						.catch(() => false)
 				};
@@ -41,13 +41,7 @@ export class EditV2 extends AbstractEndpoint {
 					secret: t.String({
 						description: 'The document secret',
 						examples: ['aaaaa-bbbbb-ccccc-ddddd']
-					}),
-					password: t.Optional(
-						t.String({
-							description: 'The document password if aplicable',
-							examples: ['abc123']
-						})
-					)
+					})
 				}),
 				response: {
 					200: t.Object(

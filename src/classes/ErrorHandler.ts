@@ -37,11 +37,6 @@ export class ErrorHandler {
 			type: 'internal',
 			message: 'Failed to parse the request, please try again later'
 		},
-		[ErrorCode.validationInvalid]: {
-			httpCode: 400,
-			type: 'validation',
-			message: 'The provided string is not alphanumeric or has an invalid length'
-		},
 		[ErrorCode.documentNotFound]: {
 			httpCode: 404,
 			type: 'document',
@@ -51,16 +46,6 @@ export class ErrorHandler {
 			httpCode: 403,
 			type: 'document',
 			message: 'This document requires credentials, however none were provided'
-		},
-		[ErrorCode.documentInvalidPasswordLength]: {
-			httpCode: 400,
-			type: 'document',
-			message: 'The provided password length is invalid'
-		},
-		[ErrorCode.documentInvalidPassword]: {
-			httpCode: 400,
-			type: 'document',
-			message: 'Invalid credentials provided for the document'
 		},
 		[ErrorCode.documentInvalidLength]: {
 			httpCode: 400,
@@ -86,6 +71,11 @@ export class ErrorHandler {
 			httpCode: 400,
 			type: 'document',
 			message: 'The provided key already exists'
+		},
+		[ErrorCode.documentInvalidKey]: {
+			httpCode: 400,
+			type: 'document',
+			message: 'The provided key is invalid'
 		}
 	};
 

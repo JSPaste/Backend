@@ -1,6 +1,7 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class AccessRawV1 extends AbstractEndpoint {
@@ -11,13 +12,17 @@ export class AccessRawV1 extends AbstractEndpoint {
 				DocumentUtils.validateKey(params.key);
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentRead(file);
-				let data = document.data;
+				const document = await DocumentUtils.documentReadV1(file);
 
-				data = Bun.inflateSync(data);
+				// V1 does not support SSE (Server-Side Encryption)
+				if (document.header.sse) {
+					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+				}
+
+				const data = Buffer.from(Bun.inflateSync(document.data)).toString();
 
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
-				return new TextDecoder().decode(data);
+				return data;
 			},
 			{
 				params: t.Object(
