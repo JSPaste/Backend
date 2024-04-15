@@ -18,7 +18,8 @@ export class AccessRawV2 extends AbstractEndpoint {
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
 				const document = await DocumentUtils.documentReadV1(file);
-				let data: string | Uint8Array = document.data;
+
+				let data: Uint8Array = document.data;
 
 				if (document.header.sse) {
 					if (!options.secret) {
@@ -29,7 +30,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 					data = CryptoUtils.decrypt(document.data, options.secret);
 				}
 
-				data = Buffer.from(Bun.inflateSync(data)).toString();
+				data = Bun.inflateSync(data);
 
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
 				return data;
