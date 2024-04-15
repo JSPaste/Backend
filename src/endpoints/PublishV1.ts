@@ -15,8 +15,8 @@ export class PublishV1 extends AbstractEndpoint {
 
 				const key = await StringUtils.createKey();
 				const secret = StringUtils.createSecret();
-				// FIXME: Why?
-				const data = Bun.deflateSync(body as any);
+
+				const data = Bun.deflateSync(body as ArrayBuffer);
 
 				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
 					data: data,

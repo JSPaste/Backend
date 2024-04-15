@@ -28,8 +28,8 @@ export class PublishV2 extends AbstractEndpoint {
 				}
 
 				const key = headers.key || (await StringUtils.createKey(headers.keylength));
-				// FIXME: Why?
-				const data = Bun.deflateSync(body as any);
+
+				const data = Bun.deflateSync(body as ArrayBuffer);
 
 				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
 					data: headers.secret ? CryptoUtils.encrypt(data, secret) : data,
