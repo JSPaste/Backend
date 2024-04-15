@@ -19,7 +19,7 @@ export class AccessRawV1 extends AbstractEndpoint {
 					ErrorHandler.send(ErrorCode.documentSecretNeeded);
 				}
 
-				const data = Buffer.from(Bun.inflateSync(document.data)).toString();
+				const data = Bun.inflateSync(document.data);
 
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
 				return data;

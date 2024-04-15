@@ -18,8 +18,7 @@ export class EditV2 extends AbstractEndpoint {
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 
-				// FIXME: Why?
-				const data = Bun.deflateSync(body as any);
+				const data = Bun.deflateSync(body as ArrayBuffer);
 
 				document.data = document.header.sse ? CryptoUtils.encrypt(data, headers.secret) : data;
 

@@ -18,8 +18,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 
 				const file = await DocumentUtils.retrieveDocument(params.key);
 				const document = await DocumentUtils.documentReadV1(file);
-
-				let data: Uint8Array = document.data;
+				let data = document.data;
 
 				if (document.header.sse) {
 					if (!options.secret) {
