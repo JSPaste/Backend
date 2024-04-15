@@ -22,8 +22,7 @@ export class PublishV1 extends AbstractEndpoint {
 					data: data,
 					header: {
 						secretHash: CryptoUtils.hash(secret),
-						sse: false,
-						createdAt: Date.now()
+						sse: false
 					}
 				});
 

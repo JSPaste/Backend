@@ -3,7 +3,6 @@ type DocumentV1 = {
 	header: {
 		secretHash: Uint8Array;
 		sse: boolean;
-		createdAt: number;
 	};
 	version: 1;
 };

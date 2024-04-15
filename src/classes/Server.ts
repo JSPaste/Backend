@@ -1,3 +1,4 @@
+import { Database } from 'bun:sqlite';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import * as env from 'env-var';
@@ -36,6 +37,7 @@ export class Server {
 	public static readonly DOCUMENT_KEY_LENGTH_DEFAULT = 8;
 
 	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
+	private readonly DATABASE = new Database(undefined);
 
 	public constructor() {
 		Server.DOCS_ENABLED && this.initDocs();
@@ -48,6 +50,10 @@ export class Server {
 
 	public get elysia(): Elysia {
 		return this.ELYSIA;
+	}
+
+	public get database(): Database {
+		return this.DATABASE;
 	}
 
 	private initDocs(): void {
