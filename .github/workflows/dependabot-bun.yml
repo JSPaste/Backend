@@ -4,6 +4,9 @@ on:
     paths:
       - "package.json"
 
+permissions:
+  contents: read
+
 jobs:
   dependabot-bun:
     if: ${{ github.actor == 'dependabot[bot]' }}
@@ -13,6 +16,11 @@ jobs:
       contents: write
 
     steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
       - name: "Checkout"
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
