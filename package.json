@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@elysiajs/swagger": "~1.0.3",
-		"@types/bun": "~1.0.12",
+		"@types/bun": "~1.1.0",
 		"cbor-x": "~1.5.9",
 		"elysia": "~1.0.13",
 		"env-var": "~7.4.1",
