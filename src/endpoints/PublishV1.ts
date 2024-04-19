@@ -13,21 +13,21 @@ export class PublishV1 extends AbstractEndpoint {
 			async ({ body }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
 
-				const key = await StringUtils.createKey();
+				const name = await StringUtils.createKey();
 				const secret = StringUtils.createSecret();
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
+				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + name, {
 					data: data,
 					header: {
-						name: key,
+						name: name,
 						secretHash: CryptoUtils.hash(secret),
 						dataHash: null
 					}
 				});
 
-				return { key, secret };
+				return { key: name, secret: secret };
 			},
 			{
 				type: 'arrayBuffer',

@@ -15,7 +15,7 @@ export class AccessV2 extends AbstractEndpoint {
 
 				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);
-				let data: string | Uint8Array = document.data;
+				let data: string | Uint8Array;
 
 				if (document.header.dataHash) {
 					if (!headers.password) {
@@ -26,7 +26,7 @@ export class AccessV2 extends AbstractEndpoint {
 					data = CryptoUtils.decrypt(document.data, headers.password);
 				}
 
-				data = Buffer.from(Bun.inflateSync(data)).toString();
+				data = Buffer.from(Bun.inflateSync(document.data)).toString();
 
 				return {
 					key: params.name,
