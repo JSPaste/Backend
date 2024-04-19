@@ -8,7 +8,7 @@ export class IndexV1 extends AbstractEndpoint {
 				description: 'A small welcome message with the current API version',
 				examples: ['Welcome to JSPaste API v1']
 			}),
-			detail: { summary: 'Index', tags: ['v1'] }
+			detail: { summary: 'Index', tags: ['v1'], deprecated: true }
 		});
 	}
 }

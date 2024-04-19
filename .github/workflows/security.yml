@@ -42,12 +42,12 @@ jobs:
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: "Setup CodeQL"
-        uses: github/codeql-action/init@1b1aada464948af03b950897e5eb522f92603cc2 # v3.24.9
+        uses: github/codeql-action/init@c7f9125735019aa87cfc361530512d50ea439c71 # v3.25.1
         with:
           languages: ${{ matrix.language }}
 
       - name: "Run analysis"
-        uses: github/codeql-action/analyze@1b1aada464948af03b950897e5eb522f92603cc2 # v3.24.9
+        uses: github/codeql-action/analyze@c7f9125735019aa87cfc361530512d50ea439c71 # v3.25.1
         with:
           category: "/language:${{ matrix.language }}"
 
@@ -77,6 +77,6 @@ jobs:
           publish_results: true
 
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@1b1aada464948af03b950897e5eb522f92603cc2 # v3.24.9
+        uses: github/codeql-action/upload-sarif@c7f9125735019aa87cfc361530512d50ea439c71 # v3.25.1
         with:
           sarif_file: scoreboard.sarif

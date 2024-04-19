@@ -1,20 +1,27 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class AccessV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ params }) => {
-				return DocumentHandler.access({ key: params.key }, ServerEndpointVersion.V1);
+				const document = await DocumentUtils.documentReadV1(params.name);
+
+				// V1 Endpoint does not support Server-Side Encryption
+				if (document.header.passwordHash) {
+					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+				}
+
+				return { key: params.name, data: Buffer.from(Bun.inflateSync(document.data)).toString() };
 			},
 			{
 				params: t.Object({
-					key: t.String({
-						description: 'The document key',
+					name: t.String({
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
@@ -22,12 +29,12 @@ export class AccessV1 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The key of the document',
+								description: 'The name of the document',
 								examples: ['abc123']
 							}),
 							data: t.String({
 								description: 'The document',
-								examples: ['Hello world']
+								examples: ['Hello, World!']
 							})
 						},
 						{ description: 'The document object' }
@@ -35,7 +42,7 @@ export class AccessV1 extends AbstractEndpoint {
 					400: ErrorHandler.SCHEMA,
 					404: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Get document', tags: ['v1'] }
+				detail: { summary: 'Get document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}

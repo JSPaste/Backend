@@ -1,0 +1,40 @@
+name: "CI -> Dependabot (bun)"
+on:
+  pull_request:
+    paths:
+      - "package.json"
+
+permissions:
+  contents: read
+
+jobs:
+  dependabot-bun:
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    name: "Dependabot (bun)"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: "Checkout"
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@8f24390df009a496891208e5e36b8a1de1f45135 # v1.2.1
+
+      - name: "Update bun.lockb"
+        run: |
+          bun install
+          git add bun.lockb
+          git config --global user.name "dependabot[bot]"
+          git config --global user.email "dependabot[bot]@users.noreply.github.com"
+          git commit --amend --no-edit 
+          git push --force

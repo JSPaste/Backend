@@ -1,3 +1,4 @@
+import { Database } from 'bun:sqlite';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import * as env from 'env-var';
@@ -23,7 +24,6 @@ export class Server {
 	public static readonly DOCUMENT_TLS = env.get('DOCUMENT_TLS').asBoolStrict() ?? false;
 	public static readonly DOCUMENT_DOMAIN = env.get('DOCUMENT_DOMAIN').default('localhost').asString();
 	public static readonly DOCUMENT_MAXLENGTH = env.get('DOCUMENT_MAXLENGTH').default(2000000).asIntPositive();
-	public static readonly DOCUMENT_MAXTIME = env.get('DOCUMENT_MAXTIME').default(86400).asIntPositive();
 	public static readonly DOCS_ENABLED = env.get('DOCS_ENABLED').asBoolStrict() ?? false;
 	public static readonly DOCS_PATH = env.get('DOCS_PATH').default('/docs').asString();
 
@@ -31,11 +31,12 @@ export class Server {
 	public static readonly HOSTNAME = (Server.DOCUMENT_TLS ? 'https://' : 'http://').concat(Server.DOCUMENT_DOMAIN);
 	public static readonly ENDPOINT_VERSIONS = [ServerEndpointVersion.V1, ServerEndpointVersion.V2];
 	public static readonly DOCUMENT_PATH = 'documents/';
-	public static readonly DOCUMENT_KEY_LENGTH_MIN = 2;
-	public static readonly DOCUMENT_KEY_LENGTH_MAX = 32;
-	public static readonly DOCUMENT_KEY_LENGTH_DEFAULT = 8;
+	public static readonly DOCUMENT_NAME_LENGTH_MIN = 2;
+	public static readonly DOCUMENT_NAME_LENGTH_MAX = 32;
+	public static readonly DOCUMENT_NAME_LENGTH_DEFAULT = 8;
 
 	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
+	private readonly DATABASE = new Database(undefined);
 
 	public constructor() {
 		Server.DOCS_ENABLED && this.initDocs();
@@ -48,6 +49,10 @@ export class Server {
 
 	public get elysia(): Elysia {
 		return this.ELYSIA;
+	}
+
+	public get database(): Database {
+		return this.DATABASE;
 	}
 
 	private initDocs(): void {
@@ -102,28 +107,24 @@ export class Server {
 
 	private initErrorListener(): void {
 		this.ELYSIA.onError(({ code, error }) => {
-			switch (code) {
-				case 'VALIDATION': {
-					return ErrorHandler.get(ErrorCode.validation);
-				}
-
-				case 'NOT_FOUND': {
-					return '';
-				}
-
-				case 'PARSE': {
-					return ErrorHandler.get(ErrorCode.parse);
-				}
-
-				case 'INTERNAL_SERVER_ERROR': {
-					console.error(error);
-					return ErrorHandler.get(ErrorCode.crash);
-				}
-
-				default: {
-					return error;
-				}
+			if (code === 'NOT_FOUND') {
+				return '';
 			}
+
+			if (code === 'VALIDATION') {
+				return ErrorHandler.get(ErrorCode.validation);
+			}
+
+			if (code === 'PARSE') {
+				return ErrorHandler.get(ErrorCode.parse);
+			}
+
+			if (error instanceof Error || code === 'INTERNAL_SERVER_ERROR') {
+				console.error(error);
+				return ErrorHandler.get(ErrorCode.crash);
+			}
+
+			return error;
 		});
 	}
 

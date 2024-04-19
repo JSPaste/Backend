@@ -1,45 +1,85 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
-import { ServerEndpointVersion } from '../types/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
+import { CryptoUtils } from '../utils/CryptoUtils.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
+import { StringUtils } from '../utils/StringUtils.ts';
 
 export class PublishV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.post(
 			this.PREFIX,
 			async ({ headers, body }) => {
-				return DocumentHandler.publish(
-					{
-						body: body,
-						selectedKey: headers.key,
-						selectedKeyLength: headers.keylength,
-						selectedSecret: headers.secret,
-						lifetime: headers.lifetime,
-						password: headers.password
-					},
-					ServerEndpointVersion.V2
-				);
+				DocumentUtils.validateSizeBetweenLimits(body);
+
+				if (headers.password) {
+					DocumentUtils.validatePasswordLength(headers.password);
+				}
+
+				let secret: string;
+
+				if (headers.secret) {
+					DocumentUtils.validateSecretLength(headers.secret);
+
+					secret = headers.secret;
+				} else {
+					secret = StringUtils.createSecret();
+				}
+
+				let name: string;
+
+				if (headers.key) {
+					DocumentUtils.validateName(headers.key);
+
+					if (await StringUtils.nameExists(headers.key)) {
+						ErrorHandler.send(ErrorCode.documentNameAlreadyExists);
+					}
+
+					name = headers.key;
+				} else {
+					DocumentUtils.validateNameLength(headers.keylength);
+
+					name = await StringUtils.createName(headers.keylength);
+				}
+
+				const data = Bun.deflateSync(body as ArrayBuffer);
+
+				await DocumentUtils.documentWriteV1(name, {
+					data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
+					header: {
+						name: name,
+						secretHash: CryptoUtils.hash(secret) as string,
+						passwordHash: headers.password ? (CryptoUtils.hash(headers.password) as string) : null
+					}
+				});
+
+				return {
+					key: name,
+					secret: secret,
+					url: Server.HOSTNAME.concat('/', name),
+					// Deprecated, for compatibility reasons will be kept to 0
+					expirationTimestamp: 0
+				};
 			},
 			{
 				type: 'arrayBuffer',
 				body: t.Any({
-					description: 'The file to be uploaded'
+					description: 'The file to be uploaded',
+					default: 'Hello, World!'
 				}),
 				headers: t.Object({
 					key: t.Optional(
 						t.String({
-							description: 'A custom key, if null, a new key will be generated',
+							description: 'A custom name, if null, a new name will be generated',
 							examples: ['abc123']
 						})
 					),
 					keylength: t.Optional(
 						t.Numeric({
-							minimum: Server.DOCUMENT_KEY_LENGTH_MIN,
-							maximum: Server.DOCUMENT_KEY_LENGTH_MAX,
 							description:
-								'If a custom key is not set, this will determine the key length of the automatically generated key',
+								'If a custom name is not set, this will determine the name length of the automatically generated name',
 							examples: ['20', '4']
 						})
 					),
@@ -52,14 +92,8 @@ export class PublishV2 extends AbstractEndpoint {
 					password: t.Optional(
 						t.String({
 							description:
-								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
+								'A custom password for the document, if null, anyone who has the name will be able to see the content of the document',
 							examples: ['abc123']
-						})
-					),
-					lifetime: t.Optional(
-						t.Numeric({
-							description: `Number in seconds that the document will exist before it is automatically removed. Set to 0 to make the document permanent. If nothing is set, the default period is: ${Server.DOCUMENT_MAXTIME}`,
-							examples: ['60', '0']
 						})
 					)
 				}),
@@ -67,30 +101,24 @@ export class PublishV2 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The generated key to access the document',
+								description: 'The generated name to access the document',
 								examples: ['abc123']
 							}),
 							secret: t.String({
 								description: 'The generated secret to delete the document',
 								examples: ['aaaaa-bbbbb-ccccc-ddddd']
 							}),
-							url: t.Optional(
-								t.String({
-									description: 'The URL for viewing the document on the web',
-									examples: ['https://jspaste.eu/abc123']
-								})
-							),
-							expirationTimestamp: t.Optional(
-								t.Numeric({
-									description:
-										'UNIX timestamp with the expiration date in milliseconds. Undefined if the document is permanent.',
-									examples: [60, 0]
-								})
-							)
+							url: t.String({
+								description: 'The URL for viewing the document on the web',
+								examples: ['https://jspaste.eu/abc123']
+							}),
+							expirationTimestamp: t.Numeric({
+								description: 'DEPRECATED! UNIX timestamp with the expiration date in milliseconds.'
+							})
 						},
 						{
 							description:
-								'An object with a key, a secret, the display URL and an expiration timestamp for the document'
+								'An object with a name, a secret, the display URL and an expiration timestamp for the document'
 						}
 					),
 					400: ErrorHandler.SCHEMA

@@ -1,1 +1,8 @@
 telemetry = false
+
+[install]
+auto = "disable"
+
+[run]
+bun = true
+silent = true

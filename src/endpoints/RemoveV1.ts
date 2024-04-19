@@ -1,22 +1,29 @@
+import { unlink } from 'node:fs/promises';
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
-import { DocumentHandler } from '../classes/DocumentHandler.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { Server } from '../classes/Server.ts';
+import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class RemoveV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.delete(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
-				return DocumentHandler.remove({
-					key: params.key,
-					secret: headers.secret
-				});
+				const document = await DocumentUtils.documentReadV1(params.name);
+
+				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
+
+				return {
+					removed: await unlink(Server.DOCUMENT_PATH + params.name)
+						.then(() => true)
+						.catch(() => false)
+				};
 			},
 			{
 				params: t.Object({
-					key: t.String({
-						description: 'The document key',
+					name: t.String({
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
@@ -39,7 +46,7 @@ export class RemoveV1 extends AbstractEndpoint {
 					403: ErrorHandler.SCHEMA,
 					404: ErrorHandler.SCHEMA
 				},
-				detail: { summary: 'Remove document', tags: ['v1'] }
+				detail: { summary: 'Remove document', tags: ['v1'], deprecated: true }
 			}
 		);
 	}

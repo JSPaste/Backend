@@ -1,9 +1,17 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: "/"
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    labels:
+      - dependency:gha
+
+  - package-ecosystem: npm
+    directory: /
     target-branch: dev
     schedule:
       interval: daily
     labels:
-      - dependency:gha
+      - dependency:bun
