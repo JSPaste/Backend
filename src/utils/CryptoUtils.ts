@@ -9,7 +9,7 @@ export class CryptoUtils {
 		const iv = randomBytes(CryptoUtils.IV_LENGTH);
 		const key = CryptoUtils.hash(password, 'binary');
 		const cipher = createCipheriv(CryptoUtils.CIPHER_ALGORITHM, key, iv);
-		const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
+		const encrypted = Buffer.concat([cipher.update(data), cipher.final(), cipher.getAuthTag()]);
 
 		return Buffer.concat([iv, encrypted]);
 	}
@@ -20,7 +20,9 @@ export class CryptoUtils {
 		const key = CryptoUtils.hash(password, 'binary');
 		const decipher = createDecipheriv(CryptoUtils.CIPHER_ALGORITHM, key, iv);
 
-		return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
+		decipher.setAuthTag(encryptedData.slice(-16));
+
+		return Buffer.concat([decipher.update(encryptedData.slice(0, -16)), decipher.final()]);
 	}
 
 	public static hash(password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array {
