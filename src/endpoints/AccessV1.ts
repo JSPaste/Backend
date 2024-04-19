@@ -12,7 +12,7 @@ export class AccessV1 extends AbstractEndpoint {
 				const document = await DocumentUtils.documentReadV1(params.name);
 
 				// V1 Endpoint does not support Server-Side Encryption
-				if (document.header.dataHash) {
+				if (document.header.passwordHash) {
 					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 

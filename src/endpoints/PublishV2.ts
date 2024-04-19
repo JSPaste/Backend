@@ -51,7 +51,7 @@ export class PublishV2 extends AbstractEndpoint {
 					header: {
 						name: name,
 						secretHash: CryptoUtils.hash(secret) as string,
-						dataHash: headers.password ? (CryptoUtils.hash(headers.password) as string) : null
+						passwordHash: headers.password ? (CryptoUtils.hash(headers.password) as string) : null
 					}
 				});
 

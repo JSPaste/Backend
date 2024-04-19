@@ -16,12 +16,12 @@ export class EditV2 extends AbstractEndpoint {
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 
-				if (document.header.dataHash) {
+				if (document.header.passwordHash) {
 					if (!headers.password) {
 						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
+					DocumentUtils.validatePassword(headers.password, document.header.passwordHash);
 				}
 
 				const data = Bun.deflateSync(body as ArrayBuffer);

@@ -14,12 +14,12 @@ export class AccessV2 extends AbstractEndpoint {
 				const document = await DocumentUtils.documentReadV1(params.name);
 				let data: string | Uint8Array;
 
-				if (document.header.dataHash) {
+				if (document.header.passwordHash) {
 					if (!headers.password) {
 						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
+					DocumentUtils.validatePassword(headers.password, document.header.passwordHash);
 					data = Buffer.from(
 						Bun.inflateSync(CryptoUtils.decrypt(document.data, headers.password))
 					).toString();

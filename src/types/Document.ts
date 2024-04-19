@@ -3,7 +3,7 @@ type DocumentV1 = {
 	header: {
 		name: string;
 		secretHash: string;
-		dataHash: string | null;
+		passwordHash: string | null;
 	};
 	version: 1;
 };

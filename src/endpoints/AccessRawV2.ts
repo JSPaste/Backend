@@ -17,12 +17,12 @@ export class AccessRawV2 extends AbstractEndpoint {
 				const document = await DocumentUtils.documentReadV1(params.name);
 				let data: Uint8Array;
 
-				if (document.header.dataHash) {
+				if (document.header.passwordHash) {
 					if (!options.password) {
 						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validatePassword(options.password, document.header.dataHash);
+					DocumentUtils.validatePassword(options.password, document.header.passwordHash);
 					data = Bun.inflateSync(CryptoUtils.decrypt(document.data, options.password));
 				} else {
 					data = Bun.inflateSync(document.data);

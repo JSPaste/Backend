@@ -49,7 +49,7 @@ export class DocumentUtils {
 		}
 	}
 
-	public static validatePassword(password: string, dataHash: DocumentV1['header']['dataHash']): void {
+	public static validatePassword(password: string, dataHash: DocumentV1['header']['passwordHash']): void {
 		if (dataHash && !CryptoUtils.compare(password, dataHash)) {
 			ErrorHandler.send(ErrorCode.documentInvalidPassword);
 		}
