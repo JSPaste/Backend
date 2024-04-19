@@ -11,8 +11,7 @@ export class AccessRawV1 extends AbstractEndpoint {
 			async ({ set, params }) => {
 				DocumentUtils.validateName(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.name);
-				const document = await DocumentUtils.documentReadV1(file);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
 				// V1 Endpoint does not support Server-Side Encryption
 				if (document.header.dataHash) {

@@ -38,7 +38,7 @@ export class PublishV2 extends AbstractEndpoint {
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + name, {
+				await DocumentUtils.documentWriteV1(name, {
 					data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
 					header: {
 						name: name,

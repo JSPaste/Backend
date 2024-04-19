@@ -1,7 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { Server } from '../classes/Server.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -18,7 +17,7 @@ export class PublishV1 extends AbstractEndpoint {
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + name, {
+				await DocumentUtils.documentWriteV1(name, {
 					data: data,
 					header: {
 						name: name,

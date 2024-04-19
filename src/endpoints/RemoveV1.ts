@@ -10,10 +10,7 @@ export class RemoveV1 extends AbstractEndpoint {
 		this.SERVER.elysia.delete(
 			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
-				DocumentUtils.validateName(params.name);
-
-				const file = await DocumentUtils.retrieveDocument(params.name);
-				const document = await DocumentUtils.documentReadV1(file);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 

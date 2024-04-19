@@ -1,7 +1,6 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { Server } from '../classes/Server.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
@@ -11,10 +10,8 @@ export class EditV2 extends AbstractEndpoint {
 			this.PREFIX.concat('/:name'),
 			async ({ headers, body, params }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
-				DocumentUtils.validateName(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.name);
-				const document = await DocumentUtils.documentReadV1(file);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 				DocumentUtils.validatePassword(headers.password, document.header.dataHash);
@@ -24,7 +21,7 @@ export class EditV2 extends AbstractEndpoint {
 				document.data = document.header.dataHash ? CryptoUtils.encrypt(data, headers.password) : data;
 
 				return {
-					edited: await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + params.name, document)
+					edited: await DocumentUtils.documentWriteV1(params.name, document)
 						.then(() => true)
 						.catch(() => false)
 				};

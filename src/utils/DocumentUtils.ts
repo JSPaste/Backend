@@ -1,4 +1,3 @@
-import type { BunFile } from 'bun';
 import { decode, encode } from 'cbor-x';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
@@ -8,22 +7,20 @@ import { CryptoUtils } from './CryptoUtils.ts';
 import { ValidatorUtils } from './ValidatorUtils.ts';
 
 export class DocumentUtils {
-	public static async documentReadV1(file: BunFile): Promise<DocumentV1> {
-		return decode(new Uint8Array(await file.arrayBuffer()));
-	}
+	public static async documentReadV1(name: string): Promise<DocumentV1> {
+		DocumentUtils.validateName(name);
 
-	public static async documentWriteV1(filePath: string, document: Omit<DocumentV1, 'version'>): Promise<void> {
-		await Bun.write(filePath, encode({ ...document, version: 1 }));
-	}
-
-	public static async retrieveDocument(key: string): Promise<BunFile> {
-		const file = Bun.file(Server.DOCUMENT_PATH + key);
+		const file = Bun.file(Server.DOCUMENT_PATH + name);
 
 		if (!(await file.exists())) {
 			ErrorHandler.send(ErrorCode.documentNotFound);
 		}
 
-		return file;
+		return decode(Buffer.from(await file.arrayBuffer()));
+	}
+
+	public static async documentWriteV1(name: string, document: Omit<DocumentV1, 'version'>): Promise<void> {
+		await Bun.write(Server.DOCUMENT_PATH + name, encode({ ...document, version: 1 }));
 	}
 
 	public static validateName(key: string): void {
