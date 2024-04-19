@@ -23,7 +23,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 					}
 
 					DocumentUtils.validatePassword(options.password, document.header.dataHash);
-					data = CryptoUtils.decrypt(document.data, options.password);
+					data = Bun.inflateSync(CryptoUtils.decrypt(document.data, options.password));
 				} else {
 					data = Bun.inflateSync(document.data);
 				}
