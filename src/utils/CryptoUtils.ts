@@ -23,23 +23,20 @@ export class CryptoUtils {
 		return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
 	}
 
-	public static hash(password: string, encoding: 'hex' | 'base64' | 'binary' = 'base64'): string | Uint8Array {
+	public static hash(password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array {
 		const hasher = new Bun.CryptoHasher(CryptoUtils.HASH_ALGORITHM).update(password);
 
 		switch (encoding) {
-			case 'hex': {
-				return hasher.digest('hex');
-			}
 			case 'base64': {
 				return hasher.digest('base64');
 			}
-			case 'binary': {
+			default: {
 				return hasher.digest() as Uint8Array;
 			}
 		}
 	}
 
-	public static compare(password: string, hash: string, encoding: 'hex' | 'base64' | 'binary' = 'base64'): boolean {
+	public static compare(password: string, hash: string, encoding: 'base64' | 'binary' = 'base64'): boolean {
 		return CryptoUtils.hash(password, encoding) === hash;
 	}
 }
