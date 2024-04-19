@@ -7,7 +7,7 @@ export class CryptoUtils {
 
 	public static encrypt(data: Uint8Array, password: string): Uint8Array {
 		const iv = randomBytes(CryptoUtils.IV_LENGTH);
-		const key = CryptoUtils.hash(password);
+		const key = CryptoUtils.hash(password, 'binary');
 		const cipher = createCipheriv(CryptoUtils.CIPHER_ALGORITHM, key, iv);
 		const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
 
@@ -17,17 +17,29 @@ export class CryptoUtils {
 	public static decrypt(data: Uint8Array, password: string): Uint8Array {
 		const iv = data.slice(0, CryptoUtils.IV_LENGTH);
 		const encryptedData = data.slice(CryptoUtils.IV_LENGTH);
-		const key = CryptoUtils.hash(password);
+		const key = CryptoUtils.hash(password, 'binary');
 		const decipher = createDecipheriv(CryptoUtils.CIPHER_ALGORITHM, key, iv);
 
 		return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
 	}
 
-	public static hash(password: string): string {
-		return new Bun.CryptoHasher(CryptoUtils.HASH_ALGORITHM).update(password).digest('base64');
+	public static hash(password: string, encoding: 'hex' | 'base64' | 'binary' = 'base64'): string | Uint8Array {
+		const hasher = new Bun.CryptoHasher(CryptoUtils.HASH_ALGORITHM).update(password);
+
+		switch (encoding) {
+			case 'hex': {
+				return hasher.digest('hex');
+			}
+			case 'base64': {
+				return hasher.digest('base64');
+			}
+			case 'binary': {
+				return hasher.digest() as Uint8Array;
+			}
+		}
 	}
 
-	public static compare(password: string, hash: string): boolean {
-		return CryptoUtils.hash(password) === hash;
+	public static compare(password: string, hash: string, encoding: 'hex' | 'base64' | 'binary' = 'base64'): boolean {
+		return CryptoUtils.hash(password, encoding) === hash;
 	}
 }

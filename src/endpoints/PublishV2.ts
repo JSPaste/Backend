@@ -25,9 +25,7 @@ export class PublishV2 extends AbstractEndpoint {
 
 				if (headers.name) {
 					await DocumentUtils.validateSelectedKey(headers.name);
-				}
-
-				if (!headers.name) {
+				} else {
 					DocumentUtils.validateSelectedKeyLength(headers.nameLength);
 				}
 
@@ -39,8 +37,8 @@ export class PublishV2 extends AbstractEndpoint {
 					data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
 					header: {
 						name: name,
-						secretHash: CryptoUtils.hash(secret),
-						dataHash: headers.password ? CryptoUtils.hash(headers.password) : null
+						secretHash: CryptoUtils.hash(secret) as string,
+						dataHash: headers.password ? (CryptoUtils.hash(headers.password) as string) : null
 					}
 				});
 
