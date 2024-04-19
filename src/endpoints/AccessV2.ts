@@ -38,7 +38,7 @@ export class AccessV2 extends AbstractEndpoint {
 			{
 				params: t.Object({
 					name: t.String({
-						description: 'The document key',
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
@@ -54,7 +54,7 @@ export class AccessV2 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The key of the document',
+								description: 'The name of the document',
 								examples: ['abc123']
 							}),
 							data: t.String({
@@ -71,7 +71,7 @@ export class AccessV2 extends AbstractEndpoint {
 						},
 						{
 							description:
-								'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
+								'The document object, including the name, the data, the display URL and an expiration timestamp for the document'
 						}
 					),
 					400: ErrorHandler.SCHEMA,

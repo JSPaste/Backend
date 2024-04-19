@@ -23,7 +23,7 @@ export class AccessV1 extends AbstractEndpoint {
 			{
 				params: t.Object({
 					name: t.String({
-						description: 'The document key',
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
@@ -31,7 +31,7 @@ export class AccessV1 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The key of the document',
+								description: 'The name of the document',
 								examples: ['abc123']
 							}),
 							data: t.String({

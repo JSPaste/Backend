@@ -23,7 +23,7 @@ export class RemoveV1 extends AbstractEndpoint {
 			{
 				params: t.Object({
 					name: t.String({
-						description: 'The document key',
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),

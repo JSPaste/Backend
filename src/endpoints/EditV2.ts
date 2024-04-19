@@ -1,6 +1,7 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
@@ -14,11 +15,18 @@ export class EditV2 extends AbstractEndpoint {
 				const document = await DocumentUtils.documentReadV1(params.name);
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
-				DocumentUtils.validatePassword(headers.password, document.header.dataHash);
+
+				if (document.header.dataHash) {
+					if (!headers.password) {
+						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+					}
+
+					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
+				}
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				document.data = document.header.dataHash ? CryptoUtils.encrypt(data, headers.password) : data;
+				document.data = headers.password ? CryptoUtils.encrypt(data, headers.password) : data;
 
 				return {
 					edited: await DocumentUtils.documentWriteV1(params.name, document)
@@ -31,7 +39,7 @@ export class EditV2 extends AbstractEndpoint {
 				body: t.Any({ description: 'The new file', default: 'Hello, World!' }),
 				params: t.Object({
 					name: t.String({
-						description: 'The document key',
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
@@ -40,10 +48,12 @@ export class EditV2 extends AbstractEndpoint {
 						description: 'The document secret',
 						examples: ['aaaaa-bbbbb-ccccc-ddddd']
 					}),
-					password: t.String({
-						description: 'The document password if aplicable',
-						examples: ['abc123']
-					})
+					password: t.Optional(
+						t.String({
+							description: 'The document password if aplicable',
+							examples: ['abc123']
+						})
+					)
 				}),
 				response: {
 					200: t.Object(

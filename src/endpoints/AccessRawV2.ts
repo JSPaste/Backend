@@ -32,18 +32,12 @@ export class AccessRawV2 extends AbstractEndpoint {
 				return data;
 			},
 			{
-				params: t.Object(
-					{
-						name: t.String({
-							description: 'The document key',
-							examples: ['abc123']
-						})
-					},
-					{
-						description: 'The request parameters',
-						examples: [{ key: 'abc123' }]
-					}
-				),
+				params: t.Object({
+					name: t.String({
+						description: 'The document name',
+						examples: ['abc123']
+					})
+				}),
 				headers: t.Object({
 					password: t.Optional(
 						t.String({

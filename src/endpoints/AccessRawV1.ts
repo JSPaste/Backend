@@ -24,18 +24,12 @@ export class AccessRawV1 extends AbstractEndpoint {
 				return data;
 			},
 			{
-				params: t.Object(
-					{
-						name: t.String({
-							description: 'The document name',
-							examples: ['abc123']
-						})
-					},
-					{
-						description: 'The request parameters',
-						examples: [{ key: 'abc123' }]
-					}
-				),
+				params: t.Object({
+					name: t.String({
+						description: 'The document name',
+						examples: ['abc123']
+					})
+				}),
 				response: {
 					200: t.Any({
 						description: 'The raw document',

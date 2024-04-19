@@ -18,23 +18,31 @@ export class PublishV2 extends AbstractEndpoint {
 					DocumentUtils.validatePasswordLength(headers.password);
 				}
 
+				let secret: string;
+
 				if (headers.secret) {
 					DocumentUtils.validateSecretLength(headers.secret);
+
+					secret = headers.secret;
+				} else {
+					secret = StringUtils.createSecret();
 				}
 
-				const secret = headers.secret || StringUtils.createSecret();
+				let name: string;
 
 				if (headers.name) {
-					if (await StringUtils.keyExists(headers.name)) {
+					DocumentUtils.validateName(headers.name);
+
+					if (await StringUtils.nameExists(headers.name)) {
 						ErrorHandler.send(ErrorCode.documentNameAlreadyExists);
 					}
 
-					DocumentUtils.validateName(headers.name);
-				} else if (headers.nameLength) {
+					name = headers.name;
+				} else {
 					DocumentUtils.validateNameLength(headers.nameLength);
-				}
 
-				const name = headers.name || (await StringUtils.createKey(headers.nameLength));
+					name = await StringUtils.createName(headers.nameLength);
+				}
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
@@ -64,14 +72,14 @@ export class PublishV2 extends AbstractEndpoint {
 				headers: t.Object({
 					name: t.Optional(
 						t.String({
-							description: 'A custom key, if null, a new key will be generated',
+							description: 'A custom name, if null, a new name will be generated',
 							examples: ['abc123']
 						})
 					),
 					nameLength: t.Optional(
 						t.Numeric({
 							description:
-								'If a custom key is not set, this will determine the key length of the automatically generated key',
+								'If a custom name is not set, this will determine the name length of the automatically generated name',
 							examples: ['20', '4']
 						})
 					),
@@ -84,7 +92,7 @@ export class PublishV2 extends AbstractEndpoint {
 					password: t.Optional(
 						t.String({
 							description:
-								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
+								'A custom password for the document, if null, anyone who has the name will be able to see the content of the document',
 							examples: ['abc123']
 						})
 					)
@@ -93,7 +101,7 @@ export class PublishV2 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The generated key to access the document',
+								description: 'The generated name to access the document',
 								examples: ['abc123']
 							}),
 							secret: t.String({
@@ -110,7 +118,7 @@ export class PublishV2 extends AbstractEndpoint {
 						},
 						{
 							description:
-								'An object with a key, a secret, the display URL and an expiration timestamp for the document'
+								'An object with a name, a secret, the display URL and an expiration timestamp for the document'
 						}
 					),
 					400: ErrorHandler.SCHEMA

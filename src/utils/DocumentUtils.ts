@@ -28,8 +28,8 @@ export class DocumentUtils {
 			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
 				Bun.stringWidth(key),
-				Server.DOCUMENT_KEY_LENGTH_MIN,
-				Server.DOCUMENT_KEY_LENGTH_MAX
+				Server.DOCUMENT_NAME_LENGTH_MIN,
+				Server.DOCUMENT_NAME_LENGTH_MAX
 			)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidName);
@@ -39,7 +39,11 @@ export class DocumentUtils {
 	public static validateNameLength(length: number | undefined): void {
 		if (
 			length &&
-			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
+			!ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.DOCUMENT_NAME_LENGTH_MIN,
+				Server.DOCUMENT_NAME_LENGTH_MAX
+			)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidNameLength);
 		}
