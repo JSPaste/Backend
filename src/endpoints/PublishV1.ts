@@ -22,7 +22,7 @@ export class PublishV1 extends AbstractEndpoint {
 					header: {
 						name: name,
 						secretHash: CryptoUtils.hash(secret) as string,
-						dataHash: null
+						passwordHash: null
 					}
 				});
 
