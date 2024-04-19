@@ -9,42 +9,40 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class AccessV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
-				DocumentUtils.validateKey(params.key);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentReadV1(file);
-				let data: string | Uint8Array = document.data;
+				let data: Uint8Array;
 
-				if (document.header.sse) {
-					if (!headers.secret) {
-						throw ErrorHandler.send(ErrorCode.documentSecretNeeded);
+				if (document.header.passwordHash) {
+					if (!headers.password) {
+						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
-					data = CryptoUtils.decrypt(document.data, headers.secret);
+					DocumentUtils.validatePassword(headers.password, document.header.passwordHash);
+					data = CryptoUtils.decrypt(document.data, headers.password);
+				} else {
+					data = document.data;
 				}
 
-				data = Buffer.from(Bun.inflateSync(data)).toString();
-
 				return {
-					key: params.key,
-					data: data,
-					url: Server.HOSTNAME.concat('/', params.key),
+					key: params.name,
+					data: Buffer.from(Bun.inflateSync(data)).toString(),
+					url: Server.HOSTNAME.concat('/', params.name),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
 				};
 			},
 			{
 				params: t.Object({
-					key: t.String({
-						description: 'The document key',
+					name: t.String({
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
 				headers: t.Object({
-					secret: t.Optional(
+					password: t.Optional(
 						t.String({
 							description: 'The document password if aplicable',
 							examples: ['abc123']
@@ -55,7 +53,7 @@ export class AccessV2 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The key of the document',
+								description: 'The name of the document',
 								examples: ['abc123']
 							}),
 							data: t.String({
@@ -72,7 +70,7 @@ export class AccessV2 extends AbstractEndpoint {
 						},
 						{
 							description:
-								'The document object, including the key, the data, the display URL and an expiration timestamp for the document'
+								'The document object, including the name, the data, the display URL and an expiration timestamp for the document'
 						}
 					),
 					400: ErrorHandler.SCHEMA,

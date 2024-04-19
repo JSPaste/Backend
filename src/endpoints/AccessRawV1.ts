@@ -7,36 +7,28 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class AccessRawV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
-			this.PREFIX.concat('/:key/raw'),
+			this.PREFIX.concat('/:name/raw'),
 			async ({ set, params }) => {
-				DocumentUtils.validateKey(params.key);
+				DocumentUtils.validateName(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentReadV1(file);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
-				// V1 does not support SSE (Server-Side Encryption)
-				if (document.header.sse) {
-					ErrorHandler.send(ErrorCode.documentSecretNeeded);
+				// V1 Endpoint does not support Server-Side Encryption
+				if (document.header.passwordHash) {
+					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
-				const data = Bun.inflateSync(document.data);
-
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
-				return data;
+
+				return Bun.inflateSync(document.data);
 			},
 			{
-				params: t.Object(
-					{
-						key: t.String({
-							description: 'The document key',
-							examples: ['abc123']
-						})
-					},
-					{
-						description: 'The request parameters',
-						examples: [{ key: 'abc123' }]
-					}
-				),
+				params: t.Object({
+					name: t.String({
+						description: 'The document name',
+						examples: ['abc123']
+					})
+				}),
 				response: {
 					200: t.Any({
 						description: 'The raw document',

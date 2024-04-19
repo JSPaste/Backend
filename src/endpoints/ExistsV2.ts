@@ -7,16 +7,16 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class ExistsV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
-			this.PREFIX.concat('/:key/exists'),
+			this.PREFIX.concat('/:name/exists'),
 			async ({ params }) => {
-				DocumentUtils.validateKey(params.key);
+				DocumentUtils.validateName(params.name);
 
-				return Bun.file(Server.DOCUMENT_PATH + params.key).exists();
+				return Bun.file(Server.DOCUMENT_PATH + params.name).exists();
 			},
 			{
 				params: t.Object({
-					key: t.String({
-						description: 'The document key',
+					name: t.String({
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),

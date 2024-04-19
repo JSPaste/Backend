@@ -2,6 +2,7 @@ import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -13,36 +14,51 @@ export class PublishV2 extends AbstractEndpoint {
 			async ({ headers, body }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
 
+				if (headers.password) {
+					DocumentUtils.validatePasswordLength(headers.password);
+				}
+
+				let secret: string;
+
 				if (headers.secret) {
 					DocumentUtils.validateSecretLength(headers.secret);
+
+					secret = headers.secret;
+				} else {
+					secret = StringUtils.createSecret();
 				}
 
-				const secret = headers.secret || StringUtils.createSecret();
+				let name: string;
 
 				if (headers.key) {
-					await DocumentUtils.validateSelectedKey(headers.key);
-				}
+					DocumentUtils.validateName(headers.key);
 
-				if (!headers.key) {
-					DocumentUtils.validateSelectedKeyLength(headers.keylength);
-				}
+					if (await StringUtils.nameExists(headers.key)) {
+						ErrorHandler.send(ErrorCode.documentNameAlreadyExists);
+					}
 
-				const key = headers.key || (await StringUtils.createKey(headers.keylength));
+					name = headers.key;
+				} else {
+					DocumentUtils.validateNameLength(headers.keylength);
+
+					name = await StringUtils.createName(headers.keylength);
+				}
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
-					data: headers.secret ? CryptoUtils.encrypt(data, secret) : data,
+				await DocumentUtils.documentWriteV1(name, {
+					data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
 					header: {
-						secretHash: CryptoUtils.hash(secret),
-						sse: !!headers.secret
+						name: name,
+						secretHash: CryptoUtils.hash(secret) as string,
+						passwordHash: headers.password ? (CryptoUtils.hash(headers.password) as string) : null
 					}
 				});
 
 				return {
-					key: key,
+					key: name,
 					secret: secret,
-					url: Server.HOSTNAME.concat('/', key),
+					url: Server.HOSTNAME.concat('/', name),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
 				};
@@ -56,22 +72,28 @@ export class PublishV2 extends AbstractEndpoint {
 				headers: t.Object({
 					key: t.Optional(
 						t.String({
-							description: 'A custom key, if null, a new key will be generated',
+							description: 'A custom name, if null, a new name will be generated',
 							examples: ['abc123']
 						})
 					),
 					keylength: t.Optional(
 						t.Numeric({
 							description:
-								'If a custom key is not set, this will determine the key length of the automatically generated key',
+								'If a custom name is not set, this will determine the name length of the automatically generated name',
 							examples: ['20', '4']
 						})
 					),
 					secret: t.Optional(
 						t.String({
-							description:
-								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
+							description: 'A custom secret, if null, a new secret will be generated',
 							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					),
+					password: t.Optional(
+						t.String({
+							description:
+								'A custom password for the document, if null, anyone who has the name will be able to see the content of the document',
+							examples: ['abc123']
 						})
 					)
 				}),
@@ -79,7 +101,7 @@ export class PublishV2 extends AbstractEndpoint {
 					200: t.Object(
 						{
 							key: t.String({
-								description: 'The generated key to access the document',
+								description: 'The generated name to access the document',
 								examples: ['abc123']
 							}),
 							secret: t.String({
@@ -96,7 +118,7 @@ export class PublishV2 extends AbstractEndpoint {
 						},
 						{
 							description:
-								'An object with a key, a secret, the display URL and an expiration timestamp for the document'
+								'An object with a name, a secret, the display URL and an expiration timestamp for the document'
 						}
 					),
 					400: ErrorHandler.SCHEMA

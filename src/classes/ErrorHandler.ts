@@ -44,12 +44,22 @@ export class ErrorHandler {
 		[ErrorCode.documentNotFound]: {
 			httpCode: 404,
 			type: 'document',
-			message: 'The requested document does not exist. Check the document key and try again.'
+			message: 'The requested document does not exist. Check the document name and try again.'
 		},
-		[ErrorCode.documentSecretNeeded]: {
+		[ErrorCode.documentPasswordNeeded]: {
 			httpCode: 401,
 			type: 'document',
-			message: 'This document is protected. Provide the document secret and try again.'
+			message: 'This document is protected. Provide the document password and try again.'
+		},
+		[ErrorCode.documentInvalidPassword]: {
+			httpCode: 403,
+			type: 'document',
+			message: 'The credentials provided for the document are invalid.'
+		},
+		[ErrorCode.documentInvalidPasswordLength]: {
+			httpCode: 400,
+			type: 'document',
+			message: 'The password length provided for the document is invalid.'
 		},
 		[ErrorCode.documentInvalidSize]: {
 			httpCode: 400,
@@ -66,20 +76,20 @@ export class ErrorHandler {
 			type: 'document',
 			message: 'The secret length provided for the document is invalid.'
 		},
-		[ErrorCode.documentInvalidKeyLength]: {
+		[ErrorCode.documentInvalidNameLength]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The key length provided for the document is out of range.'
+			message: 'The name length provided for the document is out of range.'
 		},
-		[ErrorCode.documentKeyAlreadyExists]: {
+		[ErrorCode.documentNameAlreadyExists]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The key provided for the document already exists. Use another one and try again.'
+			message: 'The name provided for the document already exists. Use another one and try again.'
 		},
-		[ErrorCode.documentInvalidKey]: {
+		[ErrorCode.documentInvalidName]: {
 			httpCode: 400,
 			type: 'document',
-			message: 'The key provided for the document is invalid. Use another one and try again.'
+			message: 'The name provided for the document is invalid. Use another one and try again.'
 		}
 	};
 

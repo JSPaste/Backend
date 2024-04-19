@@ -1,5 +1,4 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import type { SupportedCryptoAlgorithms } from 'bun';
 
 export class CryptoUtils {
 	private static readonly CIPHER_ALGORITHM = 'aes-256-gcm';
@@ -8,9 +7,9 @@ export class CryptoUtils {
 
 	public static encrypt(data: Uint8Array, password: string): Uint8Array {
 		const iv = randomBytes(CryptoUtils.IV_LENGTH);
-		const key = CryptoUtils.hash(password);
+		const key = CryptoUtils.hash(password, 'binary');
 		const cipher = createCipheriv(CryptoUtils.CIPHER_ALGORITHM, key, iv);
-		const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
+		const encrypted = Buffer.concat([cipher.update(data), cipher.final(), cipher.getAuthTag()]);
 
 		return Buffer.concat([iv, encrypted]);
 	}
@@ -18,22 +17,28 @@ export class CryptoUtils {
 	public static decrypt(data: Uint8Array, password: string): Uint8Array {
 		const iv = data.slice(0, CryptoUtils.IV_LENGTH);
 		const encryptedData = data.slice(CryptoUtils.IV_LENGTH);
-		const key = CryptoUtils.hash(password);
+		const key = CryptoUtils.hash(password, 'binary');
 		const decipher = createDecipheriv(CryptoUtils.CIPHER_ALGORITHM, key, iv);
 
-		return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
+		decipher.setAuthTag(encryptedData.slice(-16));
+
+		return Buffer.concat([decipher.update(encryptedData.slice(0, -16)), decipher.final()]);
 	}
 
-	public static hash(
-		data: string | Uint8Array,
-		algorithm: SupportedCryptoAlgorithms = CryptoUtils.HASH_ALGORITHM
-	): Uint8Array {
-		return new Bun.CryptoHasher(algorithm).update(data).digest() as Uint8Array;
+	public static hash(password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array {
+		const hasher = new Bun.CryptoHasher(CryptoUtils.HASH_ALGORITHM).update(password);
+
+		switch (encoding) {
+			case 'base64': {
+				return hasher.digest('base64');
+			}
+			default: {
+				return hasher.digest() as Uint8Array;
+			}
+		}
 	}
 
-	public static compare(password: string, hash: Uint8Array, algorithm?: SupportedCryptoAlgorithms): boolean {
-		const hashPassword = CryptoUtils.hash(password, algorithm);
-
-		return hashPassword.length === hash.length && hashPassword.every((value, index) => value === hash[index]);
+	public static compare(password: string, hash: string, encoding: 'base64' | 'binary' = 'base64'): boolean {
+		return CryptoUtils.hash(password, encoding) === hash;
 	}
 }

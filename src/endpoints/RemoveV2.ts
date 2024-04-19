@@ -8,25 +8,22 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class RemoveV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.delete(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
-				DocumentUtils.validateKey(params.key);
-
-				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentReadV1(file);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 
 				return {
-					removed: await unlink(Server.DOCUMENT_PATH + params.key)
+					removed: await unlink(Server.DOCUMENT_PATH + params.name)
 						.then(() => true)
 						.catch(() => false)
 				};
 			},
 			{
 				params: t.Object({
-					key: t.String({
-						description: 'The document key',
+					name: t.String({
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),

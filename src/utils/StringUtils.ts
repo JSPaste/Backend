@@ -14,24 +14,28 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateKey(length: number = Server.DOCUMENT_KEY_LENGTH_DEFAULT): string {
+	public static generateName(length: number = Server.DOCUMENT_NAME_LENGTH_DEFAULT): string {
 		if (
-			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
+			!ValidatorUtils.isLengthWithinRange(
+				length,
+				Server.DOCUMENT_NAME_LENGTH_MIN,
+				Server.DOCUMENT_NAME_LENGTH_MAX
+			)
 		) {
-			length = Server.DOCUMENT_KEY_LENGTH_DEFAULT;
+			length = Server.DOCUMENT_NAME_LENGTH_DEFAULT;
 		}
 
 		return StringUtils.random(length, 64);
 	}
 
-	public static async keyExists(key: string): Promise<boolean> {
-		return Bun.file(Server.DOCUMENT_PATH + key).exists();
+	public static async nameExists(name: string): Promise<boolean> {
+		return Bun.file(Server.DOCUMENT_PATH + name).exists();
 	}
 
-	public static async createKey(length: number = Server.DOCUMENT_KEY_LENGTH_DEFAULT): Promise<string> {
-		const key = StringUtils.generateKey(length);
+	public static async createName(length: number = Server.DOCUMENT_NAME_LENGTH_DEFAULT): Promise<string> {
+		const key = StringUtils.generateName(length);
 
-		return (await StringUtils.keyExists(key)) ? StringUtils.createKey(length + 1) : key;
+		return (await StringUtils.nameExists(key)) ? StringUtils.createName(length + 1) : key;
 	}
 
 	public static createSecret(chunkLength = 5, chunks = 4): string {

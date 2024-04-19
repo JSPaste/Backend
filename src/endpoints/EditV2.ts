@@ -1,29 +1,35 @@
 import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { Server } from '../classes/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 
 export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.patch(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ headers, body, params }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
-				DocumentUtils.validateKey(params.key);
 
-				const file = await DocumentUtils.retrieveDocument(params.key);
-				const document = await DocumentUtils.documentReadV1(file);
+				const document = await DocumentUtils.documentReadV1(params.name);
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 
+				if (document.header.passwordHash) {
+					if (!headers.password) {
+						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+					}
+
+					DocumentUtils.validatePassword(headers.password, document.header.passwordHash);
+				}
+
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				document.data = document.header.sse ? CryptoUtils.encrypt(data, headers.secret) : data;
+				document.data = headers.password ? CryptoUtils.encrypt(data, headers.password) : data;
 
 				return {
-					edited: await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + params.key, document)
+					edited: await DocumentUtils.documentWriteV1(params.name, document)
 						.then(() => true)
 						.catch(() => false)
 				};
@@ -32,8 +38,8 @@ export class EditV2 extends AbstractEndpoint {
 				type: 'arrayBuffer',
 				body: t.Any({ description: 'The new file', default: 'Hello, World!' }),
 				params: t.Object({
-					key: t.String({
-						description: 'The document key',
+					name: t.String({
+						description: 'The document name',
 						examples: ['abc123']
 					})
 				}),
@@ -41,7 +47,13 @@ export class EditV2 extends AbstractEndpoint {
 					secret: t.String({
 						description: 'The document secret',
 						examples: ['aaaaa-bbbbb-ccccc-ddddd']
-					})
+					}),
+					password: t.Optional(
+						t.String({
+							description: 'The document password if aplicable',
+							examples: ['abc123']
+						})
+					)
 				}),
 				response: {
 					200: t.Object(

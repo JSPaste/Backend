@@ -24,7 +24,6 @@ export class Server {
 	public static readonly DOCUMENT_TLS = env.get('DOCUMENT_TLS').asBoolStrict() ?? false;
 	public static readonly DOCUMENT_DOMAIN = env.get('DOCUMENT_DOMAIN').default('localhost').asString();
 	public static readonly DOCUMENT_MAXLENGTH = env.get('DOCUMENT_MAXLENGTH').default(2000000).asIntPositive();
-	public static readonly DOCUMENT_MAXTIME = env.get('DOCUMENT_MAXTIME').default(86400).asIntPositive();
 	public static readonly DOCS_ENABLED = env.get('DOCS_ENABLED').asBoolStrict() ?? false;
 	public static readonly DOCS_PATH = env.get('DOCS_PATH').default('/docs').asString();
 
@@ -32,9 +31,9 @@ export class Server {
 	public static readonly HOSTNAME = (Server.DOCUMENT_TLS ? 'https://' : 'http://').concat(Server.DOCUMENT_DOMAIN);
 	public static readonly ENDPOINT_VERSIONS = [ServerEndpointVersion.V1, ServerEndpointVersion.V2];
 	public static readonly DOCUMENT_PATH = 'documents/';
-	public static readonly DOCUMENT_KEY_LENGTH_MIN = 2;
-	public static readonly DOCUMENT_KEY_LENGTH_MAX = 32;
-	public static readonly DOCUMENT_KEY_LENGTH_DEFAULT = 8;
+	public static readonly DOCUMENT_NAME_LENGTH_MIN = 2;
+	public static readonly DOCUMENT_NAME_LENGTH_MAX = 32;
+	public static readonly DOCUMENT_NAME_LENGTH_DEFAULT = 8;
 
 	private readonly ELYSIA: Elysia = new Elysia({ precompile: true });
 	private readonly DATABASE = new Database(undefined);
