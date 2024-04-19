@@ -23,10 +23,12 @@ export class AccessV2 extends AbstractEndpoint {
 					}
 
 					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
-					data = CryptoUtils.decrypt(document.data, headers.password);
+					data = Buffer.from(
+						Bun.inflateSync(CryptoUtils.decrypt(document.data, headers.password))
+					).toString();
+				} else {
+					data = Buffer.from(Bun.inflateSync(document.data)).toString();
 				}
-
-				data = Buffer.from(Bun.inflateSync(document.data)).toString();
 
 				return {
 					key: params.name,

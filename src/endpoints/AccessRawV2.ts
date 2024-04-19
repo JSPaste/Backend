@@ -27,9 +27,9 @@ export class AccessRawV2 extends AbstractEndpoint {
 
 					DocumentUtils.validatePassword(options.password, document.header.dataHash);
 					data = CryptoUtils.decrypt(document.data, options.password);
+				} else {
+					data = Bun.inflateSync(document.data);
 				}
-
-				data = Bun.inflateSync(document.data);
 
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
 				return data;
