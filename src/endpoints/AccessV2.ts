@@ -12,7 +12,8 @@ export class AccessV2 extends AbstractEndpoint {
 			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
 				const document = await DocumentUtils.documentReadV1(params.name);
-				let data: string | Uint8Array;
+
+				let data: Uint8Array;
 
 				if (document.header.dataHash) {
 					if (!headers.password) {
@@ -20,16 +21,15 @@ export class AccessV2 extends AbstractEndpoint {
 					}
 
 					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
-					data = Buffer.from(
-						Bun.inflateSync(CryptoUtils.decrypt(document.data, headers.password))
-					).toString();
+
+					data = CryptoUtils.decrypt(document.data, headers.password);
 				} else {
-					data = Buffer.from(Bun.inflateSync(document.data)).toString();
+					data = document.data;
 				}
 
 				return {
 					key: params.name,
-					data: data,
+					data: Buffer.from(Bun.inflateSync(data)).toString(),
 					url: Server.HOSTNAME.concat('/', params.name),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0

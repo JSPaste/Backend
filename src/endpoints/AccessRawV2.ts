@@ -15,6 +15,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 				};
 
 				const document = await DocumentUtils.documentReadV1(params.name);
+
 				let data: Uint8Array;
 
 				if (document.header.dataHash) {
@@ -23,13 +24,15 @@ export class AccessRawV2 extends AbstractEndpoint {
 					}
 
 					DocumentUtils.validatePassword(options.password, document.header.dataHash);
-					data = Bun.inflateSync(CryptoUtils.decrypt(document.data, options.password));
+
+					data = CryptoUtils.decrypt(document.data, options.password);
 				} else {
-					data = Bun.inflateSync(document.data);
+					data = document.data;
 				}
 
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
-				return data;
+
+				return Bun.inflateSync(data);
 			},
 			{
 				params: t.Object({

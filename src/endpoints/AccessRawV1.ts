@@ -18,10 +18,9 @@ export class AccessRawV1 extends AbstractEndpoint {
 					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
-				const data = Bun.inflateSync(document.data);
-
 				set.headers['Content-Type'] = 'text/plain;charset=utf-8';
-				return data;
+
+				return Bun.inflateSync(document.data);
 			},
 			{
 				params: t.Object({
