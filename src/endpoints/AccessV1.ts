@@ -16,9 +16,7 @@ export class AccessV1 extends AbstractEndpoint {
 					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
-				const data = Buffer.from(Bun.inflateSync(document.data)).toString();
-
-				return { key: params.name, data: data };
+				return { key: params.name, data: Buffer.from(Bun.inflateSync(document.data)).toString() };
 			},
 			{
 				params: t.Object({

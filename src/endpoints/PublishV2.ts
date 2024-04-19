@@ -30,18 +30,18 @@ export class PublishV2 extends AbstractEndpoint {
 
 				let name: string;
 
-				if (headers.name) {
-					DocumentUtils.validateName(headers.name);
+				if (headers.key) {
+					DocumentUtils.validateName(headers.key);
 
-					if (await StringUtils.nameExists(headers.name)) {
+					if (await StringUtils.nameExists(headers.key)) {
 						ErrorHandler.send(ErrorCode.documentNameAlreadyExists);
 					}
 
-					name = headers.name;
+					name = headers.key;
 				} else {
-					DocumentUtils.validateNameLength(headers.nameLength);
+					DocumentUtils.validateNameLength(headers.keylength);
 
-					name = await StringUtils.createName(headers.nameLength);
+					name = await StringUtils.createName(headers.keylength);
 				}
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
@@ -70,13 +70,13 @@ export class PublishV2 extends AbstractEndpoint {
 					default: 'Hello, World!'
 				}),
 				headers: t.Object({
-					name: t.Optional(
+					key: t.Optional(
 						t.String({
 							description: 'A custom name, if null, a new name will be generated',
 							examples: ['abc123']
 						})
 					),
-					nameLength: t.Optional(
+					keylength: t.Optional(
 						t.Numeric({
 							description:
 								'If a custom name is not set, this will determine the name length of the automatically generated name',
