@@ -13,36 +13,41 @@ export class PublishV2 extends AbstractEndpoint {
 			async ({ headers, body }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
 
+				if (headers.password) {
+					DocumentUtils.validatePasswordLength(headers.password);
+				}
+
 				if (headers.secret) {
 					DocumentUtils.validateSecretLength(headers.secret);
 				}
 
 				const secret = headers.secret || StringUtils.createSecret();
 
-				if (headers.key) {
-					await DocumentUtils.validateSelectedKey(headers.key);
+				if (headers.name) {
+					await DocumentUtils.validateSelectedKey(headers.name);
 				}
 
-				if (!headers.key) {
-					DocumentUtils.validateSelectedKeyLength(headers.keylength);
+				if (!headers.name) {
+					DocumentUtils.validateSelectedKeyLength(headers.nameLength);
 				}
 
-				const key = headers.key || (await StringUtils.createKey(headers.keylength));
+				const name = headers.name || (await StringUtils.createKey(headers.nameLength));
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
-					data: headers.secret ? CryptoUtils.encrypt(data, secret) : data,
+				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + name, {
+					data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
 					header: {
+						name: name,
 						secretHash: CryptoUtils.hash(secret),
-						sse: !!headers.secret
+						dataHash: headers.password ? CryptoUtils.hash(headers.password) : null
 					}
 				});
 
 				return {
-					key: key,
+					key: name,
 					secret: secret,
-					url: Server.HOSTNAME.concat('/', key),
+					url: Server.HOSTNAME.concat('/', name),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
 				};
@@ -54,13 +59,13 @@ export class PublishV2 extends AbstractEndpoint {
 					default: 'Hello, World!'
 				}),
 				headers: t.Object({
-					key: t.Optional(
+					name: t.Optional(
 						t.String({
 							description: 'A custom key, if null, a new key will be generated',
 							examples: ['abc123']
 						})
 					),
-					keylength: t.Optional(
+					nameLength: t.Optional(
 						t.Numeric({
 							description:
 								'If a custom key is not set, this will determine the key length of the automatically generated key',
@@ -69,9 +74,15 @@ export class PublishV2 extends AbstractEndpoint {
 					),
 					secret: t.Optional(
 						t.String({
+							description: 'A custom secret, if null, a new secret will be generated',
+							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+						})
+					),
+					password: t.Optional(
+						t.String({
 							description:
 								'A custom password for the document, if null, anyone who has the key will be able to see the content of the document',
-							examples: ['aaaaa-bbbbb-ccccc-ddddd']
+							examples: ['abc123']
 						})
 					)
 				}),

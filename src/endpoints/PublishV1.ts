@@ -21,8 +21,9 @@ export class PublishV1 extends AbstractEndpoint {
 				await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + key, {
 					data: data,
 					header: {
+						name: key,
 						secretHash: CryptoUtils.hash(secret),
-						sse: false
+						dataHash: null
 					}
 				});
 

@@ -7,25 +7,25 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class AccessV1 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ params }) => {
-				DocumentUtils.validateKey(params.key);
+				DocumentUtils.validateKey(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.key);
+				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);
 
-				// V1 does not support SSE (Server-Side Encryption)
-				if (document.header.sse) {
-					ErrorHandler.send(ErrorCode.documentSecretNeeded);
+				// V1 Endpoint does not support Server-Side Encryption
+				if (document.header.dataHash) {
+					ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
 				const data = Buffer.from(Bun.inflateSync(document.data)).toString();
 
-				return { key: params.key, data: data };
+				return { key: params.name, data: data };
 			},
 			{
 				params: t.Object({
-					key: t.String({
+					name: t.String({
 						description: 'The document key',
 						examples: ['abc123']
 					})

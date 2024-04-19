@@ -46,10 +46,20 @@ export class ErrorHandler {
 			type: 'document',
 			message: 'The requested document does not exist. Check the document key and try again.'
 		},
-		[ErrorCode.documentSecretNeeded]: {
+		[ErrorCode.documentPasswordNeeded]: {
 			httpCode: 401,
 			type: 'document',
-			message: 'This document is protected. Provide the document secret and try again.'
+			message: 'This document is protected. Provide the document password and try again.'
+		},
+		[ErrorCode.documentInvalidPassword]: {
+			httpCode: 403,
+			type: 'document',
+			message: 'The credentials provided for the document are invalid.'
+		},
+		[ErrorCode.documentInvalidPasswordLength]: {
+			httpCode: 400,
+			type: 'document',
+			message: 'The password length provided for the document is invalid.'
 		},
 		[ErrorCode.documentInvalidSize]: {
 			httpCode: 400,

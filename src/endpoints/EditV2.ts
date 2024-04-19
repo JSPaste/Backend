@@ -8,22 +8,23 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class EditV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.patch(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ headers, body, params }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
-				DocumentUtils.validateKey(params.key);
+				DocumentUtils.validateKey(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.key);
+				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);
 
 				DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
+				DocumentUtils.validatePassword(headers.password, document.header.dataHash);
 
 				const data = Bun.deflateSync(body as ArrayBuffer);
 
-				document.data = document.header.sse ? CryptoUtils.encrypt(data, headers.secret) : data;
+				document.data = document.header.dataHash ? CryptoUtils.encrypt(data, headers.password) : data;
 
 				return {
-					edited: await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + params.key, document)
+					edited: await DocumentUtils.documentWriteV1(Server.DOCUMENT_PATH + params.name, document)
 						.then(() => true)
 						.catch(() => false)
 				};
@@ -32,7 +33,7 @@ export class EditV2 extends AbstractEndpoint {
 				type: 'arrayBuffer',
 				body: t.Any({ description: 'The new file', default: 'Hello, World!' }),
 				params: t.Object({
-					key: t.String({
+					name: t.String({
 						description: 'The document key',
 						examples: ['abc123']
 					})
@@ -41,6 +42,10 @@ export class EditV2 extends AbstractEndpoint {
 					secret: t.String({
 						description: 'The document secret',
 						examples: ['aaaaa-bbbbb-ccccc-ddddd']
+					}),
+					password: t.String({
+						description: 'The document password if aplicable',
+						examples: ['abc123']
 					})
 				}),
 				response: {

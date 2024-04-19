@@ -40,6 +40,22 @@ export class DocumentUtils {
 		}
 	}
 
+	public static validatePassword(password: string, dataHash: DocumentV1['header']['dataHash']): void {
+		if (dataHash && !CryptoUtils.compare(password, dataHash)) {
+			ErrorHandler.send(ErrorCode.documentInvalidPassword);
+		}
+	}
+
+	public static validatePasswordLength(password: string | undefined): void {
+		if (
+			password &&
+			(ValidatorUtils.isEmptyString(password) ||
+				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
+		) {
+			ErrorHandler.send(ErrorCode.documentInvalidPasswordLength);
+		}
+	}
+
 	public static validateSecret(secret: string, documentSecret: DocumentV1['header']['secretHash']): void {
 		if (!CryptoUtils.compare(secret, documentSecret)) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);

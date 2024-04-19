@@ -1,5 +1,4 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import type { SupportedCryptoAlgorithms } from 'bun';
 
 export class CryptoUtils {
 	private static readonly CIPHER_ALGORITHM = 'aes-256-gcm';
@@ -24,16 +23,11 @@ export class CryptoUtils {
 		return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
 	}
 
-	public static hash(
-		data: string | Uint8Array,
-		algorithm: SupportedCryptoAlgorithms = CryptoUtils.HASH_ALGORITHM
-	): Uint8Array {
-		return new Bun.CryptoHasher(algorithm).update(data).digest() as Uint8Array;
+	public static hash(password: string): string {
+		return new Bun.CryptoHasher(CryptoUtils.HASH_ALGORITHM).update(password).digest('base64');
 	}
 
-	public static compare(password: string, hash: Uint8Array, algorithm?: SupportedCryptoAlgorithms): boolean {
-		const hashPassword = CryptoUtils.hash(password, algorithm);
-
-		return hashPassword.length === hash.length && hashPassword.every((value, index) => value === hash[index]);
+	public static compare(password: string, hash: string): boolean {
+		return CryptoUtils.hash(password) === hash;
 	}
 }

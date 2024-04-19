@@ -1,8 +1,9 @@
 type DocumentV1 = {
 	data: Uint8Array;
 	header: {
-		secretHash: Uint8Array;
-		sse: boolean;
+		name: string;
+		secretHash: string;
+		dataHash: string | null;
 	};
 	version: 1;
 };

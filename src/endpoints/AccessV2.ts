@@ -9,42 +9,42 @@ import { DocumentUtils } from '../utils/DocumentUtils.ts';
 export class AccessV2 extends AbstractEndpoint {
 	protected override run(): void {
 		this.SERVER.elysia.get(
-			this.PREFIX.concat('/:key'),
+			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
-				DocumentUtils.validateKey(params.key);
+				DocumentUtils.validateKey(params.name);
 
-				const file = await DocumentUtils.retrieveDocument(params.key);
+				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);
 				let data: string | Uint8Array = document.data;
 
-				if (document.header.sse) {
-					if (!headers.secret) {
-						throw ErrorHandler.send(ErrorCode.documentSecretNeeded);
+				if (document.header.dataHash) {
+					if (!headers.password) {
+						throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 					}
 
-					DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
-					data = CryptoUtils.decrypt(document.data, headers.secret);
+					DocumentUtils.validatePassword(headers.password, document.header.dataHash);
+					data = CryptoUtils.decrypt(document.data, headers.password);
 				}
 
 				data = Buffer.from(Bun.inflateSync(data)).toString();
 
 				return {
-					key: params.key,
+					key: params.name,
 					data: data,
-					url: Server.HOSTNAME.concat('/', params.key),
+					url: Server.HOSTNAME.concat('/', params.name),
 					// Deprecated, for compatibility reasons will be kept to 0
 					expirationTimestamp: 0
 				};
 			},
 			{
 				params: t.Object({
-					key: t.String({
+					name: t.String({
 						description: 'The document key',
 						examples: ['abc123']
 					})
 				}),
 				headers: t.Object({
-					secret: t.Optional(
+					password: t.Optional(
 						t.String({
 							description: 'The document password if aplicable',
 							examples: ['abc123']
