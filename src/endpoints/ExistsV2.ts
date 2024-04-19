@@ -9,7 +9,7 @@ export class ExistsV2 extends AbstractEndpoint {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:name/exists'),
 			async ({ params }) => {
-				DocumentUtils.validateKey(params.name);
+				DocumentUtils.validateName(params.name);
 
 				return Bun.file(Server.DOCUMENT_PATH + params.name).exists();
 			},

@@ -5,7 +5,6 @@ import { Server } from '../classes/Server.ts';
 import type { DocumentV1 } from '../types/Document.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from './CryptoUtils.ts';
-import { StringUtils } from './StringUtils.ts';
 import { ValidatorUtils } from './ValidatorUtils.ts';
 
 export class DocumentUtils {
@@ -27,7 +26,7 @@ export class DocumentUtils {
 		return file;
 	}
 
-	public static validateKey(key: string): void {
+	public static validateName(key: string): void {
 		if (
 			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
@@ -36,7 +35,16 @@ export class DocumentUtils {
 				Server.DOCUMENT_KEY_LENGTH_MAX
 			)
 		) {
-			ErrorHandler.send(ErrorCode.documentInvalidKey);
+			ErrorHandler.send(ErrorCode.documentInvalidName);
+		}
+	}
+
+	public static validateNameLength(length: number | undefined): void {
+		if (
+			length &&
+			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
+		) {
+			ErrorHandler.send(ErrorCode.documentInvalidNameLength);
 		}
 	}
 
@@ -71,32 +79,6 @@ export class DocumentUtils {
 	public static validateSizeBetweenLimits(body: any): void {
 		if (!ValidatorUtils.isLengthWithinRange(Buffer.byteLength(body), 1, Server.DOCUMENT_MAXLENGTH)) {
 			ErrorHandler.send(ErrorCode.documentInvalidSize);
-		}
-	}
-
-	public static async validateSelectedKey(key: string): Promise<void> {
-		if (
-			!ValidatorUtils.isValidBase64URL(key) ||
-			!ValidatorUtils.isLengthWithinRange(
-				Bun.stringWidth(key),
-				Server.DOCUMENT_KEY_LENGTH_MIN,
-				Server.DOCUMENT_KEY_LENGTH_MAX
-			)
-		) {
-			ErrorHandler.send(ErrorCode.documentInvalidKey);
-		}
-
-		if (await StringUtils.keyExists(key)) {
-			ErrorHandler.send(ErrorCode.documentKeyAlreadyExists);
-		}
-	}
-
-	public static validateSelectedKeyLength(length: number | undefined): void {
-		if (
-			length &&
-			!ValidatorUtils.isLengthWithinRange(length, Server.DOCUMENT_KEY_LENGTH_MIN, Server.DOCUMENT_KEY_LENGTH_MAX)
-		) {
-			ErrorHandler.send(ErrorCode.documentInvalidKeyLength);
 		}
 	}
 }

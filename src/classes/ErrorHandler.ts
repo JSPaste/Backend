@@ -76,17 +76,17 @@ export class ErrorHandler {
 			type: 'document',
 			message: 'The secret length provided for the document is invalid.'
 		},
-		[ErrorCode.documentInvalidKeyLength]: {
+		[ErrorCode.documentInvalidNameLength]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The key length provided for the document is out of range.'
 		},
-		[ErrorCode.documentKeyAlreadyExists]: {
+		[ErrorCode.documentNameAlreadyExists]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The key provided for the document already exists. Use another one and try again.'
 		},
-		[ErrorCode.documentInvalidKey]: {
+		[ErrorCode.documentInvalidName]: {
 			httpCode: 400,
 			type: 'document',
 			message: 'The key provided for the document is invalid. Use another one and try again.'

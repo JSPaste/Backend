@@ -14,7 +14,7 @@ export class AccessRawV2 extends AbstractEndpoint {
 					password: headers.password || query.p
 				};
 
-				DocumentUtils.validateKey(params.name);
+				DocumentUtils.validateName(params.name);
 
 				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);

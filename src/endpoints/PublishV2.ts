@@ -2,6 +2,7 @@ import { t } from 'elysia';
 import { AbstractEndpoint } from '../classes/AbstractEndpoint.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { Server } from '../classes/Server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from '../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../utils/DocumentUtils.ts';
 import { StringUtils } from '../utils/StringUtils.ts';
@@ -24,9 +25,13 @@ export class PublishV2 extends AbstractEndpoint {
 				const secret = headers.secret || StringUtils.createSecret();
 
 				if (headers.name) {
-					await DocumentUtils.validateSelectedKey(headers.name);
-				} else {
-					DocumentUtils.validateSelectedKeyLength(headers.nameLength);
+					if (await StringUtils.keyExists(headers.name)) {
+						ErrorHandler.send(ErrorCode.documentNameAlreadyExists);
+					}
+
+					DocumentUtils.validateName(headers.name);
+				} else if (headers.nameLength) {
+					DocumentUtils.validateNameLength(headers.nameLength);
 				}
 
 				const name = headers.name || (await StringUtils.createKey(headers.nameLength));

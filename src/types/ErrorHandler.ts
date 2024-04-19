@@ -8,15 +8,15 @@ enum ErrorCode {
 
 	// * Document
 	documentNotFound = 1200,
-	documentKeyAlreadyExists = 1201,
+	documentNameAlreadyExists = 1201,
 	documentPasswordNeeded = 1202,
 	documentInvalidSize = 1203,
-	documentInvalidKeyLength = 1204,
+	documentInvalidNameLength = 1204,
 	documentInvalidPassword = 1205,
 	documentInvalidPasswordLength = 1206,
 	documentInvalidSecret = 1207,
 	documentInvalidSecretLength = 1208,
-	documentInvalidKey = 1209
+	documentInvalidName = 1209
 }
 
 type Type = 'generic' | 'document';

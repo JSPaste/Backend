@@ -11,7 +11,7 @@ export class AccessV2 extends AbstractEndpoint {
 		this.SERVER.elysia.get(
 			this.PREFIX.concat('/:name'),
 			async ({ headers, params }) => {
-				DocumentUtils.validateKey(params.name);
+				DocumentUtils.validateName(params.name);
 
 				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);

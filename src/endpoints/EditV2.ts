@@ -11,7 +11,7 @@ export class EditV2 extends AbstractEndpoint {
 			this.PREFIX.concat('/:name'),
 			async ({ headers, body, params }) => {
 				DocumentUtils.validateSizeBetweenLimits(body);
-				DocumentUtils.validateKey(params.name);
+				DocumentUtils.validateName(params.name);
 
 				const file = await DocumentUtils.retrieveDocument(params.name);
 				const document = await DocumentUtils.documentReadV1(file);
