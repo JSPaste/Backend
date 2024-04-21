@@ -58,15 +58,27 @@ export class Server {
 	private initDocs(): void {
 		this.ELYSIA.use(
 			swagger({
+				provider: 'scalar',
+				scalarConfig: {
+					// @ts-ignore: Fetch theme directly from dist
+					theme: 'saturn',
+					layout: 'classic',
+					customCss: '',
+					isEditable: false
+				},
 				documentation: {
 					servers: [
 						{
 							url: 'https://jspaste.eu',
-							description: 'JSPaste API'
+							description: 'Official JSPaste instance'
+						},
+						{
+							url: 'https://paste.inetol.net',
+							description: 'Inetol Infrastructure instance'
 						},
 						{
 							url: 'http://localhost:'.concat(Server.PORT.toString()),
-							description: 'Local API (Only use if you are running an instance locally)'
+							description: 'Local instance (Only use if you are running the backend locally)'
 						}
 					],
 					info: {
@@ -79,9 +91,6 @@ export class Server {
 						}
 					}
 				},
-				swaggerOptions: {
-					syntaxHighlight: { activate: true, theme: 'monokai' }
-				},
 				path: Server.DOCS_PATH,
 				exclude: [Server.DOCS_PATH, Server.DOCS_PATH.concat('/json'), /^\/documents/]
 			})
@@ -90,12 +99,12 @@ export class Server {
 
 	private initCORS(): void {
 		const globalHeaders: Record<string, string> = {
-			'Access-Control-Allow-Origin': '*',
-			'Access-Control-Allow-Methods': '*'
+			'Access-Control-Allow-Origin': '*'
 		};
 
 		this.ELYSIA.headers(globalHeaders).options('*', ({ set }) => {
-			set.headers['Access-Control-Max-Age'] = (300).toString();
+			set.headers['Access-Control-Allow-Headers'] = '*';
+			set.headers['Access-Control-Max-Age'] = (3600).toString();
 
 			return new Response(null, {
 				status: 204
