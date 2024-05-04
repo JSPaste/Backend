@@ -45,13 +45,13 @@ jobs:
       - name: "Build artifact"
         run: |
           bun run build:standalone:darwin-arm64
-          bsdtar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_darwin_arm64.tar.gz ./dist/backend ./LICENSE ./README.md
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_darwin_arm64.tar.gz ./dist/backend ./LICENSE ./README.md
 
           bun run build:standalone:linux-arm64
-          bsdtar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_arm64.tar.gz ./dist/backend ./LICENSE ./README.md
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_arm64.tar.gz ./dist/backend ./LICENSE ./README.md
 
           bun run build:standalone:linux-x64
-          bsdtar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_x64.tar.gz ./dist/backend ./LICENSE ./README.md
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_x64.tar.gz ./dist/backend ./LICENSE ./README.md
 
           bun run build:standalone:windows-x64
           zip -X ./dist/backend_${{ steps.release-tag.outputs.id }}_windows_x64.zip ./dist/backend.exe ./LICENSE ./README.md
