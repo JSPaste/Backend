@@ -69,9 +69,9 @@ jobs:
       - name: "Release artifact"
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
-          artifactErrorsFailBuild: true
+          name: ${{ steps.release-tag.outputs.id }}
+          tag: ${{ steps.release-tag.outputs.id }}
           artifacts: "dist/*.tar.gz,dist/*.zip"
-          commit: ${{ steps.release-tag.outputs.id }}
+          makeLatest: true
           prerelease: true
           generateReleaseNotes: true
-          makeLatest: true
