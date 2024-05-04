@@ -9,7 +9,7 @@ RUN bun install --production --frozen-lockfile && \
 FROM cgr.dev/chainguard/cc-dynamic:latest
 WORKDIR /backend/
 
-COPY --chown=nonroot --from=builder /build/dist/backend /backend/
+COPY --chown=nonroot --from=builder /build/dist/backend ./
 
 LABEL org.opencontainers.image.url="https://jspaste.eu" \
       org.opencontainers.image.source="https://github.com/jspaste/backend" \
