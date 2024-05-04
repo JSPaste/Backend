@@ -1,17 +1,15 @@
-# Builder
-FROM cgr.dev/chainguard/bun:latest-dev AS builder
-WORKDIR /home/nonroot
+FROM docker.io/oven/bun:1-alpine AS builder
+WORKDIR /build/
 
 COPY . ./
 
 RUN bun install --production --frozen-lockfile && \
     bun run build:standalone
 
-# Runner
 FROM cgr.dev/chainguard/cc-dynamic:latest
-WORKDIR /home/nonroot
+WORKDIR /backend/
 
-COPY --chown=nonroot --from=builder /home/nonroot/dist/backend ./
+COPY --chown=nonroot --from=builder /build/dist/backend ./
 
 LABEL org.opencontainers.image.url="https://jspaste.eu" \
       org.opencontainers.image.source="https://github.com/jspaste/backend" \
@@ -20,7 +18,7 @@ LABEL org.opencontainers.image.url="https://jspaste.eu" \
       org.opencontainers.image.documentation="https://docs.jspaste.eu" \
       org.opencontainers.image.licenses="EUPL-1.2"
 
-VOLUME /home/nonroot/documents
+VOLUME /backend/documents/
 EXPOSE 4000
 
-CMD ["./backend"]
+ENTRYPOINT ["./backend"]

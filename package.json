@@ -6,8 +6,12 @@
 	"type": "module",
 	"scripts": {
 		"build": "bun run build:bundle",
-		"build:bundle": "bun build --target bun --minify --sourcemap --outfile ./dist/backend.js ./src/index.ts",
-		"build:standalone": "bun build --compile --target bun --minify --sourcemap --outfile ./dist/backend ./src/index.ts",
+		"build:bundle": "bun build --target=bun --minify --sourcemap --outfile=./dist/backend.js ./src/index.ts",
+		"build:standalone": "bun run build:bundle -- --compile --outfile=./dist/backend",
+		"build:standalone:darwin-arm64": "bun run build:standalone -- --target=bun-darwin-arm64",
+		"build:standalone:linux-arm64": "bun run build:standalone -- --target=bun-linux-arm64",
+		"build:standalone:linux-x64": "bun run build:standalone -- --target=bun-linux-x64-modern",
+		"build:standalone:windows-x64": "bun run build:standalone -- --target=bun-windows-x64-modern",
 		"fix": "bun run fix:biome && bun run fix:package",
 		"fix:biome": "bun biome check --apply .",
 		"fix:package": "bun sort-package-json --quiet",
@@ -18,15 +22,15 @@
 		"start:dev": "bun ./src/index.ts"
 	},
 	"dependencies": {
-		"@elysiajs/swagger": "~1.0.3",
-		"@types/bun": "~1.1.0",
+		"@elysiajs/swagger": "~1.0.5",
+		"@types/bun": "~1.1.1",
 		"cbor-x": "~1.5.9",
-		"elysia": "~1.0.13",
+		"elysia": "~1.0.16",
 		"env-var": "~7.4.1",
 		"typescript": "~5.4.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "~1.7.0",
+		"@biomejs/biome": "1.7.1",
 		"lefthook": "~1.6.10",
 		"sort-package-json": "~2.10.0"
 	},
