@@ -1,4 +1,3 @@
-# TODO: Experimental feature
 name: "CD -> Artifact"
 on:
   workflow_dispatch:
@@ -45,16 +44,16 @@ jobs:
       - name: "Build artifact"
         run: |
           bun run build:standalone:darwin-arm64
-          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_darwin_arm64.tar.gz ./dist/backend ./LICENSE ./README.md
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_darwin_arm64.tar.gz LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-arm64
-          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_arm64.tar.gz ./dist/backend ./LICENSE ./README.md
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_arm64.tar.gz LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-x64
-          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_x64.tar.gz ./dist/backend ./LICENSE ./README.md
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux_x64.tar.gz LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:windows-x64
-          zip -X ./dist/backend_${{ steps.release-tag.outputs.id }}_windows_x64.zip ./dist/backend.exe ./LICENSE ./README.md
+          zip -j -X ./dist/backend_${{ steps.release-tag.outputs.id }}_windows_x64.zip LICENSE README.md ./dist/backend
 
       - name: "Sign artifact (.tar.gz)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
@@ -73,5 +72,4 @@ jobs:
           tag: ${{ steps.release-tag.outputs.id }}
           artifacts: "dist/*.tar.gz,dist/*.zip"
           makeLatest: true
-          prerelease: true
           generateReleaseNotes: true
