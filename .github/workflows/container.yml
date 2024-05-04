@@ -26,9 +26,6 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: "Checkout"
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
-
       - name: "Setup QEMU"
         run: |
           sudo apt-get update
@@ -46,6 +43,9 @@ jobs:
           TAGS+=("${TIMESTAMP}-${SHA_SHORT}")
 
           echo "build-tags=${TAGS[*]}" >> $GITHUB_OUTPUT
+
+      - name: "Checkout"
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: "Build image"
         id: build-image
