@@ -1,0 +1,154 @@
+name: "CD -> Release"
+on:
+  workflow_dispatch:
+    inputs:
+      build-artifact:
+        description: "Build artifact?"
+        type: boolean
+        required: false
+      release-artifact:
+        description: "Release artifact? (build-artifact should be enabled)"
+        type: boolean
+        required: false
+      build-container:
+        description: "Build container image?"
+        type: boolean
+        required: false
+      release-container:
+        description: "Release container image? (build-container should be enabled)"
+        type: boolean
+        required: false
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  artifact:
+    if: ${{ github.repository_owner == 'jspaste' && inputs.release-artifact == 'true' }}
+    name: "Build artifact"
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@8f24390df009a496891208e5e36b8a1de1f45135 # v1.2.1
+
+      - name: "Release tag"
+        id: release-tag
+        run: echo "id=$(date +%Y.%m.%d)-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: "Checkout"
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+
+      - name: "Setup dependencies"
+        run: bun install --production --frozen-lockfile
+
+      - name: "Build artifact"
+        run: |
+          bun run build:standalone:darwin-arm64
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_darwin-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:linux-amd64
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux-amd64.tar.gz LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:linux-arm64
+          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:windows-amd64
+          zip -j -X ./dist/backend_${{ steps.release-tag.outputs.id }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
+
+      - name: "Release artifact"
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          name: ${{ steps.release-tag.outputs.id }}
+          tag: ${{ steps.release-tag.outputs.id }}
+          artifacts: "dist/*.tar.gz,dist/*.zip"
+          makeLatest: true
+          prerelease: ${{ github.ref != 'refs/heads/stable' }}
+          generateReleaseNotes: true
+
+      - name: "Attest artifact (.tar.gz)"
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        with:
+          subject-path: 'dist/*.tar.gz'
+
+      - name: "Attest artifact (.zip)"
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        with:
+          subject-path: 'dist/*.zip'
+
+  container:
+    if: ${{ github.repository_owner == 'jspaste' && inputs.release-container == 'true'}}
+    name: "Build container image"
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      id-token: write
+      packages: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: "Setup QEMU"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
+      - name: "Setup tags"
+        id: setup-tags
+        run: |
+          TIMESTAMP="$(date +%Y.%m.%d)"
+          SHA_SHORT="${GITHUB_SHA::7}"
+
+          TAGS=()
+          TAGS+=("latest")
+          TAGS+=("${GITHUB_SHA}")
+          TAGS+=("${TIMESTAMP}-${SHA_SHORT}")
+
+          echo "build-tags=${TAGS[*]}" >> $GITHUB_OUTPUT
+
+      - name: "Checkout"
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+
+      - name: "Build image"
+        id: build-image
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+        with:
+          archs: amd64, arm64
+          containerfiles: Dockerfile
+          image: ${{ github.repository }}
+          layers: true
+          oci: true
+          tags: ${{ steps.setup-tags.outputs.build-tags }}
+
+      - name: "Push to GHCR"
+        id: push-image
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        with:
+          registry: ghcr.io
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Attest image"
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        with:
+          subject-name: ghcr.io/${{ steps.build-image.outputs.image }}
+          subject-digest: ${{ steps.push-image.outputs.digest }}
+          push-to-registry: true
