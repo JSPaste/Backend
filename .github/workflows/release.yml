@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   artifact:
-    if: ${{ github.repository_owner == 'jspaste' && inputs.release-artifact == 'true' }}
+    if: ${{ github.repository_owner == 'jspaste' && inputs.build-artifact == true }}
     name: "Build artifact"
     runs-on: ubuntu-latest
     permissions:
@@ -69,7 +69,8 @@ jobs:
           bun run build:standalone:windows-amd64
           zip -j -X ./dist/backend_${{ steps.release-tag.outputs.id }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
 
-      - name: "Release artifact"
+      - if: ${{ inputs.release-artifact == true }}
+        name: "Release artifact"
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
           name: ${{ steps.release-tag.outputs.id }}
@@ -79,18 +80,20 @@ jobs:
           prerelease: ${{ github.ref != 'refs/heads/stable' }}
           generateReleaseNotes: true
 
-      - name: "Attest artifact (.tar.gz)"
+      - if: ${{ inputs.release-artifact == true }}
+        name: "Attest artifact (.tar.gz)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
           subject-path: 'dist/*.tar.gz'
 
-      - name: "Attest artifact (.zip)"
+      - if: ${{ inputs.release-artifact == true }}
+        name: "Attest artifact (.zip)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
           subject-path: 'dist/*.zip'
 
   container:
-    if: ${{ github.repository_owner == 'jspaste' && inputs.release-container == 'true'}}
+    if: ${{ github.repository_owner == 'jspaste' && inputs.build-container == true }}
     name: "Build container image"
     runs-on: ubuntu-latest
     permissions:
@@ -136,7 +139,8 @@ jobs:
           oci: true
           tags: ${{ steps.setup-tags.outputs.build-tags }}
 
-      - name: "Push to GHCR"
+      - if: ${{ inputs.release-container == true }}
+        name: "Push to GHCR"
         id: push-image
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
@@ -146,7 +150,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Attest image"
+      - if: ${{ inputs.release-container == true }}
+        name: "Attest image"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
           subject-name: ghcr.io/${{ steps.build-image.outputs.image }}
