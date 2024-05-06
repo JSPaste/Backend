@@ -45,9 +45,19 @@ jobs:
       - name: "Setup Bun"
         uses: oven-sh/setup-bun@8f24390df009a496891208e5e36b8a1de1f45135 # v1.2.1
 
-      - name: "Release tag"
-        id: release-tag
-        run: echo "id=$(date +%Y.%m.%d)-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      - name: "Setup tag"
+        id: tags-artifact
+        run: |
+          TIMESTAMP="$(date +%Y.%m.%d)"
+          GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
+          
+          if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
+            TAG="latest"
+          else
+            TAG="dev"
+          fi
+
+          echo "tag=${TAG} extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
@@ -60,23 +70,23 @@ jobs:
       - name: "Build artifact"
         run: |
           bun run build:standalone:darwin-arm64
-          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_darwin-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-amd64
-          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux-amd64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-arm64
-          tar -czf ./dist/backend_${{ steps.release-tag.outputs.id }}_linux-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:windows-amd64
-          zip -j -X ./dist/backend_${{ steps.release-tag.outputs.id }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
+          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
 
       - if: ${{ inputs.release-artifact == true }}
         name: "Release artifact"
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
-          name: ${{ steps.release-tag.outputs.id }}
-          tag: ${{ steps.release-tag.outputs.id }}
+          name: ${{ steps.tags-artifact.outputs.extended }}
+          tag: ${{ steps.tags-artifact.outputs.tag }}
           artifacts: "dist/*.tar.gz,dist/*.zip"
           makeLatest: true
           prerelease: ${{ github.ref != 'refs/heads/stable' }}
@@ -115,17 +125,24 @@ jobs:
           sudo apt-get install -y qemu-user-static
 
       - name: "Setup tags"
-        id: setup-tags
+        id: tags-image
         run: |
           TIMESTAMP="$(date +%Y.%m.%d)"
-          SHA_SHORT="${GITHUB_SHA::7}"
+          GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
 
           TAGS=()
-          TAGS+=("latest")
-          TAGS+=("${GITHUB_SHA}")
-          TAGS+=("${TIMESTAMP}-${SHA_SHORT}")
 
-          echo "build-tags=${TAGS[*]}" >> $GITHUB_OUTPUT
+          if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
+            TAGS+=("latest")
+            TAGS+=("stable")
+          else
+            TAGS+=("dev")
+          fi
+
+          TAGS+=("${GITHUB_SHA}")
+          TAGS+=("${TIMESTAMP}-${GITHUB_SHA_SHORT}")
+
+          echo "tags=${TAGS[*]}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
@@ -141,7 +158,7 @@ jobs:
           image: ${{ github.repository }}
           layers: true
           oci: true
-          tags: ${{ steps.setup-tags.outputs.build-tags }}
+          tags: ${{ steps.tags-image.outputs.tags }}
 
       - if: ${{ inputs.release-container == true }}
         name: "Push to GHCR"
@@ -151,7 +168,7 @@ jobs:
           registry: ghcr.io
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - if: ${{ inputs.release-container == true }}
