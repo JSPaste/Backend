@@ -112,7 +112,7 @@ jobs:
     name: "Build container image"
     runs-on: ubuntu-latest
     env:
-      REGISTRY: quay.io
+      REGISTRY: ghcr.io
 
     permissions:
       attestations: write
