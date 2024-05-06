@@ -2,22 +2,24 @@ name: "CD -> Release"
 on:
   workflow_dispatch:
     inputs:
-      build-artifact:
-        description: "Build artifact?"
-        type: boolean
-        required: false
-      release-artifact:
-        description: 'Release artifact? (depends on "build-artifact")'
-        type: boolean
-        required: false
-      build-container:
-        description: "Build container image?"
-        type: boolean
-        required: false
-      release-container:
-        description: 'Release container image? (depends on "build-container")'
-        type: boolean
-        required: false
+      artifact-action:
+        description: "Artifact action"
+        type: choice
+        required: true
+        default: "none"
+        options:
+          - "none"
+          - "build"
+          - "build-release"
+      image-action:
+        description: "Container image action"
+        type: choice
+        required: true
+        default: "none"
+        options:
+          - "none"
+          - "build"
+          - "build-release"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -28,7 +30,7 @@ permissions:
 
 jobs:
   artifact:
-    if: ${{ github.repository_owner == 'jspaste' && inputs.build-artifact == true }}
+    if: ${{ github.repository_owner == 'jspaste' && inputs.artifact-action != 'none' }}
     name: "Build artifact"
     runs-on: ubuntu-latest
     permissions:
@@ -57,7 +59,8 @@ jobs:
             TAG="dev"
           fi
 
-          echo "tag=${TAG} extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >>"$GITHUB_OUTPUT"
+          echo "extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
@@ -81,7 +84,7 @@ jobs:
           bun run build:standalone:windows-amd64
           zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
 
-      - if: ${{ inputs.release-artifact == true }}
+      - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Release artifact"
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
@@ -92,20 +95,20 @@ jobs:
           prerelease: ${{ github.ref != 'refs/heads/stable' }}
           generateReleaseNotes: true
 
-      - if: ${{ inputs.release-artifact == true }}
+      - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Attest artifact (.tar.gz)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
           subject-path: 'dist/*.tar.gz'
 
-      - if: ${{ inputs.release-artifact == true }}
+      - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Attest artifact (.zip)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
           subject-path: 'dist/*.zip'
 
   container:
-    if: ${{ github.repository_owner == 'jspaste' && inputs.build-container == true }}
+    if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}
     name: "Build container image"
     runs-on: ubuntu-latest
     permissions:
@@ -160,7 +163,7 @@ jobs:
           oci: true
           tags: ${{ steps.tags-image.outputs.tags }}
 
-      - if: ${{ inputs.release-container == true }}
+      - if: ${{ inputs.image-action == 'build-release' }}
         name: "Push to GHCR"
         id: push-image
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
@@ -171,7 +174,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: ${{ inputs.release-container == true }}
+      - if: ${{ inputs.image-action == 'build-release' }}
         name: "Attest image"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
