@@ -1,0 +1,180 @@
+name: "CD -> Release"
+on:
+  workflow_dispatch:
+    inputs:
+      build-artifact:
+        description: "Build artifact?"
+        type: boolean
+        required: false
+      release-artifact:
+        description: 'Release artifact? (depends on "build-artifact")'
+        type: boolean
+        required: false
+      build-container:
+        description: "Build container image?"
+        type: boolean
+        required: false
+      release-container:
+        description: 'Release container image? (depends on "build-container")'
+        type: boolean
+        required: false
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  artifact:
+    if: ${{ github.repository_owner == 'jspaste' && inputs.build-artifact == true }}
+    name: "Build artifact"
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@8f24390df009a496891208e5e36b8a1de1f45135 # v1.2.1
+
+      - name: "Setup tags"
+        id: tags-artifact
+        run: |
+          TIMESTAMP="$(date +%Y.%m.%d)"
+          GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
+          
+          if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
+            TAG="latest"
+          else
+            TAG="dev"
+          fi
+
+          echo "tag=${TAG} extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
+
+      - name: "Checkout"
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        with:
+          persist-credentials: false
+
+      - name: "Setup dependencies"
+        run: bun install --production --frozen-lockfile
+
+      - name: "Build artifact"
+        run: |
+          bun run build:standalone:darwin-arm64
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:linux-amd64
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:linux-arm64
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:windows-amd64
+          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
+
+      - if: ${{ inputs.release-artifact == true }}
+        name: "Release artifact"
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          name: ${{ steps.tags-artifact.outputs.extended }}
+          tag: ${{ steps.tags-artifact.outputs.tag }}
+          artifacts: "dist/*.tar.gz,dist/*.zip"
+          makeLatest: true
+          prerelease: ${{ github.ref != 'refs/heads/stable' }}
+          generateReleaseNotes: true
+
+      - if: ${{ inputs.release-artifact == true }}
+        name: "Attest artifact (.tar.gz)"
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        with:
+          subject-path: 'dist/*.tar.gz'
+
+      - if: ${{ inputs.release-artifact == true }}
+        name: "Attest artifact (.zip)"
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        with:
+          subject-path: 'dist/*.zip'
+
+  container:
+    if: ${{ github.repository_owner == 'jspaste' && inputs.build-container == true }}
+    name: "Build container image"
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      id-token: write
+      packages: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit
+
+      - name: "Setup QEMU"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
+      - name: "Setup tags"
+        id: tags-image
+        run: |
+          TIMESTAMP="$(date +%Y.%m.%d)"
+          GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
+
+          TAGS=()
+
+          if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
+            TAGS+=("latest")
+            TAGS+=("stable")
+          else
+            TAGS+=("dev")
+          fi
+
+          TAGS+=("${GITHUB_SHA}")
+          TAGS+=("${TIMESTAMP}-${GITHUB_SHA_SHORT}")
+
+          echo "tags=${TAGS[*]}" >>"$GITHUB_OUTPUT"
+
+      - name: "Checkout"
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          persist-credentials: false
+
+      - name: "Build image"
+        id: build-image
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+        with:
+          archs: amd64, arm64
+          containerfiles: Dockerfile
+          image: ${{ github.repository }}
+          layers: true
+          oci: true
+          tags: ${{ steps.tags-image.outputs.tags }}
+
+      - if: ${{ inputs.release-container == true }}
+        name: "Push to GHCR"
+        id: push-image
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        with:
+          registry: ghcr.io
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ inputs.release-container == true }}
+        name: "Attest image"
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        with:
+          subject-name: ghcr.io/${{ steps.build-image.outputs.image }}
+          subject-digest: ${{ steps.push-image.outputs.digest }}
+          push-to-registry: true
