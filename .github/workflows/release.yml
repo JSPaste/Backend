@@ -7,7 +7,7 @@ on:
         type: boolean
         required: false
       release-artifact:
-        description: "Release artifact? (build-artifact should be enabled)"
+        description: 'Release artifact? (depends on "build-artifact")'
         type: boolean
         required: false
       build-container:
@@ -15,7 +15,7 @@ on:
         type: boolean
         required: false
       release-container:
-        description: "Release container image? (build-container should be enabled)"
+        description: 'Release container image? (depends on "build-container")'
         type: boolean
         required: false
 
@@ -45,7 +45,7 @@ jobs:
       - name: "Setup Bun"
         uses: oven-sh/setup-bun@8f24390df009a496891208e5e36b8a1de1f45135 # v1.2.1
 
-      - name: "Setup tag"
+      - name: "Setup tags"
         id: tags-artifact
         run: |
           TIMESTAMP="$(date +%Y.%m.%d)"
