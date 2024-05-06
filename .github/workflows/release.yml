@@ -164,6 +164,14 @@ jobs:
           tags: ${{ steps.tags-image.outputs.tags }}
 
       - if: ${{ inputs.image-action == 'build-release' }}
+        name: "Login to GHCR"
+        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1.7
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+
+      - if: ${{ inputs.image-action == 'build-release' }}
         name: "Push to GHCR"
         id: push-image
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
