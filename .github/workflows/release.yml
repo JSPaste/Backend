@@ -52,11 +52,11 @@ jobs:
         run: |
           TIMESTAMP="$(date +%Y.%m.%d)"
           GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
-          
+
           if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
             TAG="latest"
           else
-            TAG="dev"
+            TAG="snapshot"
           fi
 
           echo "tag=${TAG}" >>"$GITHUB_OUTPUT"
@@ -137,9 +137,8 @@ jobs:
 
           if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
             TAGS+=("latest")
-            TAGS+=("stable")
           else
-            TAGS+=("dev")
+            TAGS+=("snapshot")
           fi
 
           TAGS+=("${GITHUB_SHA}")
