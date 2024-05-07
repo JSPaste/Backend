@@ -73,16 +73,16 @@ jobs:
       - name: "Build artifact"
         run: |
           bun run build:standalone:darwin-arm64
-          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-amd64
-          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-arm64
-          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:windows-amd64
-          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
+          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip .env.example LICENSE README.md ./dist/backend.exe
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Release artifact"
@@ -188,4 +188,4 @@ jobs:
         with:
           subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
           subject-digest: ${{ steps.push-image.outputs.digest }}
-          push-to-registry: true
+          push-to-registry: false
