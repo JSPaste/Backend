@@ -1,5 +1,8 @@
 import { Server } from './classes/Server.ts';
 
-const server = new Server();
+const instance = new Server().instance;
 
-process.on('SIGTERM', () => server.elysia.stop().finally(process.exit(0)));
+export default {
+	port: Server.PORT,
+	fetch: instance.fetch
+};
