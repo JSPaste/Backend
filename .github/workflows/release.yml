@@ -52,11 +52,11 @@ jobs:
         run: |
           TIMESTAMP="$(date +%Y.%m.%d)"
           GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
-          
+
           if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
             TAG="latest"
           else
-            TAG="dev"
+            TAG="snapshot"
           fi
 
           echo "tag=${TAG}" >>"$GITHUB_OUTPUT"
@@ -73,16 +73,16 @@ jobs:
       - name: "Build artifact"
         run: |
           bun run build:standalone:darwin-arm64
-          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-amd64
-          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:linux-arm64
-          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz LICENSE README.md -C ./dist/ backend
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
 
           bun run build:standalone:windows-amd64
-          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip LICENSE README.md ./dist/backend.exe
+          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip .env.example LICENSE README.md ./dist/backend.exe
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Release artifact"
@@ -111,6 +111,9 @@ jobs:
     if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}
     name: "Build container image"
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+
     permissions:
       attestations: write
       id-token: write
@@ -137,9 +140,8 @@ jobs:
 
           if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
             TAGS+=("latest")
-            TAGS+=("stable")
           else
-            TAGS+=("dev")
+            TAGS+=("snapshot")
           fi
 
           TAGS+=("${GITHUB_SHA}")
@@ -164,20 +166,26 @@ jobs:
           tags: ${{ steps.tags-image.outputs.tags }}
 
       - if: ${{ inputs.image-action == 'build-release' }}
+        name: "Login to GHCR"
+        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1.7
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+
+      - if: ${{ inputs.image-action == 'build-release' }}
         name: "Push to GHCR"
         id: push-image
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
-          registry: ghcr.io
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
 
       - if: ${{ inputs.image-action == 'build-release' }}
         name: "Attest image"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
-          subject-name: ghcr.io/${{ steps.build-image.outputs.image }}
+          subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
           subject-digest: ${{ steps.push-image.outputs.digest }}
-          push-to-registry: true
+          push-to-registry: false
