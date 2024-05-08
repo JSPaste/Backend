@@ -4,20 +4,18 @@ import { Server } from '../../classes/Server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
+import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
 export const publishRoute = (endpoint: Hono) => {
-	endpoint.post('/', async (ctx) => {
+	endpoint.post('/', MiddlewareUtils.bodyLimit(), async (ctx) => {
 		const body = await ctx.req.arrayBuffer();
-
 		const headers = {
 			key: ctx.req.header('key'),
 			keylength: Number(ctx.req.header('keylength')),
 			password: ctx.req.header('password'),
 			secret: ctx.req.header('secret')
 		};
-
-		DocumentUtils.validateSizeBetweenLimits(body);
 
 		if (headers.password) {
 			DocumentUtils.validatePasswordLength(headers.password);

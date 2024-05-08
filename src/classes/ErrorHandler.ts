@@ -53,9 +53,9 @@ export class ErrorHandler {
 			message: 'The password length provided for the document is invalid.'
 		},
 		[ErrorCode.documentInvalidSize]: {
-			httpCode: 400,
+			httpCode: 413,
 			type: 'document',
-			message: 'The body size provided for the document is too large (or too small).'
+			message: 'The body size provided for the document is too large.'
 		},
 		[ErrorCode.documentInvalidSecret]: {
 			httpCode: 403,

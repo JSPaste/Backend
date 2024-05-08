@@ -9,7 +9,7 @@ export class Server {
 	public static readonly LOCAL = env('LOCAL').asBoolStrict() ?? true;
 	public static readonly DOCUMENT_TLS = env('DOCUMENT_TLS').asBoolStrict() ?? false;
 	public static readonly DOCUMENT_DOMAIN = env('DOCUMENT_DOMAIN').default('localhost').asString();
-	public static readonly DOCUMENT_MAXLENGTH = env('DOCUMENT_MAXLENGTH').default(2000000).asIntPositive();
+	public static readonly DOCUMENT_MAXSIZE = env('DOCUMENT_MAXSIZE').default(1024).asIntPositive();
 	public static readonly DOCS_ENABLED = env('DOCS_ENABLED').asBoolStrict() ?? false;
 	public static readonly DOCS_PATH = env('DOCS_PATH').default('/docs').asString();
 

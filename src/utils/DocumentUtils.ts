@@ -76,10 +76,4 @@ export class DocumentUtils {
 			ErrorHandler.send(ErrorCode.documentInvalidSecretLength);
 		}
 	}
-
-	public static validateSizeBetweenLimits(body: any): void {
-		if (!ValidatorUtils.isLengthWithinRange(Buffer.byteLength(body), 1, Server.DOCUMENT_MAXLENGTH)) {
-			ErrorHandler.send(ErrorCode.documentInvalidSize);
-		}
-	}
 }

@@ -3,19 +3,16 @@ import { ErrorHandler } from '../../classes/ErrorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
+import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
 
 export const editRoute = (endpoint: Hono) => {
-	endpoint.patch('/:name', async (ctx) => {
+	endpoint.patch('/:name', MiddlewareUtils.bodyLimit(), async (ctx) => {
 		const body = await ctx.req.arrayBuffer();
-
 		const params = ctx.req.param();
-
 		const headers = {
 			secret: ctx.req.header('secret'),
 			password: ctx.req.header('password')
 		};
-
-		DocumentUtils.validateSizeBetweenLimits(body);
 
 		const document = await DocumentUtils.documentReadV1(params.name);
 
