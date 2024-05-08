@@ -34,13 +34,11 @@ export class Server {
 		return this._instance;
 	}
 
-	private initInstance(): void {
+	private initInstance() {
 		this._instance.use('*', cors());
 
 		this._instance.onError((err, ctx) => {
-			console.error(err);
-
-			return ctx.json({ error: true });
+			return ctx.json(JSON.parse(err.message));
 		});
 
 		this._instance.notFound((ctx) => {
@@ -50,7 +48,10 @@ export class Server {
 		});
 	}
 
+	// FIXME: Alias routes?
 	private initEndpoints() {
-		this._instance.route('/v2', V2.endpoint);
+		this._instance.route('/v1/documents', V2.endpoint);
+		this._instance.route('/v2/documents', V2.endpoint);
+		this._instance.route('/documents', V2.endpoint);
 	}
 }
