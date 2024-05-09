@@ -50,6 +50,8 @@ export class Server {
 
 	// FIXME: Alias routes?
 	private initEndpoints() {
+		V2.setup();
+
 		this._instance.route('/v1/documents', V2.endpoint);
 		this._instance.route('/v2/documents', V2.endpoint);
 		this._instance.route('/documents', V2.endpoint);

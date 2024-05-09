@@ -9,7 +9,7 @@ import { removeRoute } from './remove.route.ts';
 export default class V2 {
 	public static endpoint = new Hono();
 
-	static {
+	static setup() {
 		V2.endpoint.get('/', (ctx) => {
 			return ctx.text('Welcome to JSPaste API v2');
 		});
