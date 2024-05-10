@@ -24,8 +24,8 @@
 	"dependencies": {
 		"@types/bun": "~1.1.1",
 		"cbor-x": "~1.5.9",
-		"env-var": "~7.4.1",
-		"hono": "~4.3.3",
+		"env-var": "~7.4.2",
+		"hono": "~4.3.4",
 		"typescript": "~5.4.5"
 	},
 	"devDependencies": {

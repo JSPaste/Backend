@@ -1,7 +1,8 @@
 import { get as env } from 'env-var';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { default as V2 } from '../endpoints/v2';
+import V1 from '../endpoints/v1';
+import V2 from '../endpoints/v2';
 
 export class Server {
 	// ENV
@@ -48,12 +49,10 @@ export class Server {
 		});
 	}
 
-	// FIXME: Alias routes?
+	// TODO: Alias routes
 	private initEndpoints() {
-		V2.setup();
-
-		this._instance.route('/v1/documents', V2.endpoint);
-		this._instance.route('/v2/documents', V2.endpoint);
-		this._instance.route('/documents', V2.endpoint);
+		this._instance.route('/v1/documents', V1.register());
+		this._instance.route('/v2/documents', V2.register());
+		this._instance.route('/documents', V2.register());
 	}
 }

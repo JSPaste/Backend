@@ -4,7 +4,6 @@ import { Server } from '../classes/Server.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 
 export class MiddlewareUtils {
-	// FIXME(Server.DOCUMENT_MAXSIZE): Cannot access uninitialized variable ???
 	public static bodyLimit(maxSize: number = Server.DOCUMENT_MAXSIZE) {
 		return middlewareBodyLimit({
 			maxSize: maxSize * 1024,

@@ -7,18 +7,20 @@ import { publishRoute } from './publish.route.ts';
 import { removeRoute } from './remove.route.ts';
 
 export default class V2 {
-	public static endpoint = new Hono();
+	private static readonly _endpoint = new Hono();
 
-	static setup() {
-		V2.endpoint.get('/', (ctx) => {
+	public static register() {
+		V2._endpoint.get('/', (ctx) => {
 			return ctx.text('Welcome to JSPaste API v2');
 		});
 
-		accessRoute(V2.endpoint);
-		accessRawRoute(V2.endpoint);
-		editRoute(V2.endpoint);
-		existsRoute(V2.endpoint);
-		publishRoute(V2.endpoint);
-		removeRoute(V2.endpoint);
+		accessRoute(V2._endpoint);
+		accessRawRoute(V2._endpoint);
+		editRoute(V2._endpoint);
+		existsRoute(V2._endpoint);
+		publishRoute(V2._endpoint);
+		removeRoute(V2._endpoint);
+
+		return V2._endpoint;
 	}
 }

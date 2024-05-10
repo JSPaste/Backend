@@ -5,16 +5,18 @@ import { publishRoute } from './publish.route.ts';
 import { removeRoute } from './remove.route.ts';
 
 export default class V1 {
-	public static endpoint = new Hono();
+	private static readonly _endpoint = new Hono();
 
-	static {
-		V1.endpoint.get('/', (ctx) => {
+	public static register() {
+		V1._endpoint.get('/', (ctx) => {
 			return ctx.text('Welcome to JSPaste API v1');
 		});
 
-		accessRoute(V1.endpoint);
-		accessRawRoute(V1.endpoint);
-		publishRoute(V1.endpoint);
-		removeRoute(V1.endpoint);
+		accessRoute(V1._endpoint);
+		accessRawRoute(V1._endpoint);
+		publishRoute(V1._endpoint);
+		removeRoute(V1._endpoint);
+
+		return V1._endpoint;
 	}
 }
