@@ -1,4 +1,5 @@
 import { HTTPException } from 'hono/http-exception';
+import type { StatusCode } from 'hono/utils/http-status';
 import { ErrorCode, type Schema } from '../types/ErrorHandler.ts';
 
 export class ErrorHandler {
@@ -93,6 +94,8 @@ export class ErrorHandler {
 	public static send(code: ErrorCode) {
 		const { httpCode, type, message } = ErrorHandler.MAP[code];
 
-		throw new HTTPException(httpCode, { message: JSON.stringify({ type, code, message }) });
+		throw new HTTPException(httpCode as StatusCode, {
+			message: JSON.stringify({ type, code, message })
+		});
 	}
 }
