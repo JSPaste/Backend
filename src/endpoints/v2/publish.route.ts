@@ -7,6 +7,11 @@ import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
+import util from 'node:util';
+import zlib from 'node:zlib';
+
+const brotliCompress = util.promisify(zlib.brotliCompress);
+
 export const publishRoute = (endpoint: Hono) => {
 	endpoint.post('/', MiddlewareUtils.bodyLimit(), async (ctx) => {
 		const body = await ctx.req.arrayBuffer();
@@ -47,7 +52,7 @@ export const publishRoute = (endpoint: Hono) => {
 			name = await StringUtils.createName(headers.keylength);
 		}
 
-		const data = Bun.deflateSync(body);
+		const data = await brotliCompress(body);
 
 		await DocumentUtils.documentWriteV1(name, {
 			data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
