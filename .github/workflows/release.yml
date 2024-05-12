@@ -99,13 +99,13 @@ jobs:
         name: "Attest artifact (.tar.gz)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
-          subject-path: 'dist/*.tar.gz'
+          subject-path: "dist/*.tar.gz"
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Attest artifact (.zip)"
         uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
         with:
-          subject-path: 'dist/*.zip'
+          subject-path: "dist/*.zip"
 
   container:
     if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}

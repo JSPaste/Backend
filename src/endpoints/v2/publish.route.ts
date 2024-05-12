@@ -2,15 +2,11 @@ import type { Hono } from 'hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
 import { Server } from '../../classes/Server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
+import { CompressorUtils } from '../../utils/CompressorUtils.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
-
-import util from 'node:util';
-import zlib from 'node:zlib';
-
-const brotliCompress = util.promisify(zlib.brotliCompress);
 
 export const publishRoute = (endpoint: Hono) => {
 	endpoint.post('/', MiddlewareUtils.bodyLimit(), async (ctx) => {
@@ -52,7 +48,7 @@ export const publishRoute = (endpoint: Hono) => {
 			name = await StringUtils.createName(headers.keylength);
 		}
 
-		const data = await brotliCompress(body);
+		const data = await CompressorUtils.compress(body);
 
 		await DocumentUtils.documentWriteV1(name, {
 			data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
