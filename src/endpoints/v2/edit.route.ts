@@ -1,7 +1,7 @@
+import { brotliCompressSync } from 'node:zlib';
 import type { Hono } from 'hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { CompressorUtils } from '../../utils/CompressorUtils.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
@@ -27,7 +27,7 @@ export const editRoute = (endpoint: Hono) => {
 			DocumentUtils.validatePassword(headers.password, document.header.passwordHash);
 		}
 
-		const data = await CompressorUtils.compress(body);
+		const data = brotliCompressSync(body);
 
 		document.data = headers.password ? CryptoUtils.encrypt(data, headers.password) : data;
 

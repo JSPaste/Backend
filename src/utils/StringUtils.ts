@@ -5,7 +5,7 @@ import { ValidatorUtils } from './ValidatorUtils.ts';
 export class StringUtils {
 	public static readonly BASE64URL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
 
-	public static random(length: number, base: Range<2, 64> = 64): string {
+	public static random(length: number, base: Range<2, 64> = 62): string {
 		const baseSet = StringUtils.BASE64URL.slice(0, base);
 		let string = '';
 

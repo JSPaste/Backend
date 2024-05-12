@@ -1,8 +1,8 @@
+import { brotliCompressSync } from 'node:zlib';
 import type { Hono } from 'hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
 import { Server } from '../../classes/Server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { CompressorUtils } from '../../utils/CompressorUtils.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
@@ -48,7 +48,7 @@ export const publishRoute = (endpoint: Hono) => {
 			name = await StringUtils.createName(headers.keylength);
 		}
 
-		const data = await CompressorUtils.compress(body);
+		const data = brotliCompressSync(body);
 
 		await DocumentUtils.documentWriteV1(name, {
 			data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,

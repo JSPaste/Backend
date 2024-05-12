@@ -1,7 +1,7 @@
+import { brotliDecompressSync } from 'node:zlib';
 import type { Hono } from 'hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { CompressorUtils } from '../../utils/CompressorUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
 export const accessRawRoute = (endpoint: Hono) => {
@@ -19,6 +19,6 @@ export const accessRawRoute = (endpoint: Hono) => {
 
 		ctx.header('Content-Type', 'text/plain;charset=utf-8');
 
-		return ctx.body(await CompressorUtils.decompress(document.data));
+		return ctx.body(brotliDecompressSync(document.data));
 	});
 };
