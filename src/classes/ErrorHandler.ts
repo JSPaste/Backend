@@ -1,8 +1,25 @@
+import { z } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import type { StatusCode } from 'hono/utils/http-status';
 import { ErrorCode, type Schema } from '../types/ErrorHandler.ts';
 
 export class ErrorHandler {
+	public static readonly SCHEMA = {
+		content: {
+			'application/json': {
+				schema: z.object(
+					{
+						type: z.string({ description: 'The message type' }),
+						code: z.number({ description: 'The message code' }),
+						message: z.string({ description: 'The message description' })
+					},
+					{ description: 'An object representing a message' }
+				)
+			}
+		},
+		description: 'The error object'
+	};
+
 	private static readonly MAP: Record<ErrorCode, Schema> = {
 		[ErrorCode.unknown]: {
 			httpCode: 500,

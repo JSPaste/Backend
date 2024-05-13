@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { accessRoute } from './access.route.ts';
 import { accessRawRoute } from './accessRaw.route.ts';
 import { editRoute } from './edit.route.ts';
@@ -6,21 +6,19 @@ import { existsRoute } from './exists.route.ts';
 import { publishRoute } from './publish.route.ts';
 import { removeRoute } from './remove.route.ts';
 
-export default class V2 {
-	private static readonly _endpoint = new Hono();
+export const v2 = () => {
+	const endpoint = new OpenAPIHono();
 
-	public static register() {
-		V2._endpoint.get('/', (ctx) => {
-			return ctx.text('Welcome to JSPaste API v2');
-		});
+	endpoint.get('/', (ctx) => {
+		return ctx.text('Welcome to JSPaste API v2');
+	});
 
-		accessRoute(V2._endpoint);
-		accessRawRoute(V2._endpoint);
-		editRoute(V2._endpoint);
-		existsRoute(V2._endpoint);
-		publishRoute(V2._endpoint);
-		removeRoute(V2._endpoint);
+	accessRoute(endpoint);
+	accessRawRoute(endpoint);
+	editRoute(endpoint);
+	existsRoute(endpoint);
+	publishRoute(endpoint);
+	removeRoute(endpoint);
 
-		return V2._endpoint;
-	}
-}
+	return endpoint;
+};
