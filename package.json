@@ -22,7 +22,6 @@
 		"start:dev": "bun ./src/index.ts"
 	},
 	"dependencies": {
-		"@hono/swagger-ui": "~0.2.2",
 		"@hono/zod-openapi": "~0.11.1",
 		"@scalar/hono-api-reference": "~0.5.33",
 		"@types/bun": "~1.1.2",
