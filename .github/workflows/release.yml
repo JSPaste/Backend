@@ -96,16 +96,12 @@ jobs:
           generateReleaseNotes: true
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
-        name: "Attest artifact (.tar.gz)"
+        name: "Attest artifact"
         uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4 # v1.1.1
         with:
-          subject-path: 'dist/*.tar.gz'
-
-      - if: ${{ inputs.artifact-action == 'build-release' }}
-        name: "Attest artifact (.zip)"
-        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4 # v1.1.1
-        with:
-          subject-path: 'dist/*.zip'
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
 
   container:
     if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}
