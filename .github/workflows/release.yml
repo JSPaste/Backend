@@ -63,7 +63,7 @@ jobs:
           echo "extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
         with:
           persist-credentials: false
 
@@ -96,16 +96,12 @@ jobs:
           generateReleaseNotes: true
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
-        name: "Attest artifact (.tar.gz)"
-        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        name: "Attest artifact"
+        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4 # v1.1.1
         with:
-          subject-path: "dist/*.tar.gz"
-
-      - if: ${{ inputs.artifact-action == 'build-release' }}
-        name: "Attest artifact (.zip)"
-        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
-        with:
-          subject-path: "dist/*.zip"
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
 
   container:
     if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}
@@ -150,7 +146,7 @@ jobs:
           echo "tags=${TAGS[*]}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
         with:
           persist-credentials: false
 
@@ -184,7 +180,7 @@ jobs:
 
       - if: ${{ inputs.image-action == 'build-release' }}
         name: "Attest image"
-        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4 # v1.1.1
         with:
           subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
           subject-digest: ${{ steps.push-image.outputs.digest }}
