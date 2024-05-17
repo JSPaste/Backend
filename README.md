@@ -7,7 +7,7 @@
 
 ### Binaries
 
-- Download latest release: https://github.com/jspaste/backend/releases/tag/latest
+- Download latest release: <https://github.com/jspaste/backend/releases/tag/latest>
 - Uncompress to a new folder
 - Modify the `.env.example` file to your needs and rename it to `.env`
 - Execute the binary
@@ -19,7 +19,7 @@
 
 ## Validate
 
-All artifacts and images originate from this repository (https://github.com/jspaste/backend), no other artifacts or
+All artifacts and images originate from this repository (<https://github.com/jspaste/backend>), no other artifacts or
 images built and distributed outside of this repository are considered secure nor trusted by the JSPaste developers.
 
 You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
