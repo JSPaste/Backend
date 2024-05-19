@@ -2,12 +2,15 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
 import { get as env } from 'env-var';
 import { cors } from 'hono/cors';
+import type log from 'loglevel';
 import { v1 } from '../endpoints/v1';
 import { v2 } from '../endpoints/v2';
+import { Logger } from './Logger.ts';
 
 export class Server {
 	// ENV
 	public static readonly PORT = env('PORT').default(4000).asPortNumber();
+	public static readonly LOGLEVEL = env('LOGLEVEL').default('info').asString();
 	public static readonly DOCUMENT_TLS = env('DOCUMENT_TLS').asBoolStrict() ?? false;
 	public static readonly DOCUMENT_DOMAIN = env('DOCUMENT_DOMAIN').default('localhost').asString();
 	public static readonly DOCUMENT_MAXSIZE = env('DOCUMENT_MAXSIZE').default(1024).asIntPositive();
@@ -25,12 +28,15 @@ export class Server {
 	private readonly _instance = new OpenAPIHono().basePath(Server.PATH);
 
 	public constructor() {
+		// FIXME
+		Logger.init(Server.LOGLEVEL as log.LogLevelNames);
+
 		this.initInstance();
 		this.initEndpoints();
 		Server.DOCS_ENABLED && this.initDocs();
 
-		console.info('Started', this._instance.routes.length, 'routes');
-		console.info(`Listening on: http://localhost:${Server.PORT}`);
+		Logger.info('Started', this.instance.routes.length, 'routes');
+		Logger.info(`Listening on: http://localhost:${Server.PORT}`);
 	}
 
 	public get instance() {
@@ -38,13 +44,13 @@ export class Server {
 	}
 
 	private initInstance() {
-		this._instance.use('*', cors());
+		this.instance.use('*', cors());
 
-		this._instance.onError((err, ctx) => {
+		this.instance.onError((err, ctx) => {
 			return ctx.json(JSON.parse(err.message));
 		});
 
-		this._instance.notFound((ctx) => {
+		this.instance.notFound((ctx) => {
 			ctx.status(404);
 
 			return ctx.body(null);
@@ -52,7 +58,7 @@ export class Server {
 	}
 
 	private initDocs() {
-		this._instance.doc('/oas.json', {
+		this.instance.doc('/oas.json', {
 			openapi: '3.0.3',
 			info: {
 				title: 'JSPaste API',
@@ -79,7 +85,7 @@ export class Server {
 			]
 		});
 
-		this._instance.get(
+		this.instance.get(
 			Server.DOCS_PATH,
 			apiReference({
 				pageTitle: 'JSPaste Documentation',
@@ -93,10 +99,9 @@ export class Server {
 		);
 	}
 
-	// TODO: Alias routes
 	private initEndpoints() {
-		this._instance.route('/v1/documents', v1());
-		this._instance.route('/v2/documents', v2());
-		this._instance.route('/documents', v2());
+		this.instance.route('/v1/documents', v1());
+		this.instance.route('/v2/documents', v2());
+		this.instance.route('/documents', v2());
 	}
 }

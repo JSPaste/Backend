@@ -42,7 +42,7 @@
 			},
 			"suspicious": {
 				"noExplicitAny": "off",
-				"noConsoleLog": "warn"
+				"noConsoleLog": "error"
 			}
 		}
 	},
