@@ -1,24 +1,14 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
-import { get as env } from 'env-var';
 import { cors } from 'hono/cors';
 import type log from 'loglevel';
 import { v1 } from '../endpoints/v1';
 import { v2 } from '../endpoints/v2';
+import { ENV } from './ENV.ts';
 import { Logger } from './Logger.ts';
 
 export class Server {
-	// ENV
-	public static readonly PORT = env('PORT').default(4000).asPortNumber();
-	public static readonly LOGLEVEL = env('LOGLEVEL').default('info').asString();
-	public static readonly DOCUMENT_TLS = env('DOCUMENT_TLS').asBoolStrict() ?? false;
-	public static readonly DOCUMENT_DOMAIN = env('DOCUMENT_DOMAIN').default('localhost').asString();
-	public static readonly DOCUMENT_MAXSIZE = env('DOCUMENT_MAXSIZE').default(1024).asIntPositive();
-	public static readonly DOCS_ENABLED = env('DOCS_ENABLED').asBoolStrict() ?? false;
-	public static readonly DOCS_PATH = env('DOCS_PATH').default('/docs').asString();
-
-	// CONFIG
-	public static readonly HOSTNAME = (Server.DOCUMENT_TLS ? 'https://' : 'http://').concat(Server.DOCUMENT_DOMAIN);
+	public static readonly HOSTNAME = (ENV.DOCUMENT_TLS ? 'https://' : 'http://').concat(ENV.DOCUMENT_DOMAIN);
 	public static readonly PATH = '/api';
 	public static readonly DOCUMENT_PATH = 'documents/';
 	public static readonly DOCUMENT_NAME_LENGTH_MIN = 2;
@@ -29,14 +19,14 @@ export class Server {
 
 	public constructor() {
 		// FIXME
-		Logger.init(Server.LOGLEVEL as log.LogLevelNames);
+		Logger.init(ENV.LOGLEVEL as log.LogLevelNames);
 
 		this.initInstance();
 		this.initEndpoints();
-		Server.DOCS_ENABLED && this.initDocs();
+		ENV.DOCS_ENABLED && this.initDocs();
 
 		Logger.info('Started', this.instance.routes.length, 'routes');
-		Logger.info(`Listening on: http://localhost:${Server.PORT}`);
+		Logger.info(`Listening on: http://localhost:${ENV.PORT}`);
 	}
 
 	public get instance() {
@@ -86,7 +76,7 @@ export class Server {
 		});
 
 		this.instance.get(
-			Server.DOCS_PATH,
+			ENV.DOCS_PATH,
 			apiReference({
 				pageTitle: 'JSPaste Documentation',
 				theme: 'saturn',

@@ -1,5 +1,4 @@
 // https://github.com/microsoft/TypeScript/issues/43505
-
 type Range<
 	START extends number,
 	END extends number,
