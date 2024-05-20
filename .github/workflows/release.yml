@@ -97,7 +97,7 @@ jobs:
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Attest artifact"
-        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4 # v1.1.1
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
         with:
           subject-path: |
             dist/*.tar.gz
@@ -180,7 +180,7 @@ jobs:
 
       - if: ${{ inputs.image-action == 'build-release' }}
         name: "Attest image"
-        uses: actions/attest-build-provenance@951c0c5f8e375ad4efad33405ab77f7ded2358e4 # v1.1.1
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
         with:
           subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
           subject-digest: ${{ steps.push-image.outputs.digest }}
