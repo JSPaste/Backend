@@ -65,8 +65,8 @@ export class DocumentUtils {
 		}
 	}
 
-	public static validateSecret(secret: string, secretHash: DocumentV1['header']['secretHash']): void {
-		if (!CryptoUtils.compare(secret, secretHash)) {
+	public static validateSecret(secret: string | undefined, secretHash: DocumentV1['header']['secretHash']): void {
+		if (secret === undefined || !CryptoUtils.compare(secret, secretHash)) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);
 		}
 	}
