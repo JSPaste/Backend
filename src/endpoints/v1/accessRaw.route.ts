@@ -51,8 +51,6 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 			ErrorHandler.send(ErrorCode.documentPasswordNeeded);
 		}
 
-		ctx.header('Content-Type', 'text/plain;charset=utf-8');
-
-		return ctx.body(brotliDecompressSync(document.data));
+		return ctx.text(brotliDecompressSync(document.data).toString('binary'));
 	});
 };

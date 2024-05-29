@@ -10,7 +10,7 @@ export class DocumentUtils {
 	public static async documentReadV1(name: string): Promise<DocumentV1> {
 		DocumentUtils.validateName(name);
 
-		const file = Bun.file(config.DOCUMENT_PATH + name);
+		const file = Bun.file(config.SYSTEM_DOCUMENT_PATH + name);
 
 		if (!(await file.exists())) {
 			ErrorHandler.send(ErrorCode.documentNotFound);
@@ -20,7 +20,7 @@ export class DocumentUtils {
 	}
 
 	public static async documentWriteV1(name: string, document: Omit<DocumentV1, 'version'>): Promise<void> {
-		await Bun.write(config.DOCUMENT_PATH + name, encode({ ...document, version: 1 }));
+		await Bun.write(config.SYSTEM_DOCUMENT_PATH + name, encode({ ...document, version: 1 }));
 	}
 
 	public static validateName(key: string): void {
@@ -65,8 +65,8 @@ export class DocumentUtils {
 		}
 	}
 
-	public static validateSecret(secret: string | undefined, secretHash: DocumentV1['header']['secretHash']): void {
-		if (secret === undefined || !CryptoUtils.compare(secret, secretHash)) {
+	public static validateSecret(secret: string, secretHash: DocumentV1['header']['secretHash']): void {
+		if (!CryptoUtils.compare(secret, secretHash)) {
 			ErrorHandler.send(ErrorCode.documentInvalidSecret);
 		}
 	}

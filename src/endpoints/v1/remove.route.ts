@@ -16,7 +16,7 @@ export const removeRoute = (endpoint: Hono) => {
 		DocumentUtils.validateSecret(headers.secret, document.header.secretHash);
 
 		return ctx.json({
-			removed: await unlink(config.DOCUMENT_PATH + params.name)
+			removed: await unlink(config.SYSTEM_DOCUMENT_PATH + params.name)
 				.then(() => true)
 				.catch(() => false)
 		});

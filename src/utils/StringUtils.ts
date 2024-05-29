@@ -29,7 +29,7 @@ export class StringUtils {
 	}
 
 	public static async nameExists(name: string): Promise<boolean> {
-		return Bun.file(config.DOCUMENT_PATH + name).exists();
+		return Bun.file(config.SYSTEM_DOCUMENT_PATH + name).exists();
 	}
 
 	public static async createName(length: number = config.DOCUMENT_NAME_LENGTH_DEFAULT): Promise<string> {
