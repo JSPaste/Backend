@@ -7,7 +7,7 @@ import { Logger } from './classes/Logger.ts';
 import { v1 } from './endpoints/v1';
 import { v2 } from './endpoints/v2';
 
-export const env = Object.freeze({
+export const env = {
 	PORT: envvar('PORT').default(4000).asPortNumber(),
 	LOGLEVEL: envvar('LOGLEVEL').default('info').asString(),
 	DOCUMENT_TLS: envvar('DOCUMENT_TLS').asBoolStrict() ?? false,
@@ -15,18 +15,18 @@ export const env = Object.freeze({
 	DOCUMENT_MAXSIZE: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	DOCS_ENABLED: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
 	DOCS_PATH: envvar('DOCS_PATH').default('/docs').asString()
-});
+} as const;
 
-export const config = Object.freeze({
+export const config = {
 	HOSTNAME: (env.DOCUMENT_TLS ? 'https://' : 'http://').concat(env.DOCUMENT_DOMAIN),
 	PATH: '/api',
 	DOCUMENT_PATH: 'documents/',
 	DOCUMENT_NAME_LENGTH_MIN: 2,
 	DOCUMENT_NAME_LENGTH_MAX: 32,
 	DOCUMENT_NAME_LENGTH_DEFAULT: 8
-});
+} as const;
 
-export const server = Object.freeze({
+export const server = {
 	instance: new OpenAPIHono().basePath(config.PATH),
 
 	run: (): void => {
@@ -105,4 +105,4 @@ export const server = Object.freeze({
 		);
 		Logger.info(`Listening on: http://localhost:${env.PORT}`);
 	}
-});
+} as const;

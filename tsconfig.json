@@ -6,11 +6,13 @@
 		"module": "ESNext",
 		"moduleDetection": "force",
 		"moduleResolution": "Bundler",
+
 		"allowJs": true,
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
+
 		"strict": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
