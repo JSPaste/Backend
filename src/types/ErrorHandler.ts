@@ -5,6 +5,7 @@ enum ErrorCode {
 	validation = 1002,
 	parse = 1003,
 	notFound = 1004,
+	dummy = 1005,
 
 	// * Document
 	documentNotFound = 1200,

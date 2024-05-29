@@ -11,12 +11,13 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 		method: 'get',
 		path: '/{name}/raw',
 		tags: ['v1'],
-		summary: 'Get raw document',
+		summary: 'Get raw document data',
 		deprecated: true,
 		request: {
 			params: z.object({
 				name: z
 					.string()
+					.min(config.DOCUMENT_NAME_LENGTH_MIN)
 					.max(config.DOCUMENT_NAME_LENGTH_MAX)
 					.openapi({
 						description: 'The document name',
@@ -28,12 +29,11 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 			200: {
 				content: {
 					'text/plain': {
-						schema: z.any().openapi({
-							example: 'Hello, World!'
-						})
+						schema: z.any(),
+						example: 'Hello, World!'
 					}
 				},
-				description: 'The raw document'
+				description: 'The raw document data'
 			},
 			400: schema,
 			404: schema,

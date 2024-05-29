@@ -97,7 +97,7 @@ export const server = {
 		initEndpoints();
 		env.DOCS_ENABLED && initDocs();
 
-		logger.info('Registered', server.instance.routes.length, 'routes');
+		logger.debug('Registered', server.instance.routes.length, 'routes');
 		logger.debug(
 			'Registered routes:',
 			server.instance.routes.map((route) => route.path)

@@ -34,6 +34,11 @@ const map: Record<ErrorCode, Schema> = {
 		message:
 			'The request could not be parsed. This may be due to a malformed input or an unsupported data format. Check the entered data and try again.'
 	},
+	[ErrorCode.dummy]: {
+		httpCode: 200,
+		type: 'generic',
+		message: 'This is a dummy error.'
+	},
 	[ErrorCode.documentNotFound]: {
 		httpCode: 404,
 		type: 'document',
@@ -91,22 +96,6 @@ const map: Record<ErrorCode, Schema> = {
 	}
 } as const;
 
-export const schema: ResponseConfig = {
-	content: {
-		'application/json': {
-			schema: z.object(
-				{
-					type: z.string({ description: 'The message type' }),
-					code: z.number({ description: 'The message code' }),
-					message: z.string({ description: 'The message description' })
-				},
-				{ description: 'An object representing a message' }
-			)
-		}
-	},
-	description: 'The error object'
-} as const;
-
 export const errorHandler = {
 	get: (code: ErrorCode) => {
 		const { type, message } = map[code];
@@ -121,4 +110,26 @@ export const errorHandler = {
 			message: JSON.stringify({ type, code, message })
 		});
 	}
+} as const;
+
+export const schema: ResponseConfig = {
+	content: {
+		'application/json': {
+			schema: z.object(
+				{
+					type: z.string({ description: 'The message type' }).openapi({
+						example: errorHandler.get(ErrorCode.dummy).type
+					}),
+					code: z.number({ description: 'The message code' }).openapi({
+						example: errorHandler.get(ErrorCode.dummy).code
+					}),
+					message: z.string({ description: 'The message description' }).openapi({
+						example: errorHandler.get(ErrorCode.dummy).message
+					})
+				},
+				{ description: 'An object representing a message' }
+			)
+		}
+	},
+	description: 'Generic error object'
 } as const;
