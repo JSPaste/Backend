@@ -1,3 +1,4 @@
+import type { ResponseConfig } from '@asteasolutions/zod-to-openapi/dist/openapi-registry';
 import { HTTPException } from '@hono/hono/http-exception';
 import type { StatusCode } from '@hono/hono/utils/http-status';
 import { z } from '@hono/zod-openapi';
@@ -90,23 +91,23 @@ const map: Record<ErrorCode, Schema> = {
 	}
 } as const;
 
-export const errorHandler = {
-	schema: {
-		content: {
-			'application/json': {
-				schema: z.object(
-					{
-						type: z.string({ description: 'The message type' }),
-						code: z.number({ description: 'The message code' }),
-						message: z.string({ description: 'The message description' })
-					},
-					{ description: 'An object representing a message' }
-				)
-			}
-		},
-		description: 'The error object'
+export const schema: ResponseConfig = {
+	content: {
+		'application/json': {
+			schema: z.object(
+				{
+					type: z.string({ description: 'The message type' }),
+					code: z.number({ description: 'The message code' }),
+					message: z.string({ description: 'The message description' })
+				},
+				{ description: 'An object representing a message' }
+			)
+		}
 	},
+	description: 'The error object'
+} as const;
 
+export const errorHandler = {
 	get: (code: ErrorCode) => {
 		const { type, message } = map[code];
 

@@ -2,7 +2,7 @@ import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { compression } from '../../document/compression.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler } from '../../errorHandler.ts';
+import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
@@ -35,9 +35,9 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 				},
 				description: 'The raw document'
 			},
-			400: errorHandler.schema,
-			404: errorHandler.schema,
-			500: errorHandler.schema
+			400: schema,
+			404: schema,
+			500: schema
 		}
 	});
 
