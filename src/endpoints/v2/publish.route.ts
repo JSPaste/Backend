@@ -1,6 +1,6 @@
 import { brotliCompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
-import { ErrorHandler } from '../../classes/ErrorHandler.ts';
+import { errorHandler } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
@@ -38,7 +38,7 @@ export const publishRoute = (endpoint: Hono) => {
 			DocumentUtils.validateName(headers.key);
 
 			if (await StringUtils.nameExists(headers.key)) {
-				ErrorHandler.send(ErrorCode.documentNameAlreadyExists);
+				errorHandler.send(ErrorCode.documentNameAlreadyExists);
 			}
 
 			name = headers.key;

@@ -1,6 +1,6 @@
 import { brotliDecompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
-import { ErrorHandler } from '../../classes/ErrorHandler.ts';
+import { errorHandler } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
@@ -20,7 +20,7 @@ export const accessRoute = (endpoint: Hono) => {
 
 		if (document.header.passwordHash) {
 			if (!headers.password) {
-				throw ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+				throw errorHandler.send(ErrorCode.documentPasswordNeeded);
 			}
 
 			DocumentUtils.validatePassword(headers.password, document.header.passwordHash);

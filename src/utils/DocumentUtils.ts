@@ -1,5 +1,5 @@
 import { decode, encode } from 'cbor-x';
-import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { errorHandler } from '../errorHandler.ts';
 import { config } from '../server.ts';
 import type { DocumentV1 } from '../types/Document.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
@@ -13,7 +13,7 @@ export class DocumentUtils {
 		const file = Bun.file(config.SYSTEM_DOCUMENT_PATH + name);
 
 		if (!(await file.exists())) {
-			ErrorHandler.send(ErrorCode.documentNotFound);
+			errorHandler.send(ErrorCode.documentNotFound);
 		}
 
 		return decode(Buffer.from(await file.arrayBuffer()));
@@ -32,7 +32,7 @@ export class DocumentUtils {
 				config.DOCUMENT_NAME_LENGTH_MAX
 			)
 		) {
-			ErrorHandler.send(ErrorCode.documentInvalidName);
+			errorHandler.send(ErrorCode.documentInvalidName);
 		}
 	}
 
@@ -45,13 +45,13 @@ export class DocumentUtils {
 				config.DOCUMENT_NAME_LENGTH_MAX
 			)
 		) {
-			ErrorHandler.send(ErrorCode.documentInvalidNameLength);
+			errorHandler.send(ErrorCode.documentInvalidNameLength);
 		}
 	}
 
 	public static validatePassword(password: string, dataHash: DocumentV1['header']['passwordHash']): void {
 		if (dataHash && !CryptoUtils.compare(password, dataHash)) {
-			ErrorHandler.send(ErrorCode.documentInvalidPassword);
+			errorHandler.send(ErrorCode.documentInvalidPassword);
 		}
 	}
 
@@ -61,19 +61,19 @@ export class DocumentUtils {
 			(ValidatorUtils.isEmptyString(password) ||
 				!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(password), 1, 255))
 		) {
-			ErrorHandler.send(ErrorCode.documentInvalidPasswordLength);
+			errorHandler.send(ErrorCode.documentInvalidPasswordLength);
 		}
 	}
 
 	public static validateSecret(secret: string, secretHash: DocumentV1['header']['secretHash']): void {
 		if (!CryptoUtils.compare(secret, secretHash)) {
-			ErrorHandler.send(ErrorCode.documentInvalidSecret);
+			errorHandler.send(ErrorCode.documentInvalidSecret);
 		}
 	}
 
 	public static validateSecretLength(secret: string): void {
 		if (!ValidatorUtils.isLengthWithinRange(Bun.stringWidth(secret), 1, 255)) {
-			ErrorHandler.send(ErrorCode.documentInvalidSecretLength);
+			errorHandler.send(ErrorCode.documentInvalidSecretLength);
 		}
 	}
 }

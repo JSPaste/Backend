@@ -1,5 +1,5 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { ErrorHandler } from '../../classes/ErrorHandler.ts';
+import { errorHandler } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CompressorUtils } from '../../utils/CompressorUtils.ts';
@@ -34,9 +34,9 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 				},
 				description: 'The raw document'
 			},
-			400: ErrorHandler.SCHEMA,
-			404: ErrorHandler.SCHEMA,
-			500: ErrorHandler.SCHEMA
+			400: errorHandler.schema,
+			404: errorHandler.schema,
+			500: errorHandler.schema
 		}
 	});
 
@@ -49,7 +49,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 
 		// V1 Endpoint does not support Server-Side Encryption
 		if (document.header.passwordHash) {
-			ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+			errorHandler.send(ErrorCode.documentPasswordNeeded);
 		}
 
 		const buffer = await CompressorUtils.decompress(document.data);

@@ -1,6 +1,6 @@
 import { brotliDecompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
-import { ErrorHandler } from '../../classes/ErrorHandler.ts';
+import { errorHandler } from '../../errorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
@@ -12,7 +12,7 @@ export const accessRoute = (endpoint: Hono) => {
 
 		// V1 Endpoint does not support Server-Side Encryption
 		if (document.header.passwordHash) {
-			ErrorHandler.send(ErrorCode.documentPasswordNeeded);
+			errorHandler.send(ErrorCode.documentPasswordNeeded);
 		}
 
 		return ctx.json({

@@ -1,5 +1,5 @@
 import { type InputType, brotliCompress, brotliDecompress } from 'node:zlib';
-import { ErrorHandler } from '../classes/ErrorHandler.ts';
+import { errorHandler } from '../errorHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 
 export class CompressorUtils {
@@ -7,7 +7,7 @@ export class CompressorUtils {
 		return new Promise((resolve, reject) => {
 			brotliCompress(data, (err, buffer) => {
 				if (err) {
-					reject(ErrorHandler.send(ErrorCode.documentCorrupted));
+					reject(errorHandler.send(ErrorCode.documentCorrupted));
 				} else {
 					resolve(buffer);
 				}
@@ -19,7 +19,7 @@ export class CompressorUtils {
 		return new Promise((resolve, reject) => {
 			brotliDecompress(data, (err, buffer) => {
 				if (err) {
-					reject(ErrorHandler.send(ErrorCode.documentCorrupted));
+					reject(errorHandler.send(ErrorCode.documentCorrupted));
 				} else {
 					resolve(buffer);
 				}
