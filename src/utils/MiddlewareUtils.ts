@@ -1,4 +1,4 @@
-import { bodyLimit as middlewareBodyLimit } from 'hono/body-limit';
+import { bodyLimit as middlewareBodyLimit } from '@hono/hono/body-limit';
 import { ENV } from '../classes/ENV.ts';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';

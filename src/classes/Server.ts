@@ -1,6 +1,6 @@
+import { cors } from '@hono/hono/cors';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
-import { cors } from 'hono/cors';
 import type log from 'loglevel';
 import { v1 } from '../endpoints/v1';
 import { v2 } from '../endpoints/v2';

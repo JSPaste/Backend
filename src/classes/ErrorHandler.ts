@@ -1,10 +1,11 @@
+import type { ResponseConfig } from '@asteasolutions/zod-to-openapi';
+import { HTTPException } from '@hono/hono/http-exception';
+import type { StatusCode } from '@hono/hono/utils/http-status';
 import { z } from '@hono/zod-openapi';
-import { HTTPException } from 'hono/http-exception';
-import type { StatusCode } from 'hono/utils/http-status';
 import { ErrorCode, type Schema } from '../types/ErrorHandler.ts';
 
 export class ErrorHandler {
-	public static readonly SCHEMA = {
+	public static readonly SCHEMA: ResponseConfig = {
 		content: {
 			'application/json': {
 				schema: z.object(

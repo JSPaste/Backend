@@ -1,5 +1,5 @@
 import { brotliDecompressSync } from 'node:zlib';
-import type { Hono } from 'hono';
+import type { Hono } from '@hono/hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
 import { Server } from '../../classes/Server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';

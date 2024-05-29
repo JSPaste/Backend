@@ -1,5 +1,5 @@
 import { brotliCompressSync } from 'node:zlib';
-import type { Hono } from 'hono';
+import type { Hono } from '@hono/hono';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';

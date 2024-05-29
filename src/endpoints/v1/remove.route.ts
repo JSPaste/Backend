@@ -1,5 +1,5 @@
 import { unlink } from 'node:fs/promises';
-import type { Hono } from 'hono';
+import type { Hono } from '@hono/hono';
 import { Server } from '../../classes/Server.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
