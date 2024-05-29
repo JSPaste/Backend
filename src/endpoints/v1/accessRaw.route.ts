@@ -1,7 +1,6 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { compression } from '../../document/compression.ts';
 import { storage } from '../../document/storage.ts';
-import { validator } from '../../document/validator.ts';
 import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
@@ -11,7 +10,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 		method: 'get',
 		path: '/{name}/raw',
 		tags: ['v1'],
-		summary: 'Get raw document data',
+		summary: 'Get the document data',
 		deprecated: true,
 		request: {
 			params: z.object({
@@ -29,11 +28,11 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 			200: {
 				content: {
 					'text/plain': {
-						schema: z.any(),
+						schema: z.any({ description: 'The document data' }),
 						example: 'Hello, World!'
 					}
 				},
-				description: 'The raw document data'
+				description: 'The document data'
 			},
 			400: schema,
 			404: schema,
@@ -43,8 +42,6 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 
 	endpoint.openapi(route, async (ctx) => {
 		const params = ctx.req.valid('param');
-
-		validator.validateName(params.name);
 
 		const document = await storage.read(params.name);
 

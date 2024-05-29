@@ -1,12 +1,53 @@
-import { brotliDecompressSync } from 'node:zlib';
-import type { Hono } from '@hono/hono';
+import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { compression } from '../../document/compression.ts';
 import { storage } from '../../document/storage.ts';
-import { errorHandler } from '../../errorHandler.ts';
+import { errorHandler, schema } from '../../errorHandler.ts';
+import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
-export const accessRoute = (endpoint: Hono) => {
-	endpoint.get('/:name', async (ctx) => {
-		const params = ctx.req.param();
+export const accessRoute = (endpoint: OpenAPIHono) => {
+	const route = createRoute({
+		method: 'get',
+		path: '/{name}',
+		tags: ['v1'],
+		summary: 'Get the document',
+		deprecated: true,
+		request: {
+			params: z.object({
+				name: z
+					.string()
+					.min(config.DOCUMENT_NAME_LENGTH_MIN)
+					.max(config.DOCUMENT_NAME_LENGTH_MAX)
+					.openapi({
+						description: 'The document name',
+						examples: ['abc123']
+					})
+			})
+		},
+		responses: {
+			200: {
+				content: {
+					'application/json': {
+						schema: z.object({
+							key: z.string({ description: 'The document name (formerly key)' }).openapi({
+								example: 'abc123'
+							}),
+							data: z.string({ description: 'The document data' }).openapi({
+								example: 'Hello, World!'
+							})
+						})
+					}
+				},
+				description: 'The document'
+			},
+			400: schema,
+			404: schema,
+			500: schema
+		}
+	});
+
+	endpoint.openapi(route, async (ctx) => {
+		const params = ctx.req.valid('param');
 
 		const document = await storage.read(params.name);
 
@@ -15,9 +56,11 @@ export const accessRoute = (endpoint: Hono) => {
 			errorHandler.send(ErrorCode.documentPasswordNeeded);
 		}
 
+		const buffer = await compression.decode(document.data);
+
 		return ctx.json({
 			key: params.name,
-			data: brotliDecompressSync(document.data).toString()
+			data: buffer.toString('binary')
 		});
 	});
 };

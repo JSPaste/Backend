@@ -115,20 +115,17 @@ export const errorHandler = {
 export const schema: ResponseConfig = {
 	content: {
 		'application/json': {
-			schema: z.object(
-				{
-					type: z.string({ description: 'The message type' }).openapi({
-						example: errorHandler.get(ErrorCode.dummy).type
-					}),
-					code: z.number({ description: 'The message code' }).openapi({
-						example: errorHandler.get(ErrorCode.dummy).code
-					}),
-					message: z.string({ description: 'The message description' }).openapi({
-						example: errorHandler.get(ErrorCode.dummy).message
-					})
-				},
-				{ description: 'An object representing a message' }
-			)
+			schema: z.object({
+				type: z.string({ description: 'The message type' }).openapi({
+					example: errorHandler.get(ErrorCode.dummy).type
+				}),
+				code: z.number({ description: 'The message code' }).openapi({
+					example: errorHandler.get(ErrorCode.dummy).code
+				}),
+				message: z.string({ description: 'The message description' }).openapi({
+					example: errorHandler.get(ErrorCode.dummy).message
+				})
+			})
 		}
 	},
 	description: 'Generic error object'
