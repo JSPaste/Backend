@@ -1,7 +1,7 @@
-import { cors } from '@hono/hono/cors';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
 import { get as envvar } from 'env-var';
+import { cors } from 'hono/cors';
 import { v1 } from './endpoints/v1';
 import { v2 } from './endpoints/v2';
 import { logger } from './logger.ts';
@@ -27,8 +27,8 @@ const initEndpoints = (): void => {
 };
 
 const initDocs = (): void => {
-	server.instance.doc('/oas.json', {
-		openapi: '3.0.3',
+	server.instance.doc31('/oas.json', {
+		openapi: '3.1.0',
 		info: {
 			title: 'JSPaste API',
 			version: 'rolling',

@@ -1,5 +1,5 @@
 import { unlink } from 'node:fs/promises';
-import type { Hono } from '@hono/hono';
+import type { Hono } from 'hono';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';

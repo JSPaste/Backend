@@ -1,4 +1,4 @@
-import type { Hono } from '@hono/hono';
+import type { Hono } from 'hono';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';
 
