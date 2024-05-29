@@ -1,9 +1,10 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { compression } from '../../document/compression.ts';
+import { storage } from '../../document/storage.ts';
+import { validator } from '../../document/validator.ts';
 import { errorHandler } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { CompressorUtils } from '../../utils/CompressorUtils.ts';
-import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
 export const accessRawRoute = (endpoint: OpenAPIHono) => {
 	const route = createRoute({
@@ -43,16 +44,16 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 	endpoint.openapi(route, async (ctx) => {
 		const params = ctx.req.valid('param');
 
-		DocumentUtils.validateName(params.name);
+		validator.validateName(params.name);
 
-		const document = await DocumentUtils.documentReadV1(params.name);
+		const document = await storage.read(params.name);
 
 		// V1 Endpoint does not support Server-Side Encryption
 		if (document.header.passwordHash) {
 			errorHandler.send(ErrorCode.documentPasswordNeeded);
 		}
 
-		const buffer = await CompressorUtils.decompress(document.data);
+		const buffer = await compression.decode(document.data);
 
 		return ctx.text(buffer.toString('binary'));
 	});

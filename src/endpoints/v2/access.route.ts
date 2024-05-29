@@ -1,10 +1,11 @@
 import { brotliDecompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
+import { crypto } from '../../document/crypto.ts';
+import { storage } from '../../document/storage.ts';
+import { validator } from '../../document/validator.ts';
 import { errorHandler } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { CryptoUtils } from '../../utils/CryptoUtils.ts';
-import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
 export const accessRoute = (endpoint: Hono) => {
 	endpoint.get('/:name', async (ctx) => {
@@ -14,7 +15,7 @@ export const accessRoute = (endpoint: Hono) => {
 			password: ctx.req.header('password')
 		};
 
-		const document = await DocumentUtils.documentReadV1(params.name);
+		const document = await storage.read(params.name);
 
 		let data: Uint8Array;
 
@@ -23,8 +24,8 @@ export const accessRoute = (endpoint: Hono) => {
 				throw errorHandler.send(ErrorCode.documentPasswordNeeded);
 			}
 
-			DocumentUtils.validatePassword(headers.password, document.header.passwordHash);
-			data = CryptoUtils.decrypt(document.data, headers.password);
+			validator.validatePassword(headers.password, document.header.passwordHash);
+			data = crypto.decrypt(document.data, headers.password);
 		} else {
 			data = document.data;
 		}

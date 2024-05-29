@@ -1,15 +1,16 @@
 import { brotliCompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
+import { crypto } from '../../document/crypto.ts';
+import { storage } from '../../document/storage.ts';
+import { validator } from '../../document/validator.ts';
 import { errorHandler } from '../../errorHandler.ts';
+import { middleware } from '../../middleware.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { CryptoUtils } from '../../utils/CryptoUtils.ts';
-import { DocumentUtils } from '../../utils/DocumentUtils.ts';
-import { MiddlewareUtils } from '../../utils/MiddlewareUtils.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
 export const publishRoute = (endpoint: Hono) => {
-	endpoint.post('/', MiddlewareUtils.bodyLimit(), async (ctx) => {
+	endpoint.post('/', middleware.bodyLimit(), async (ctx) => {
 		const body = await ctx.req.arrayBuffer();
 		const headers = {
 			key: ctx.req.header('key'),
@@ -19,13 +20,13 @@ export const publishRoute = (endpoint: Hono) => {
 		};
 
 		if (headers.password) {
-			DocumentUtils.validatePasswordLength(headers.password);
+			validator.validatePasswordLength(headers.password);
 		}
 
 		let secret: string;
 
 		if (headers.secret) {
-			DocumentUtils.validateSecretLength(headers.secret);
+			validator.validateSecretLength(headers.secret);
 
 			secret = headers.secret;
 		} else {
@@ -35,7 +36,7 @@ export const publishRoute = (endpoint: Hono) => {
 		let name: string;
 
 		if (headers.key) {
-			DocumentUtils.validateName(headers.key);
+			validator.validateName(headers.key);
 
 			if (await StringUtils.nameExists(headers.key)) {
 				errorHandler.send(ErrorCode.documentNameAlreadyExists);
@@ -43,19 +44,19 @@ export const publishRoute = (endpoint: Hono) => {
 
 			name = headers.key;
 		} else {
-			DocumentUtils.validateNameLength(headers.keylength);
+			validator.validateNameLength(headers.keylength);
 
 			name = await StringUtils.createName(headers.keylength);
 		}
 
 		const data = brotliCompressSync(body);
 
-		await DocumentUtils.documentWriteV1(name, {
-			data: headers.password ? CryptoUtils.encrypt(data, headers.password) : data,
+		await storage.write(name, {
+			data: headers.password ? crypto.encrypt(data, headers.password) : data,
 			header: {
 				name: name,
-				secretHash: CryptoUtils.hash(secret) as string,
-				passwordHash: headers.password ? (CryptoUtils.hash(headers.password) as string) : null
+				secretHash: crypto.hash(secret) as string,
+				passwordHash: headers.password ? (crypto.hash(headers.password) as string) : null
 			}
 		});
 
