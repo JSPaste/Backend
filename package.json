@@ -34,7 +34,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "~1.7.3",
-		"lefthook": "~1.6.12",
+		"lefthook": "1.6.8",
 		"sort-package-json": "~2.10.0"
 	},
 	"trustedDependencies": [
