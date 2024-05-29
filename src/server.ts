@@ -2,14 +2,13 @@ import { cors } from '@hono/hono/cors';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
 import { get as envvar } from 'env-var';
-import type { LogLevelNames } from 'loglevel';
-import { Logger } from './classes/Logger.ts';
 import { v1 } from './endpoints/v1';
 import { v2 } from './endpoints/v2';
+import { logger } from './logger.ts';
 
 export const env = {
 	PORT: envvar('PORT').default(4000).asPortNumber(),
-	LOGLEVEL: envvar('LOGLEVEL').default('info').asString(),
+	LOGLEVEL: envvar('LOGLEVEL').default(2).asIntPositive(),
 	DOCUMENT_TLS: envvar('DOCUMENT_TLS').asBoolStrict() ?? false,
 	DOCUMENT_DOMAIN: envvar('DOCUMENT_DOMAIN').default('localhost').asString(),
 	DOCUMENT_MAXSIZE: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
@@ -30,7 +29,7 @@ export const server = {
 	instance: new OpenAPIHono().basePath(config.PATH),
 
 	run: (): void => {
-		Logger.init(env.LOGLEVEL as LogLevelNames);
+		logger.set(env.LOGLEVEL);
 
 		const initInstance = (): void => {
 			server.instance.use('*', cors());
@@ -98,11 +97,11 @@ export const server = {
 		initEndpoints();
 		env.DOCS_ENABLED && initDocs();
 
-		Logger.info('Registered', server.instance.routes.length, 'routes');
-		Logger.debug(
+		logger.info('Registered', server.instance.routes.length, 'routes');
+		logger.debug(
 			'Registered routes:',
 			server.instance.routes.map((route) => route.path)
 		);
-		Logger.info(`Listening on: http://localhost:${env.PORT}`);
+		logger.info(`Listening on: http://localhost:${env.PORT}`);
 	}
 } as const;

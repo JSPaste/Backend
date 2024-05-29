@@ -100,6 +100,11 @@ export class ErrorHandler {
 			httpCode: 400,
 			type: 'document',
 			message: 'The name provided for the document is invalid. Use another one and try again.'
+		},
+		[ErrorCode.documentCorrupted]: {
+			httpCode: 500,
+			type: 'document',
+			message: 'The document is corrupted. It may have been tampered with or uses an unsupported format.'
 		}
 	};
 
