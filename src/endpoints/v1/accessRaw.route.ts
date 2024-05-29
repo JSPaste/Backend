@@ -1,7 +1,7 @@
 import { brotliDecompressSync } from 'node:zlib';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
-import { Server } from '../../classes/Server.ts';
+import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
@@ -16,7 +16,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono) => {
 			params: z.object({
 				name: z
 					.string()
-					.max(Server.DOCUMENT_NAME_LENGTH_MAX)
+					.max(config.DOCUMENT_NAME_LENGTH_MAX)
 					.openapi({
 						description: 'The document name',
 						examples: ['abc123']

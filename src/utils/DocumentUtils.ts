@@ -1,6 +1,6 @@
 import { decode, encode } from 'cbor-x';
 import { ErrorHandler } from '../classes/ErrorHandler.ts';
-import { Server } from '../classes/Server.ts';
+import { config } from '../server.ts';
 import type { DocumentV1 } from '../types/Document.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { CryptoUtils } from './CryptoUtils.ts';
@@ -10,7 +10,7 @@ export class DocumentUtils {
 	public static async documentReadV1(name: string): Promise<DocumentV1> {
 		DocumentUtils.validateName(name);
 
-		const file = Bun.file(Server.DOCUMENT_PATH + name);
+		const file = Bun.file(config.DOCUMENT_PATH + name);
 
 		if (!(await file.exists())) {
 			ErrorHandler.send(ErrorCode.documentNotFound);
@@ -20,7 +20,7 @@ export class DocumentUtils {
 	}
 
 	public static async documentWriteV1(name: string, document: Omit<DocumentV1, 'version'>): Promise<void> {
-		await Bun.write(Server.DOCUMENT_PATH + name, encode({ ...document, version: 1 }));
+		await Bun.write(config.DOCUMENT_PATH + name, encode({ ...document, version: 1 }));
 	}
 
 	public static validateName(key: string): void {
@@ -28,8 +28,8 @@ export class DocumentUtils {
 			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
 				Bun.stringWidth(key),
-				Server.DOCUMENT_NAME_LENGTH_MIN,
-				Server.DOCUMENT_NAME_LENGTH_MAX
+				config.DOCUMENT_NAME_LENGTH_MIN,
+				config.DOCUMENT_NAME_LENGTH_MAX
 			)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidName);
@@ -41,8 +41,8 @@ export class DocumentUtils {
 			length &&
 			!ValidatorUtils.isLengthWithinRange(
 				length,
-				Server.DOCUMENT_NAME_LENGTH_MIN,
-				Server.DOCUMENT_NAME_LENGTH_MAX
+				config.DOCUMENT_NAME_LENGTH_MIN,
+				config.DOCUMENT_NAME_LENGTH_MAX
 			)
 		) {
 			ErrorHandler.send(ErrorCode.documentInvalidNameLength);

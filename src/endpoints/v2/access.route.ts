@@ -1,7 +1,7 @@
 import { brotliDecompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
-import { Server } from '../../classes/Server.ts';
+import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
@@ -32,7 +32,7 @@ export const accessRoute = (endpoint: Hono) => {
 		return ctx.json({
 			key: params.name,
 			data: brotliDecompressSync(data).toString(),
-			url: Server.HOSTNAME.concat('/', params.name),
+			url: config.HOSTNAME.concat('/', params.name),
 			// Deprecated, for compatibility reasons will be kept to 0
 			expirationTimestamp: 0
 		});

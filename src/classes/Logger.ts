@@ -1,8 +1,9 @@
 import chalk from 'chalk';
+import type { LogLevelNames } from 'loglevel';
 import log from 'loglevel';
 
 export class Logger {
-	public static init(level: log.LogLevelNames) {
+	public static init(level: LogLevelNames) {
 		log.setLevel(level || 'info');
 	}
 

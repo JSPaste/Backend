@@ -1,5 +1,5 @@
 import type { Hono } from '@hono/hono';
-import { Server } from '../../classes/Server.ts';
+import { config } from '../../server.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
 
 export const existsRoute = (endpoint: Hono) => {
@@ -8,6 +8,6 @@ export const existsRoute = (endpoint: Hono) => {
 
 		DocumentUtils.validateName(params.name);
 
-		return ctx.text(await Bun.file(Server.DOCUMENT_PATH + params.name).exists());
+		return ctx.text(await Bun.file(config.DOCUMENT_PATH + params.name).exists());
 	});
 };

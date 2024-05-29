@@ -1,7 +1,7 @@
 import { brotliCompressSync } from 'node:zlib';
 import type { Hono } from '@hono/hono';
 import { ErrorHandler } from '../../classes/ErrorHandler.ts';
-import { Server } from '../../classes/Server.ts';
+import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { CryptoUtils } from '../../utils/CryptoUtils.ts';
 import { DocumentUtils } from '../../utils/DocumentUtils.ts';
@@ -62,7 +62,7 @@ export const publishRoute = (endpoint: Hono) => {
 		return ctx.json({
 			key: name,
 			secret: secret,
-			url: Server.HOSTNAME.concat('/', name),
+			url: config.HOSTNAME.concat('/', name),
 			// Deprecated, for compatibility reasons will be kept to 0
 			expirationTimestamp: 0
 		});

@@ -1,9 +1,8 @@
-import { ENV } from './classes/ENV.ts';
-import { Server } from './classes/Server.ts';
+import { env, server } from './server.ts';
 
-const instance = new Server().instance;
+server.run();
 
 export default {
-	port: ENV.PORT,
-	fetch: instance.fetch
+	port: env.PORT,
+	fetch: server.instance.fetch
 };
