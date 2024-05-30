@@ -14,25 +14,19 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateName(length: number = config.DOCUMENT_NAME_LENGTH_DEFAULT): string {
-		if (
-			!ValidatorUtils.isLengthWithinRange(
-				length,
-				config.DOCUMENT_NAME_LENGTH_MIN,
-				config.DOCUMENT_NAME_LENGTH_MAX
-			)
-		) {
-			length = config.DOCUMENT_NAME_LENGTH_DEFAULT;
+	public static generateName(length: number = config.documentNameLengthDefault): string {
+		if (!ValidatorUtils.isLengthWithinRange(length, config.documentNameLengthMin, config.documentNameLengthMax)) {
+			length = config.documentNameLengthDefault;
 		}
 
 		return StringUtils.random(length, 64);
 	}
 
 	public static async nameExists(name: string): Promise<boolean> {
-		return Bun.file(config.SYSTEM_DOCUMENT_PATH + name).exists();
+		return Bun.file(config.storagePath + name).exists();
 	}
 
-	public static async createName(length: number = config.DOCUMENT_NAME_LENGTH_DEFAULT): Promise<string> {
+	public static async createName(length: number = config.documentNameLengthDefault): Promise<string> {
 		const key = StringUtils.generateName(length);
 
 		return (await StringUtils.nameExists(key)) ? StringUtils.createName(length + 1) : key;

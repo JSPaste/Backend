@@ -11,8 +11,8 @@ export const validator = {
 			!ValidatorUtils.isValidBase64URL(key) ||
 			!ValidatorUtils.isLengthWithinRange(
 				Bun.stringWidth(key),
-				config.DOCUMENT_NAME_LENGTH_MIN,
-				config.DOCUMENT_NAME_LENGTH_MAX
+				config.documentNameLengthMin,
+				config.documentNameLengthMax
 			)
 		) {
 			errorHandler.send(ErrorCode.documentInvalidName);
@@ -22,11 +22,7 @@ export const validator = {
 	validateNameLength: (length: number | undefined): void => {
 		if (
 			length &&
-			!ValidatorUtils.isLengthWithinRange(
-				length,
-				config.DOCUMENT_NAME_LENGTH_MIN,
-				config.DOCUMENT_NAME_LENGTH_MAX
-			)
+			!ValidatorUtils.isLengthWithinRange(length, config.documentNameLengthMin, config.documentNameLengthMax)
 		) {
 			errorHandler.send(ErrorCode.documentInvalidNameLength);
 		}

@@ -33,7 +33,7 @@ export const accessRoute = (endpoint: Hono) => {
 		return ctx.json({
 			key: params.name,
 			data: brotliDecompressSync(data).toString(),
-			url: config.HOSTNAME.concat('/', params.name),
+			url: config.hostname.concat('/', params.name),
 			// Deprecated, for compatibility reasons will be kept to 0
 			expirationTimestamp: 0
 		});

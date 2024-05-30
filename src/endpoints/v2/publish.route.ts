@@ -63,7 +63,7 @@ export const publishRoute = (endpoint: Hono) => {
 		return ctx.json({
 			key: name,
 			secret: secret,
-			url: config.HOSTNAME.concat('/', name),
+			url: config.hostname.concat('/', name),
 			// Deprecated, for compatibility reasons will be kept to 0
 			expirationTimestamp: 0
 		});

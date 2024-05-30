@@ -9,7 +9,7 @@ export const storage = {
 	read: async (name: string): Promise<DocumentV1> => {
 		validator.validateName(name);
 
-		const file = Bun.file(config.SYSTEM_DOCUMENT_PATH + name);
+		const file = Bun.file(config.storagePath + name);
 
 		if (!(await file.exists())) {
 			errorHandler.send(ErrorCode.documentNotFound);
@@ -19,6 +19,6 @@ export const storage = {
 	},
 
 	write: async (name: string, document: Omit<DocumentV1, 'version'>): Promise<void> => {
-		await Bun.write(config.SYSTEM_DOCUMENT_PATH + name, encode({ ...document, version: 1 }));
+		await Bun.write(config.storagePath + name, encode({ ...document, version: 1 }));
 	}
 } as const;

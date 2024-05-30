@@ -16,8 +16,8 @@ export const removeRoute = (endpoint: OpenAPIHono) => {
 			params: z.object({
 				name: z
 					.string()
-					.min(config.DOCUMENT_NAME_LENGTH_MIN)
-					.max(config.DOCUMENT_NAME_LENGTH_MAX)
+					.min(config.documentNameLengthMin)
+					.max(config.documentNameLengthMax)
 					.openapi({
 						description: 'The document name',
 						examples: ['abc123']
@@ -57,7 +57,7 @@ export const removeRoute = (endpoint: OpenAPIHono) => {
 		validator.validateSecret(headers.secret, document.header.secretHash);
 
 		return ctx.json({
-			removed: await unlink(config.SYSTEM_DOCUMENT_PATH + params.name)
+			removed: await unlink(config.storagePath + params.name)
 				.then(() => true)
 				.catch(() => false)
 		});

@@ -8,6 +8,6 @@ export const existsRoute = (endpoint: Hono) => {
 
 		validator.validateName(params.name);
 
-		return ctx.text(await Bun.file(config.SYSTEM_DOCUMENT_PATH + params.name).exists());
+		return ctx.text(await Bun.file(config.storagePath + params.name).exists());
 	});
 };

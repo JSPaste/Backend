@@ -5,7 +5,7 @@ import { config, env } from './server.ts';
 import { ErrorCode } from './types/ErrorHandler.ts';
 
 export const middleware = {
-	bodyLimit: (maxSize: number = env.DOCUMENT_MAXSIZE) => {
+	bodyLimit: (maxSize: number = env.documentMaxSize) => {
 		return middlewareBodyLimit({
 			maxSize: maxSize * 1024,
 			onError: () => {
@@ -21,7 +21,7 @@ export const middleware = {
 			layout: 'classic',
 			isEditable: false,
 			spec: {
-				url: config.PATH.concat('/oas.json')
+				url: config.apiPath.concat('/oas.json')
 			}
 		});
 	}

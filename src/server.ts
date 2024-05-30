@@ -7,25 +7,25 @@ import { logger } from './logger.ts';
 import { middleware } from './middleware.ts';
 
 const initInstance = (): void => {
-	server.instance.use('*', cors());
+	instance.use('*', cors());
 
-	server.instance.onError((err, ctx) => {
+	instance.onError((err, ctx) => {
 		return ctx.json(JSON.parse(err.message));
 	});
 
-	server.instance.notFound((ctx) => {
+	instance.notFound((ctx) => {
 		return ctx.body(null, 404);
 	});
 };
 
 const initEndpoints = (): void => {
-	server.instance.route('/v1/documents', v1());
-	server.instance.route('/v2/documents', v2());
-	server.instance.route('/documents', v2());
+	instance.route('/v1/documents', v1());
+	instance.route('/v2/documents', v2());
+	instance.route('/documents', v2());
 };
 
 const initDocs = (): void => {
-	server.instance.doc31('/oas.json', {
+	instance.doc31('/oas.json', {
 		openapi: '3.1.0',
 		info: {
 			title: 'JSPaste API',
@@ -42,7 +42,7 @@ const initDocs = (): void => {
 				description: 'Official JSPaste instance'
 			},
 			{
-				url: 'https://jspaste.eu'.concat(config.PATH),
+				url: 'https://jspaste.eu'.concat(config.apiPath),
 				description:
 					'Official JSPaste instance workaround (See https://github.com/honojs/middleware/issues/459)'
 			},
@@ -51,7 +51,7 @@ const initDocs = (): void => {
 				description: 'Inetol Infrastructure instance'
 			},
 			{
-				url: 'https://paste.inetol.net'.concat(config.PATH),
+				url: 'https://paste.inetol.net'.concat(config.apiPath),
 				description:
 					'Inetol Infrastructure instance workaround (See https://github.com/honojs/middleware/issues/459)'
 			},
@@ -60,50 +60,50 @@ const initDocs = (): void => {
 				description: 'Local instance (Only use if you are running the backend locally)'
 			},
 			{
-				url: 'http://localhost:4000'.concat(config.PATH),
+				url: 'http://localhost:4000'.concat(config.apiPath),
 				description:
 					'Local instance workaround (Only use if you are running the backend locally, see https://github.com/honojs/middleware/issues/459)'
 			}
 		]
 	});
 
-	server.instance.get(env.DOCS_PATH, middleware.scalar());
+	instance.get(env.docsPath, middleware.scalar());
 };
 
 export const env = {
-	PORT: envvar('PORT').default(4000).asPortNumber(),
-	LOGLEVEL: envvar('LOGLEVEL').default(2).asIntPositive(),
-	DOCUMENT_TLS: envvar('DOCUMENT_TLS').asBoolStrict() ?? false,
-	DOCUMENT_DOMAIN: envvar('DOCUMENT_DOMAIN').default('localhost').asString(),
-	DOCUMENT_MAXSIZE: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
-	DOCS_ENABLED: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
-	DOCS_PATH: envvar('DOCS_PATH').default('/docs').asString()
+	port: envvar('PORT').default(4000).asPortNumber(),
+	logLevel: envvar('LOGLEVEL').default(2).asIntPositive(),
+	documentTLS: envvar('DOCUMENT_TLS').asBoolStrict() ?? false,
+	documentDomain: envvar('DOCUMENT_DOMAIN').default('localhost').asString(),
+	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
+	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
+	docsPath: envvar('DOCS_PATH').default('/docs').asString()
 } as const;
 
 export const config = {
-	HOSTNAME: (env.DOCUMENT_TLS ? 'https://' : 'http://').concat(env.DOCUMENT_DOMAIN),
-	PATH: '/api',
-	SYSTEM_DOCUMENT_PATH: 'documents/',
-	DOCUMENT_NAME_LENGTH_MIN: 2,
-	DOCUMENT_NAME_LENGTH_MAX: 32,
-	DOCUMENT_NAME_LENGTH_DEFAULT: 8
+	hostname: (env.documentTLS ? 'https://' : 'http://').concat(env.documentDomain),
+	apiPath: '/api',
+	storagePath: 'documents/',
+	documentNameLengthMin: 2,
+	documentNameLengthMax: 32,
+	documentNameLengthDefault: 8
 } as const;
 
-export const server = {
-	instance: new OpenAPIHono().basePath(config.PATH),
+const instance = new OpenAPIHono().basePath(config.apiPath);
 
-	run: (): void => {
-		logger.set(env.LOGLEVEL);
+export const server = (): typeof instance => {
+	logger.set(env.logLevel);
 
-		initInstance();
-		initEndpoints();
-		env.DOCS_ENABLED && initDocs();
+	initInstance();
+	initEndpoints();
+	env.docsEnabled && initDocs();
 
-		logger.debug('Registered', server.instance.routes.length, 'routes');
-		logger.debug(
-			'Registered routes:',
-			server.instance.routes.map((route) => route.path)
-		);
-		logger.info(`Listening on: http://localhost:${env.PORT}`);
-	}
-} as const;
+	logger.debug('Registered', instance.routes.length, 'routes');
+	logger.debug(
+		'Registered routes:',
+		instance.routes.map((route) => route.path)
+	);
+	logger.info(`Listening on: http://localhost:${env.port}`);
+
+	return instance;
+};

@@ -16,8 +16,8 @@ export const accessRoute = (endpoint: OpenAPIHono) => {
 			params: z.object({
 				name: z
 					.string()
-					.min(config.DOCUMENT_NAME_LENGTH_MIN)
-					.max(config.DOCUMENT_NAME_LENGTH_MAX)
+					.min(config.documentNameLengthMin)
+					.max(config.documentNameLengthMax)
 					.openapi({
 						description: 'The document name',
 						examples: ['abc123']
