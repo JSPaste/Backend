@@ -1,10 +1,10 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { apiReference } from '@scalar/hono-api-reference';
 import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { v1 } from './endpoints/v1';
 import { v2 } from './endpoints/v2';
 import { logger } from './logger.ts';
+import { middleware } from './middleware.ts';
 
 const initInstance = (): void => {
 	server.instance.use('*', cors());
@@ -14,9 +14,7 @@ const initInstance = (): void => {
 	});
 
 	server.instance.notFound((ctx) => {
-		ctx.status(404);
-
-		return ctx.body(null);
+		return ctx.body(null, 404);
 	});
 };
 
@@ -44,28 +42,32 @@ const initDocs = (): void => {
 				description: 'Official JSPaste instance'
 			},
 			{
+				url: 'https://jspaste.eu'.concat(config.PATH),
+				description:
+					'Official JSPaste instance workaround (See https://github.com/honojs/middleware/issues/459)'
+			},
+			{
 				url: 'https://paste.inetol.net',
 				description: 'Inetol Infrastructure instance'
 			},
 			{
+				url: 'https://paste.inetol.net'.concat(config.PATH),
+				description:
+					'Inetol Infrastructure instance workaround (See https://github.com/honojs/middleware/issues/459)'
+			},
+			{
 				url: 'http://localhost:4000',
 				description: 'Local instance (Only use if you are running the backend locally)'
+			},
+			{
+				url: 'http://localhost:4000'.concat(config.PATH),
+				description:
+					'Local instance workaround (Only use if you are running the backend locally, see https://github.com/honojs/middleware/issues/459)'
 			}
 		]
 	});
 
-	server.instance.get(
-		env.DOCS_PATH,
-		apiReference({
-			pageTitle: 'JSPaste Documentation',
-			theme: 'saturn',
-			layout: 'classic',
-			isEditable: false,
-			spec: {
-				url: config.PATH.concat('/oas.json')
-			}
-		})
-	);
+	server.instance.get(env.DOCS_PATH, middleware.scalar());
 };
 
 export const env = {
