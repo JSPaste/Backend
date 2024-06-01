@@ -1,23 +1,75 @@
-import { brotliCompressSync } from 'node:zlib';
-import type { Hono } from 'hono';
+import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler } from '../../errorHandler.ts';
+import { errorHandler, schema } from '../../errorHandler.ts';
 import { middleware } from '../../middleware.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
-export const publishRoute = (endpoint: Hono) => {
-	endpoint.post('/', middleware.bodyLimit(), async (ctx) => {
+export const publishRoute = (endpoint: OpenAPIHono): void => {
+	const route = createRoute({
+		method: 'post',
+		path: '/',
+		tags: ['v2'],
+		summary: 'Publish document',
+		middleware: [middleware.bodyLimit()],
+		request: {
+			body: {
+				content: {},
+				description: 'Hello, World!'
+			},
+			headers: z.object({
+				password: z.string().optional().openapi({
+					description: 'The password to decrypt the document'
+				}),
+				key: z.string().optional().openapi({
+					description: 'The document name (formerly key)'
+				}),
+				keylength: z.number().optional().openapi({
+					description: 'The document name length (formerly key)'
+				}),
+				secret: z.string().optional().openapi({
+					description: 'The document secret'
+				})
+			})
+		},
+		responses: {
+			200: {
+				content: {
+					'application/json': {
+						schema: z.object({
+							key: z.string({ description: 'The document name (formerly key)' }).openapi({
+								example: 'abc123'
+							}),
+							secret: z.string({ description: 'The document secret' }).openapi({
+								example: 'aaaaa-bbbbb-ccccc-ddddd'
+							}),
+							url: z.string({ description: 'The document URL' }).openapi({
+								example: 'https://example.test/abc123'
+							}),
+							expirationTimestamp: z
+								.number({ description: 'The document expiration timestamp' })
+								.openapi({
+									deprecated: true,
+									example: 0
+								})
+						})
+					}
+				},
+				description: 'The document'
+			},
+			400: schema,
+			404: schema,
+			500: schema
+		}
+	});
+
+	endpoint.openapi(route, async (ctx) => {
 		const body = await ctx.req.arrayBuffer();
-		const headers = {
-			key: ctx.req.header('key'),
-			keylength: Number(ctx.req.header('keylength')),
-			password: ctx.req.header('password'),
-			secret: ctx.req.header('secret')
-		};
+		const headers = ctx.req.valid('header');
 
 		if (headers.password) {
 			validator.validatePasswordLength(headers.password);
@@ -49,7 +101,7 @@ export const publishRoute = (endpoint: Hono) => {
 			name = await StringUtils.createName(headers.keylength);
 		}
 
-		const data = brotliCompressSync(body);
+		const data = await compression.encode(body);
 
 		await storage.write(name, {
 			data: headers.password ? crypto.encrypt(data, headers.password) : data,

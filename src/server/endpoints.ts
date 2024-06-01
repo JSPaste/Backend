@@ -9,6 +9,6 @@ export const endpoints = (instance: OpenAPIHono): void => {
 
 	// FIXME: Internal redirect?
 	instance.get('/documents/*', (ctx) => {
-		return ctx.redirect(`${config.apiPath}/v2/documents`.concat(ctx.req.path.split('/documents').pop() ?? ''), 302);
+		return ctx.redirect(`${config.apiPath}/v2/documents`.concat(ctx.req.path.split('/documents').pop() ?? ''), 307);
 	});
 };

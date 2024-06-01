@@ -10,7 +10,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 		method: 'get',
 		path: '/{name}',
 		tags: ['v1'],
-		summary: 'Get the document',
+		summary: 'Get document',
 		deprecated: true,
 		request: {
 			params: z.object({

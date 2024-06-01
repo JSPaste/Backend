@@ -10,7 +10,7 @@ export const removeRoute = (endpoint: OpenAPIHono): void => {
 		method: 'delete',
 		path: '/{name}',
 		tags: ['v1'],
-		summary: 'Delete a document',
+		summary: 'Delete document',
 		deprecated: true,
 		request: {
 			params: z.object({

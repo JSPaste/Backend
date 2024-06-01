@@ -11,7 +11,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 		method: 'post',
 		path: '/',
 		tags: ['v1'],
-		summary: 'Publish a document',
+		summary: 'Publish document',
 		deprecated: true,
 		middleware: [middleware.bodyLimit()],
 		request: {

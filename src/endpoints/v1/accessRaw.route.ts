@@ -10,7 +10,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		method: 'get',
 		path: '/{name}/raw',
 		tags: ['v1'],
-		summary: 'Get the document data',
+		summary: 'Get document data',
 		deprecated: true,
 		request: {
 			params: z.object({
