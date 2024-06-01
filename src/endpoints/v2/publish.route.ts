@@ -48,7 +48,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 								example: 'aaaaa-bbbbb-ccccc-ddddd'
 							}),
 							url: z.string({ description: 'The document URL' }).openapi({
-								example: 'https://example.test/abc123'
+								example: 'https://jspaste.eu/abc123'
 							}),
 							expirationTimestamp: z
 								.number({ description: 'The document expiration timestamp' })

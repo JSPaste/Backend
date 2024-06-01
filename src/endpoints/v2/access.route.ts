@@ -38,11 +38,11 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 							key: z.string({ description: 'The document name (formerly key)' }).openapi({
 								example: 'abc123'
 							}),
-							data: z.string({ description: 'The document data' }).openapi({
+							data: z.any({ description: 'The document data' }).openapi({
 								example: 'Hello, World!'
 							}),
 							url: z.string({ description: 'The document URL' }).openapi({
-								example: 'https://example.test/abc123'
+								example: 'https://jspaste.eu/abc123'
 							}),
 							expirationTimestamp: z
 								.number({ description: 'The document expiration timestamp' })
@@ -53,7 +53,8 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 						})
 					}
 				},
-				description: 'The document'
+				description:
+					'The document object, including the name, the data, the display URL and an expiration timestamp for the document'
 			},
 			400: schema,
 			404: schema,

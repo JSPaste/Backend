@@ -5,7 +5,6 @@ import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { crypto } from './crypto.ts';
 
-// TODO: Move some validators to middleware
 export const validator = {
 	validateName: (key: string): void => {
 		if (

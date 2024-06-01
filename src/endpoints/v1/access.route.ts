@@ -32,7 +32,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 							key: z.string({ description: 'The document name (formerly key)' }).openapi({
 								example: 'abc123'
 							}),
-							data: z.string({ description: 'The document data' }).openapi({
+							data: z.any({ description: 'The document data' }).openapi({
 								example: 'Hello, World!'
 							})
 						})
