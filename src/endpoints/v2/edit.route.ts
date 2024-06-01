@@ -1,5 +1,5 @@
-import { brotliCompressSync } from 'node:zlib';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
@@ -75,7 +75,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 			validator.validatePassword(headers.password, document.header.passwordHash);
 		}
 
-		const data = brotliCompressSync(body);
+		const data = await compression.encode(body);
 
 		document.data = headers.password ? crypto.encrypt(data, headers.password) : data;
 
