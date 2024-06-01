@@ -1,7 +1,8 @@
+import type { OpenAPIHono } from '@hono/zod-openapi';
 import { middleware } from '../middleware.ts';
-import { config, env, instance } from '../server.ts';
+import { config, env } from '../server.ts';
 
-export const documentation = (): void => {
+export const documentation = (instance: OpenAPIHono): void => {
 	instance.doc31('/oas.json', {
 		openapi: '3.1.0',
 		info: {

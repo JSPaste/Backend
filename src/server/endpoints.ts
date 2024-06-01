@@ -1,8 +1,9 @@
+import type { OpenAPIHono } from '@hono/zod-openapi';
 import { v1 } from '../endpoints/v1';
 import { v2 } from '../endpoints/v2';
-import { config, instance } from '../server.ts';
+import { config } from '../server.ts';
 
-export const endpoints = (): void => {
+export const endpoints = (instance: OpenAPIHono): void => {
 	instance.route('/v1/documents', v1());
 	instance.route('/v2/documents', v2());
 

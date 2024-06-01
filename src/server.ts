@@ -24,7 +24,7 @@ export const config = {
 	documentNameLengthDefault: 8
 } as const;
 
-export const instance = new OpenAPIHono().basePath(config.apiPath);
+const instance = new OpenAPIHono().basePath(config.apiPath);
 
 export const server = (): typeof instance => {
 	logger.set(env.logLevel);
@@ -39,8 +39,8 @@ export const server = (): typeof instance => {
 		return ctx.body(null, 404);
 	});
 
-	endpoints();
-	env.docsEnabled && documentation();
+	endpoints(instance);
+	env.docsEnabled && documentation(instance);
 
 	logger.debug('Registered', instance.routes.length, 'routes');
 	logger.debug('Registered routes:', instance.routes);
