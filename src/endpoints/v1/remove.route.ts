@@ -5,7 +5,7 @@ import { validator } from '../../document/validator.ts';
 import { schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 
-export const removeRoute = (endpoint: OpenAPIHono) => {
+export const removeRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
 		method: 'delete',
 		path: '/{name}',

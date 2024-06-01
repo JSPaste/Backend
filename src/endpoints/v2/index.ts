@@ -5,7 +5,7 @@ import { editRoute } from './edit.route.ts';
 import { existsRoute } from './exists.route.ts';
 import { publishRoute } from './publish.route.ts';
 
-export const v2 = () => {
+export const v2 = (): typeof endpoint => {
 	const endpoint = new OpenAPIHono();
 
 	endpoint.get('/', (ctx) => {

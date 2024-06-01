@@ -6,7 +6,7 @@ import { schema } from '../../errorHandler.ts';
 import { middleware } from '../../middleware.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
-export const publishRoute = (endpoint: OpenAPIHono) => {
+export const publishRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
 		method: 'post',
 		path: '/',

@@ -4,7 +4,7 @@ import { accessRawRoute } from './accessRaw.route.ts';
 import { publishRoute } from './publish.route.ts';
 import { removeRoute } from './remove.route.ts';
 
-export const v1 = () => {
+export const v1 = (): typeof endpoint => {
 	const endpoint = new OpenAPIHono();
 
 	endpoint.get('/', (ctx) => {

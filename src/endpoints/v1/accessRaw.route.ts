@@ -5,7 +5,7 @@ import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
-export const accessRawRoute = (endpoint: OpenAPIHono) => {
+export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
 		method: 'get',
 		path: '/{name}/raw',
