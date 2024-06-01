@@ -50,8 +50,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 			errorHandler.send(ErrorCode.documentPasswordNeeded);
 		}
 
-		const buffer = await compression.decode(document.data);
-
-		return ctx.text(buffer.toString('binary'));
+		// @ts-ignore: Return the buffer directly
+		return ctx.text(await compression.decode(document.data));
 	});
 };

@@ -76,8 +76,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 			data = document.data;
 		}
 
-		const buffer = await compression.decode(data);
-
-		return ctx.text(buffer.toString('binary'));
+		// @ts-ignore: Return the buffer directly
+		return ctx.text(await compression.decode(data));
 	});
 };
