@@ -22,7 +22,8 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document'
+					description: 'The password to decrypt the document',
+					example: 'aabbccdd11223344'
 				})
 			})
 		},

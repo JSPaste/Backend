@@ -29,16 +29,20 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			},
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document'
+					description: 'The password to encrypt the document',
+					example: 'aabbccdd11223344'
 				}),
 				key: z.string().optional().openapi({
-					description: 'The document name (formerly key)'
+					description: 'The document name (formerly key)',
+					example: 'abc123'
 				}),
 				keylength: z.number().optional().openapi({
-					description: 'The document name length (formerly key)'
+					description: 'The document name length (formerly key length)',
+					example: config.documentNameLengthDefault
 				}),
 				secret: z.string().optional().openapi({
-					description: 'The document secret'
+					description: 'The document secret',
+					example: 'aaaaa-bbbbb-ccccc-ddddd'
 				})
 			})
 		},

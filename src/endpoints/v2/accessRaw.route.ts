@@ -22,13 +22,15 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document'
+					description: 'The password to decrypt the document',
+					example: 'aabbccdd11223344'
 				})
 			}),
 			query: z.object({
 				p: z.string().optional().openapi({
 					description:
-						'The password to decrypt the document. It is preferred to pass the password through headers, only use this method for support of web browsers.'
+						'The password to decrypt the document. It is preferred to pass the password through headers, only use this method for support of web browsers.',
+					example: 'aabbccdd11223344'
 				})
 			})
 		},
