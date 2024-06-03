@@ -5,6 +5,7 @@ enum ErrorCode {
 	validation = 1002,
 	parse = 1003,
 	notFound = 1004,
+	dummy = 1005,
 
 	// * Document
 	documentNotFound = 1200,
@@ -16,7 +17,8 @@ enum ErrorCode {
 	documentInvalidPasswordLength = 1206,
 	documentInvalidSecret = 1207,
 	documentInvalidSecretLength = 1208,
-	documentInvalidName = 1209
+	documentInvalidName = 1209,
+	documentCorrupted = 1210
 }
 
 type Type = 'generic' | 'document';
