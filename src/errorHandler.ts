@@ -107,7 +107,12 @@ export const errorHandler = {
 		const { httpCode, type, message } = map[code];
 
 		throw new HTTPException(httpCode as StatusCode, {
-			message: JSON.stringify({ type, code, message })
+			res: new Response(JSON.stringify({ type, code, message }), {
+				status: httpCode,
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
 		});
 	}
 } as const;
@@ -116,13 +121,16 @@ export const schema: ResponseConfig = {
 	content: {
 		'application/json': {
 			schema: z.object({
-				type: z.string({ description: 'The message type' }).openapi({
+				type: z.string().openapi({
+					description: 'The message type',
 					example: errorHandler.get(ErrorCode.dummy).type
 				}),
-				code: z.number({ description: 'The message code' }).openapi({
+				code: z.number().openapi({
+					description: 'The message code',
 					example: errorHandler.get(ErrorCode.dummy).code
 				}),
-				message: z.string({ description: 'The message description' }).openapi({
+				message: z.string().openapi({
+					description: 'The message description',
 					example: errorHandler.get(ErrorCode.dummy).message
 				})
 			})

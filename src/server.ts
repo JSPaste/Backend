@@ -1,9 +1,12 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
+import { HTTPException } from 'hono/http-exception';
+import { errorHandler } from './errorHandler.ts';
 import { logger } from './logger.ts';
 import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
+import { ErrorCode } from './types/ErrorHandler.ts';
 
 export const env = {
 	port: envvar('PORT').default(4000).asPortNumber(),
@@ -31,8 +34,13 @@ export const server = (): typeof instance => {
 
 	instance.use('*', cors());
 
-	instance.onError((err, ctx) => {
-		return ctx.json(JSON.parse(err.message));
+	instance.onError((err) => {
+		if (err instanceof HTTPException) {
+			return err.getResponse();
+		}
+
+		logger.error(err);
+		throw errorHandler.send(ErrorCode.unknown);
 	});
 
 	instance.notFound((ctx) => {
