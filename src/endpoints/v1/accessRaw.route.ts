@@ -14,21 +14,19 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		deprecated: true,
 		request: {
 			params: z.object({
-				name: z
-					.string()
-					.min(config.documentNameLengthMin)
-					.max(config.documentNameLengthMax)
-					.openapi({
-						description: 'The document name',
-						examples: ['abc123']
-					})
+				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
+					description: 'The document name',
+					example: 'abc123'
+				})
 			})
 		},
 		responses: {
 			200: {
 				content: {
 					'text/plain': {
-						schema: z.any({ description: 'The document data' }),
+						schema: z.any().openapi({
+							description: 'The document data'
+						}),
 						example: 'Hello, World!'
 					}
 				},

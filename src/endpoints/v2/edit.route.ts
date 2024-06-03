@@ -17,18 +17,20 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 		middleware: [middleware.bodyLimit()],
 		request: {
 			body: {
-				content: {},
-				description: 'Hello, World!'
+				content: {
+					'text/plain': {
+						schema: z.string().openapi({
+							description: 'Data to replace in the document',
+							example: 'Hello, World!'
+						})
+					}
+				}
 			},
 			params: z.object({
-				name: z
-					.string()
-					.min(config.documentNameLengthMin)
-					.max(config.documentNameLengthMax)
-					.openapi({
-						description: 'The document name',
-						examples: ['abc123']
-					})
+				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
+					description: 'The document name',
+					example: 'abc123'
+				})
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
@@ -44,7 +46,8 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							removed: z.boolean({ description: 'Confirmation of edition' }).openapi({
+							removed: z.boolean().openapi({
+								description: 'Confirmation of edition',
 								example: true
 							})
 						})

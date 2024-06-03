@@ -16,8 +16,14 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 		middleware: [middleware.bodyLimit()],
 		request: {
 			body: {
-				content: {},
-				description: 'Hello, World!'
+				content: {
+					'text/plain': {
+						schema: z.string().openapi({
+							description: 'Data to publish in the document',
+							example: 'Hello, World!'
+						})
+					}
+				}
 			}
 		},
 		responses: {
@@ -25,16 +31,18 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							key: z.string({ description: 'The document name (formerly key)' }).openapi({
+							key: z.string().openapi({
+								description: 'The document name (formerly key)',
 								example: 'abc123'
 							}),
-							secret: z.string({ description: 'The document secret' }).openapi({
+							secret: z.string().openapi({
+								description: 'The document secret',
 								example: 'aaaaa-bbbbb-ccccc-ddddd'
 							})
 						})
 					}
 				},
-				description: 'The document credentials'
+				description: 'An object with a "name" and "secret" parameters of the created document'
 			},
 			400: schema,
 			404: schema,

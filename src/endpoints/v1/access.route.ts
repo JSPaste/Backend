@@ -14,14 +14,10 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 		deprecated: true,
 		request: {
 			params: z.object({
-				name: z
-					.string()
-					.min(config.documentNameLengthMin)
-					.max(config.documentNameLengthMax)
-					.openapi({
-						description: 'The document name',
-						examples: ['abc123']
-					})
+				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
+					description: 'The document name',
+					example: 'abc123'
+				})
 			})
 		},
 		responses: {
@@ -29,16 +25,18 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							key: z.string({ description: 'The document name (formerly key)' }).openapi({
+							key: z.string().openapi({
+								description: 'The document name (formerly key)',
 								example: 'abc123'
 							}),
-							data: z.any({ description: 'The document data' }).openapi({
+							data: z.string().openapi({
+								description: 'The document data',
 								example: 'Hello, World!'
 							})
 						})
 					}
 				},
-				description: 'The document'
+				description: 'The document object'
 			},
 			400: schema,
 			404: schema,

@@ -15,14 +15,10 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		summary: 'Get document data',
 		request: {
 			params: z.object({
-				name: z
-					.string()
-					.min(config.documentNameLengthMin)
-					.max(config.documentNameLengthMax)
-					.openapi({
-						description: 'The document name',
-						examples: ['abc123']
-					})
+				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
+					description: 'The document name',
+					example: 'abc123'
+				})
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
@@ -31,7 +27,8 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 			}),
 			query: z.object({
 				p: z.string().optional().openapi({
-					description: 'The password to decrypt the document'
+					description:
+						'The password to decrypt the document. It is preferred to pass the password through headers, only use this method for support of web browsers.'
 				})
 			})
 		},
@@ -39,7 +36,9 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 			200: {
 				content: {
 					'text/plain': {
-						schema: z.any({ description: 'The document data' }),
+						schema: z.any().openapi({
+							description: 'The document data'
+						}),
 						example: 'Hello, World!'
 					}
 				},

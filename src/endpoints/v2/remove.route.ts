@@ -13,18 +13,15 @@ export const removeRoute = (endpoint: OpenAPIHono): void => {
 		summary: 'Remove document',
 		request: {
 			params: z.object({
-				name: z
-					.string()
-					.min(config.documentNameLengthMin)
-					.max(config.documentNameLengthMax)
-					.openapi({
-						description: 'The document name',
-						examples: ['abc123']
-					})
+				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
+					description: 'The document name',
+					example: 'abc123'
+				})
 			}),
 			headers: z.object({
 				secret: z.string().min(1).openapi({
-					description: 'The secret key'
+					description: 'The document secret',
+					example: 'aaaaa-bbbbb-ccccc-ddddd'
 				})
 			})
 		},
@@ -33,13 +30,14 @@ export const removeRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							removed: z.boolean({ description: 'Confirmation of deletion' }).openapi({
+							removed: z.boolean().openapi({
+								description: 'Confirmation of deletion',
 								example: true
 							})
 						})
 					}
 				},
-				description: 'Confirmation of deletion'
+				description: 'An object with a "removed" parameter of the deleted document'
 			},
 			400: schema,
 			404: schema,

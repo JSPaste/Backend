@@ -15,14 +15,10 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 		summary: 'Get document',
 		request: {
 			params: z.object({
-				name: z
-					.string()
-					.min(config.documentNameLengthMin)
-					.max(config.documentNameLengthMax)
-					.openapi({
-						description: 'The document name',
-						examples: ['abc123']
-					})
+				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
+					description: 'The document name',
+					example: 'abc123'
+				})
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
@@ -35,26 +31,27 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							key: z.string({ description: 'The document name (formerly key)' }).openapi({
+							key: z.string().openapi({
+								description: 'The document name (formerly key)',
 								example: 'abc123'
 							}),
-							data: z.any({ description: 'The document data' }).openapi({
+							data: z.string().openapi({
+								description: 'The document data',
 								example: 'Hello, World!'
 							}),
-							url: z.string({ description: 'The document URL' }).openapi({
+							url: z.string().openapi({
+								description: 'The document URL',
 								example: 'https://jspaste.eu/abc123'
 							}),
-							expirationTimestamp: z
-								.number({ description: 'The document expiration timestamp' })
-								.openapi({
-									deprecated: true,
-									example: 0
-								})
+							expirationTimestamp: z.number().openapi({
+								deprecated: true,
+								description: 'The document expiration timestamp (always will be 0)',
+								example: 0
+							})
 						})
 					}
 				},
-				description:
-					'The document object, including the name, the data, the display URL and an expiration timestamp for the document'
+				description: 'The document object'
 			},
 			400: schema,
 			404: schema,
@@ -87,7 +84,6 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 			key: params.name,
 			data: buffer.toString('binary'),
 			url: config.hostname.concat('/', params.name),
-			// Deprecated, for compatibility reasons will be kept to 0
 			expirationTimestamp: 0
 		});
 	});

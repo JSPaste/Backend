@@ -18,8 +18,14 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 		middleware: [middleware.bodyLimit()],
 		request: {
 			body: {
-				content: {},
-				description: 'Hello, World!'
+				content: {
+					'text/plain': {
+						schema: z.string().openapi({
+							description: 'Data to publish in the document',
+							example: 'Hello, World!'
+						})
+					}
+				}
 			},
 			headers: z.object({
 				password: z.string().optional().openapi({
@@ -41,25 +47,27 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							key: z.string({ description: 'The document name (formerly key)' }).openapi({
+							key: z.string().openapi({
+								description: 'The document name (formerly key)',
 								example: 'abc123'
 							}),
-							secret: z.string({ description: 'The document secret' }).openapi({
+							secret: z.string().openapi({
+								description: 'The document secret',
 								example: 'aaaaa-bbbbb-ccccc-ddddd'
 							}),
-							url: z.string({ description: 'The document URL' }).openapi({
+							url: z.string().openapi({
+								description: 'The document URL',
 								example: 'https://jspaste.eu/abc123'
 							}),
-							expirationTimestamp: z
-								.number({ description: 'The document expiration timestamp' })
-								.openapi({
-									deprecated: true,
-									example: 0
-								})
+							expirationTimestamp: z.number().openapi({
+								deprecated: true,
+								description: 'The document expiration timestamp (always will be 0)',
+								example: 0
+							})
 						})
 					}
 				},
-				description: 'The document'
+				description: 'An object with a "key", "secret" and "url" parameters of the created document'
 			},
 			400: schema,
 			404: schema,
@@ -116,7 +124,6 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			key: name,
 			secret: secret,
 			url: config.hostname.concat('/', name),
-			// Deprecated, for compatibility reasons will be kept to 0
 			expirationTimestamp: 0
 		});
 	});
