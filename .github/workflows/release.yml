@@ -1,0 +1,187 @@
+name: "CD -> Release"
+on:
+  workflow_dispatch:
+    inputs:
+      artifact-action:
+        description: "Artifact action"
+        type: choice
+        required: true
+        default: "none"
+        options:
+          - "none"
+          - "build"
+          - "build-release"
+      image-action:
+        description: "Container image action"
+        type: choice
+        required: true
+        default: "none"
+        options:
+          - "none"
+          - "build"
+          - "build-release"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  artifact:
+    if: ${{ github.repository_owner == 'jspaste' && inputs.artifact-action != 'none' }}
+    name: "Build artifact"
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@f086349bfa2bd1361f7909c78558e816508cdc10 # v2.8.0
+        with:
+          egress-policy: audit
+
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
+
+      - name: "Setup tags"
+        id: tags-artifact
+        run: |
+          TIMESTAMP="$(date +%Y.%m.%d)"
+          GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
+
+          if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
+            TAG="latest"
+          else
+            TAG="snapshot"
+          fi
+
+          echo "tag=${TAG}" >>"$GITHUB_OUTPUT"
+          echo "extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
+
+      - name: "Checkout"
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        with:
+          persist-credentials: false
+
+      - name: "Setup dependencies"
+        run: bun install --production --frozen-lockfile
+
+      - name: "Build artifact"
+        run: |
+          bun run build:standalone:darwin-arm64
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:linux-amd64
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:linux-arm64
+          tar -czf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz .env.example LICENSE README.md -C ./dist/ backend
+
+          bun run build:standalone:windows-amd64
+          zip -j -X ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_windows-amd64.zip .env.example LICENSE README.md ./dist/backend.exe
+
+      - if: ${{ inputs.artifact-action == 'build-release' }}
+        name: "Release artifact"
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          name: ${{ steps.tags-artifact.outputs.extended }}
+          tag: ${{ steps.tags-artifact.outputs.extended }}
+          artifacts: "dist/*.tar.gz,dist/*.zip"
+          makeLatest: true
+          prerelease: ${{ github.ref != 'refs/heads/stable' }}
+          generateReleaseNotes: true
+
+      - if: ${{ inputs.artifact-action == 'build-release' }}
+        name: "Attest artifact"
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+
+  container:
+    if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}
+    name: "Build container image"
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+
+    permissions:
+      attestations: write
+      id-token: write
+      packages: write
+
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@f086349bfa2bd1361f7909c78558e816508cdc10 # v2.8.0
+        with:
+          egress-policy: audit
+
+      - name: "Setup QEMU"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
+      - name: "Setup tags"
+        id: tags-image
+        run: |
+          TIMESTAMP="$(date +%Y.%m.%d)"
+          GITHUB_SHA_SHORT="${GITHUB_SHA::7}"
+
+          TAGS=()
+
+          if [[ "${GITHUB_REF}" == "refs/heads/stable" ]]; then
+            TAGS+=("latest")
+          else
+            TAGS+=("snapshot")
+          fi
+
+          TAGS+=("${GITHUB_SHA}")
+          TAGS+=("${TIMESTAMP}-${GITHUB_SHA_SHORT}")
+
+          echo "tags=${TAGS[*]}" >>"$GITHUB_OUTPUT"
+
+      - name: "Checkout"
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        with:
+          persist-credentials: false
+
+      - name: "Build image"
+        id: build-image
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+        with:
+          archs: amd64, arm64
+          containerfiles: Dockerfile
+          image: ${{ github.repository }}
+          layers: true
+          oci: true
+          tags: ${{ steps.tags-image.outputs.tags }}
+
+      - if: ${{ inputs.image-action == 'build-release' }}
+        name: "Login to GHCR"
+        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1.7
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+
+      - if: ${{ inputs.image-action == 'build-release' }}
+        name: "Push to GHCR"
+        id: push-image
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ${{ env.REGISTRY }}
+
+      - if: ${{ inputs.image-action == 'build-release' }}
+        name: "Attest image"
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+        with:
+          subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
+          subject-digest: ${{ steps.push-image.outputs.digest }}
+          push-to-registry: false

@@ -1,4 +1,4 @@
-import { Server } from '../classes/Server.ts';
+import { config } from '../server.ts';
 import type { Range } from '../types/Range.ts';
 import { ValidatorUtils } from './ValidatorUtils.ts';
 
@@ -14,25 +14,19 @@ export class StringUtils {
 		return string;
 	}
 
-	public static generateName(length: number = Server.DOCUMENT_NAME_LENGTH_DEFAULT): string {
-		if (
-			!ValidatorUtils.isLengthWithinRange(
-				length,
-				Server.DOCUMENT_NAME_LENGTH_MIN,
-				Server.DOCUMENT_NAME_LENGTH_MAX
-			)
-		) {
-			length = Server.DOCUMENT_NAME_LENGTH_DEFAULT;
+	public static generateName(length: number = config.documentNameLengthDefault): string {
+		if (!ValidatorUtils.isLengthWithinRange(length, config.documentNameLengthMin, config.documentNameLengthMax)) {
+			length = config.documentNameLengthDefault;
 		}
 
 		return StringUtils.random(length, 64);
 	}
 
 	public static async nameExists(name: string): Promise<boolean> {
-		return Bun.file(Server.DOCUMENT_PATH + name).exists();
+		return Bun.file(config.storagePath + name).exists();
 	}
 
-	public static async createName(length: number = Server.DOCUMENT_NAME_LENGTH_DEFAULT): Promise<string> {
+	public static async createName(length: number = config.documentNameLengthDefault): Promise<string> {
 		const key = StringUtils.generateName(length);
 
 		return (await StringUtils.nameExists(key)) ? StringUtils.createName(length + 1) : key;

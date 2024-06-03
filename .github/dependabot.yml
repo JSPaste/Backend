@@ -7,11 +7,3 @@ updates:
       interval: weekly
     labels:
       - dependency:gha
-
-  - package-ecosystem: npm
-    directory: /
-    target-branch: dev
-    schedule:
-      interval: daily
-    labels:
-      - dependency:bun
