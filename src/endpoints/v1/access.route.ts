@@ -44,21 +44,29 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const params = ctx.req.valid('param');
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const params = ctx.req.valid('param');
 
-		const document = await storage.read(params.name);
+			const document = await storage.read(params.name);
 
-		// V1 Endpoint does not support Server-Side Encryption
-		if (document.header.passwordHash) {
-			errorHandler.send(ErrorCode.documentPasswordNeeded);
+			// V1 Endpoint does not support Server-Side Encryption
+			if (document.header.passwordHash) {
+				errorHandler.send(ErrorCode.documentPasswordNeeded);
+			}
+
+			const buffer = await compression.decode(document.data);
+
+			return ctx.json({
+				key: params.name,
+				data: buffer.toString('binary')
+			});
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
+			}
 		}
-
-		const buffer = await compression.decode(document.data);
-
-		return ctx.json({
-			key: params.name,
-			data: buffer.toString('binary')
-		});
-	});
+	);
 };

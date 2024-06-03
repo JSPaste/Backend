@@ -38,17 +38,25 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const params = ctx.req.valid('param');
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const params = ctx.req.valid('param');
 
-		const document = await storage.read(params.name);
+			const document = await storage.read(params.name);
 
-		// V1 Endpoint does not support Server-Side Encryption
-		if (document.header.passwordHash) {
-			errorHandler.send(ErrorCode.documentPasswordNeeded);
+			// V1 Endpoint does not support Server-Side Encryption
+			if (document.header.passwordHash) {
+				errorHandler.send(ErrorCode.documentPasswordNeeded);
+			}
+
+			// @ts-ignore: Return the buffer directly
+			return ctx.text(await compression.decode(document.data));
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
+			}
 		}
-
-		// @ts-ignore: Return the buffer directly
-		return ctx.text(await compression.decode(document.data));
-	});
+	);
 };

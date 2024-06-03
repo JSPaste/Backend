@@ -2,8 +2,9 @@ import { unlink } from 'node:fs/promises';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { schema } from '../../errorHandler.ts';
+import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
+import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const removeRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
@@ -46,18 +47,26 @@ export const removeRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const params = ctx.req.valid('param');
-		const headers = ctx.req.valid('header');
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const params = ctx.req.valid('param');
+			const headers = ctx.req.valid('header');
 
-		const document = await storage.read(params.name);
+			const document = await storage.read(params.name);
 
-		validator.validateSecret(headers.secret, document.header.secretHash);
+			validator.validateSecret(headers.secret, document.header.secretHash);
 
-		return ctx.json({
-			removed: await unlink(config.storagePath + params.name)
-				.then(() => true)
-				.catch(() => false)
-		});
-	});
+			return ctx.json({
+				removed: await unlink(config.storagePath + params.name)
+					.then(() => true)
+					.catch(() => false)
+			});
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
+			}
+		}
+	);
 };

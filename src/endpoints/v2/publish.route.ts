@@ -75,56 +75,64 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const body = await ctx.req.arrayBuffer();
-		const headers = ctx.req.valid('header');
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const body = await ctx.req.arrayBuffer();
+			const headers = ctx.req.valid('header');
 
-		if (headers.password) {
-			validator.validatePasswordLength(headers.password);
-		}
-
-		let secret: string;
-
-		if (headers.secret) {
-			validator.validateSecretLength(headers.secret);
-
-			secret = headers.secret;
-		} else {
-			secret = StringUtils.createSecret();
-		}
-
-		let name: string;
-
-		if (headers.key) {
-			validator.validateName(headers.key);
-
-			if (await StringUtils.nameExists(headers.key)) {
-				errorHandler.send(ErrorCode.documentNameAlreadyExists);
+			if (headers.password) {
+				validator.validatePasswordLength(headers.password);
 			}
 
-			name = headers.key;
-		} else {
-			validator.validateNameLength(headers.keylength);
+			let secret: string;
 
-			name = await StringUtils.createName(headers.keylength);
-		}
+			if (headers.secret) {
+				validator.validateSecretLength(headers.secret);
 
-		const data = await compression.encode(body);
-
-		await storage.write(name, {
-			data: headers.password ? crypto.encrypt(data, headers.password) : data,
-			header: {
-				name: name,
-				secretHash: crypto.hash(secret) as string,
-				passwordHash: headers.password ? (crypto.hash(headers.password) as string) : null
+				secret = headers.secret;
+			} else {
+				secret = StringUtils.createSecret();
 			}
-		});
 
-		return ctx.json({
-			key: name,
-			secret: secret,
-			url: config.hostname.concat('/', name),
-			expirationTimestamp: 0
-		});
-	});
+			let name: string;
+
+			if (headers.key) {
+				validator.validateName(headers.key);
+
+				if (await StringUtils.nameExists(headers.key)) {
+					errorHandler.send(ErrorCode.documentNameAlreadyExists);
+				}
+
+				name = headers.key;
+			} else {
+				validator.validateNameLength(headers.keylength);
+
+				name = await StringUtils.createName(headers.keylength);
+			}
+
+			const data = await compression.encode(body);
+
+			await storage.write(name, {
+				data: headers.password ? crypto.encrypt(data, headers.password) : data,
+				header: {
+					name: name,
+					secretHash: crypto.hash(secret) as string,
+					passwordHash: headers.password ? (crypto.hash(headers.password) as string) : null
+				}
+			});
+
+			return ctx.json({
+				key: name,
+				secret: secret,
+				url: config.hostname.concat('/', name),
+				expirationTimestamp: 0
+			});
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
+			}
+		}
+	);
 };

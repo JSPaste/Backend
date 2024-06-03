@@ -3,7 +3,7 @@ import { middleware } from '../middleware.ts';
 import { config, env } from '../server.ts';
 
 export const documentation = (instance: OpenAPIHono): void => {
-	instance.doc31('/oas.json', {
+	instance.doc31('/oas.json', (ctx) => ({
 		openapi: '3.1.0',
 		info: {
 			title: 'JSPaste API',
@@ -15,6 +15,14 @@ export const documentation = (instance: OpenAPIHono): void => {
 			}
 		},
 		servers: [
+			{
+				url: new URL(ctx.req.url).origin,
+				description: 'This instance'
+			},
+			{
+				url: new URL(ctx.req.url).origin.concat(config.apiPath),
+				description: 'This instance workaround (See https://github.com/honojs/middleware/issues/459)'
+			},
 			{
 				url: 'https://jspaste.eu',
 				description: 'Official JSPaste instance'
@@ -32,18 +40,9 @@ export const documentation = (instance: OpenAPIHono): void => {
 				url: 'https://paste.inetol.net'.concat(config.apiPath),
 				description:
 					'Inetol Infrastructure instance workaround (See https://github.com/honojs/middleware/issues/459)'
-			},
-			{
-				url: 'http://localhost:4000',
-				description: 'Local instance (Only use if you are running the backend locally)'
-			},
-			{
-				url: 'http://localhost:4000'.concat(config.apiPath),
-				description:
-					'Local instance workaround (Only use if you are running the backend locally, see https://github.com/honojs/middleware/issues/459)'
 			}
 		]
-	});
+	}));
 
 	instance.get(env.docsPath, middleware.scalar());
 };

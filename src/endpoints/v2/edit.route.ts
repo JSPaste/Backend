@@ -63,32 +63,40 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const body = await ctx.req.arrayBuffer();
-		const params = ctx.req.valid('param');
-		const headers = ctx.req.valid('header');
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const body = await ctx.req.arrayBuffer();
+			const params = ctx.req.valid('param');
+			const headers = ctx.req.valid('header');
 
-		const document = await storage.read(params.name);
+			const document = await storage.read(params.name);
 
-		validator.validateSecret(headers.secret, document.header.secretHash);
+			validator.validateSecret(headers.secret, document.header.secretHash);
 
-		if (document.header.passwordHash) {
-			if (!headers.password) {
-				throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+			if (document.header.passwordHash) {
+				if (!headers.password) {
+					throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+				}
+
+				validator.validatePassword(headers.password, document.header.passwordHash);
 			}
 
-			validator.validatePassword(headers.password, document.header.passwordHash);
+			const data = await compression.encode(body);
+
+			document.data = headers.password ? crypto.encrypt(data, headers.password) : data;
+
+			return ctx.json({
+				edited: await storage
+					.write(params.name, document)
+					.then(() => true)
+					.catch(() => false)
+			});
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
+			}
 		}
-
-		const data = await compression.encode(body);
-
-		document.data = headers.password ? crypto.encrypt(data, headers.password) : data;
-
-		return ctx.json({
-			edited: await storage
-				.write(params.name, document)
-				.then(() => true)
-				.catch(() => false)
-		});
-	});
+	);
 };

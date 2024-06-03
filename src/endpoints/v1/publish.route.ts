@@ -2,8 +2,9 @@ import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
-import { schema } from '../../errorHandler.ts';
+import { errorHandler, schema } from '../../errorHandler.ts';
 import { middleware } from '../../middleware.ts';
+import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
 export const publishRoute = (endpoint: OpenAPIHono): void => {
@@ -50,20 +51,28 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const body = await ctx.req.arrayBuffer();
-		const name = await StringUtils.createName();
-		const secret = StringUtils.createSecret();
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const body = await ctx.req.arrayBuffer();
+			const name = await StringUtils.createName();
+			const secret = StringUtils.createSecret();
 
-		await storage.write(name, {
-			data: await compression.encode(body),
-			header: {
-				name: name,
-				secretHash: crypto.hash(secret) as string,
-				passwordHash: null
+			await storage.write(name, {
+				data: await compression.encode(body),
+				header: {
+					name: name,
+					secretHash: crypto.hash(secret) as string,
+					passwordHash: null
+				}
+			});
+
+			return ctx.json({ key: name, secret: secret });
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
 			}
-		});
-
-		return ctx.json({ key: name, secret: secret });
-	});
+		}
+	);
 };

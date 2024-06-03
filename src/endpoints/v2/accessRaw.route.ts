@@ -50,32 +50,40 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		}
 	});
 
-	endpoint.openapi(route, async (ctx) => {
-		const params = ctx.req.valid('param');
-		const headers = ctx.req.valid('header');
-		const query = ctx.req.valid('query');
+	endpoint.openapi(
+		route,
+		async (ctx) => {
+			const params = ctx.req.valid('param');
+			const headers = ctx.req.valid('header');
+			const query = ctx.req.valid('query');
 
-		const options = {
-			password: headers.password || query.p
-		};
+			const options = {
+				password: headers.password || query.p
+			};
 
-		const document = await storage.read(params.name);
+			const document = await storage.read(params.name);
 
-		let data: Uint8Array;
+			let data: Uint8Array;
 
-		if (document.header.passwordHash) {
-			if (!options.password) {
-				throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+			if (document.header.passwordHash) {
+				if (!options.password) {
+					throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+				}
+
+				validator.validatePassword(options.password, document.header.passwordHash);
+
+				data = crypto.decrypt(document.data, options.password);
+			} else {
+				data = document.data;
 			}
 
-			validator.validatePassword(options.password, document.header.passwordHash);
-
-			data = crypto.decrypt(document.data, options.password);
-		} else {
-			data = document.data;
+			// @ts-ignore: Return the buffer directly
+			return ctx.text(await compression.decode(data));
+		},
+		(result) => {
+			if (!result.success) {
+				throw errorHandler.send(ErrorCode.validation);
+			}
 		}
-
-		// @ts-ignore: Return the buffer directly
-		return ctx.text(await compression.decode(data));
-	});
+	);
 };
