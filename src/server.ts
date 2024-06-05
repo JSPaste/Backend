@@ -11,15 +11,14 @@ import { ErrorCode } from './types/ErrorHandler.ts';
 export const env = {
 	port: envvar('PORT').default(4000).asPortNumber(),
 	logLevel: envvar('LOGLEVEL').default(2).asIntPositive(),
-	documentTLS: envvar('DOCUMENT_TLS').asBoolStrict() ?? false,
-	documentDomain: envvar('DOCUMENT_DOMAIN').default('localhost').asString(),
+	tls: envvar('TLS').asBoolStrict() ?? true,
 	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
 	docsPath: envvar('DOCS_PATH').default('/docs').asString()
 } as const;
 
 export const config = {
-	hostname: (env.documentTLS ? 'https://' : 'http://').concat(env.documentDomain),
+	protocol: env.tls ? 'https://' : 'http://',
 	apiPath: '/api',
 	storagePath: 'documents/',
 	documentNameLengthMin: 2,
