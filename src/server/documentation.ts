@@ -16,11 +16,11 @@ export const documentation = (instance: OpenAPIHono): void => {
 		},
 		servers: [
 			{
-				url: (env.tls ? 'https://' : 'http://').concat(new URL(ctx.req.url).host),
+				url: config.protocol.concat(new URL(ctx.req.url).host),
 				description: 'This instance'
 			},
 			{
-				url: (env.tls ? 'https://' : 'http://').concat(new URL(ctx.req.url).host.concat(config.apiPath)),
+				url: config.protocol.concat(new URL(ctx.req.url).host.concat(config.apiPath)),
 				description: 'This instance workaround (See https://github.com/honojs/middleware/issues/459)'
 			},
 			{

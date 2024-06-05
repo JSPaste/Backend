@@ -18,6 +18,7 @@ export const env = {
 } as const;
 
 export const config = {
+	protocol: env.tls ? 'https://' : 'http://',
 	apiPath: '/api',
 	storagePath: 'documents/',
 	documentNameLengthMin: 2,

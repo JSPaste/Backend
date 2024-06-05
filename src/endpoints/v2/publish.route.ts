@@ -5,7 +5,7 @@ import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { errorHandler, schema } from '../../errorHandler.ts';
 import { middleware } from '../../middleware.ts';
-import { config, env } from '../../server.ts';
+import { config } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
@@ -129,7 +129,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			return ctx.json({
 				key: name,
 				secret: secret,
-				url: (env.tls ? 'https://' : 'http://').concat(new URL(ctx.req.url).host.concat('/', name)),
+				url: config.protocol.concat(new URL(ctx.req.url).host.concat('/', name)),
 				expirationTimestamp: 0
 			});
 		},
