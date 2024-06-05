@@ -4,7 +4,7 @@ import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { errorHandler, schema } from '../../errorHandler.ts';
-import { config } from '../../server.ts';
+import { config, env } from '../../server.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const accessRoute = (endpoint: OpenAPIHono): void => {
@@ -86,7 +86,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 			return ctx.json({
 				key: params.name,
 				data: buffer.toString('binary'),
-				url: config.hostname.concat('/', params.name),
+				url: (env.tls ? 'https://' : 'http://').concat(new URL(ctx.req.url).host.concat('/', params.name)),
 				expirationTimestamp: 0
 			});
 		},

@@ -129,7 +129,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			return ctx.json({
 				key: name,
 				secret: secret,
-				url: config.hostname.concat('/', name),
+				url: new URL(ctx.req.url).host.concat('/', name),
 				expirationTimestamp: 0
 			});
 		},
