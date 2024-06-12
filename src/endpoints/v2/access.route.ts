@@ -86,7 +86,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 			return ctx.json({
 				key: params.name,
 				data: buffer.toString('binary'),
-				url: config.hostname.concat('/', params.name),
+				url: config.protocol.concat(new URL(ctx.req.url).host.concat('/', params.name)),
 				expirationTimestamp: 0
 			});
 		},
