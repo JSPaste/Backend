@@ -19,9 +19,12 @@
 			"complexity": {
 				"noStaticOnlyClass": "off"
 			},
-			"suspicious": { "noExplicitAny": "off" },
 			"style": {
 				"noParameterAssign": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noConsoleLog": "error"
 			}
 		}
 	},
