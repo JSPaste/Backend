@@ -2,7 +2,7 @@ import type { ResponseConfig } from '@asteasolutions/zod-to-openapi/dist/openapi
 import { z } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import type { StatusCode } from 'hono/utils/http-status';
-import { ErrorCode, type Schema } from './types/ErrorHandler.ts';
+import { ErrorCode, type Schema } from '../types/ErrorHandler.ts';
 
 const map: Record<ErrorCode, Schema> = {
 	[ErrorCode.unknown]: {

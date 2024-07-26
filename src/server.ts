@@ -2,10 +2,10 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
-import { errorHandler } from './errorHandler.ts';
 import { logger } from './logger.ts';
 import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
+import { errorHandler } from './server/errorHandler.ts';
 import { ErrorCode } from './types/ErrorHandler.ts';
 
 export const env = {

@@ -2,8 +2,8 @@ import { unlink } from 'node:fs/promises';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const removeRoute = (endpoint: OpenAPIHono): void => {
@@ -56,15 +56,15 @@ export const removeRoute = (endpoint: OpenAPIHono): void => {
 
 			validator.validateSecret(headers.secret, document.header.secretHash);
 
-			return ctx.json({
-				removed: await unlink(config.storagePath + params.name)
-					.then(() => true)
-					.catch(() => false)
-			});
+			const result = await unlink(config.storagePath + params.name)
+				.then(() => true)
+				.catch(() => false);
+
+			return ctx.json({ removed: result });
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);

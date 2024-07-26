@@ -3,8 +3,8 @@ import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const accessRawRoute = (endpoint: OpenAPIHono): void => {
@@ -69,7 +69,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 
 			if (document.header.passwordHash) {
 				if (!options.password) {
-					throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+					return errorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
 				validator.validatePassword(options.password, document.header.passwordHash);
@@ -84,7 +84,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);

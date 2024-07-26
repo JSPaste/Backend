@@ -2,8 +2,9 @@ import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
-import { middleware } from '../../middleware.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
+import { middleware } from '../../server/middleware.ts';
+import { DocumentVersion } from '../../types/Document.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
@@ -64,14 +65,15 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 					name: name,
 					secretHash: crypto.hash(secret) as string,
 					passwordHash: null
-				}
+				},
+				version: DocumentVersion.V1
 			});
 
 			return ctx.json({ key: name, secret: secret });
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);
