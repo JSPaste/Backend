@@ -40,12 +40,12 @@ jobs:
 
     steps:
       - name: "Harden Runner"
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
         with:
           egress-policy: audit
 
       - name: "Setup Bun"
-        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
 
       - name: "Setup tags"
         id: tags-artifact
@@ -63,7 +63,7 @@ jobs:
           echo "extended=${TIMESTAMP}-${GITHUB_SHA_SHORT}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
 
@@ -97,7 +97,7 @@ jobs:
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Attest artifact"
-        uses: actions/attest-build-provenance@49df96e17e918a15956db358890b08e61c704919 # v1.2.0
+        uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
         with:
           subject-path: |
             dist/*.tar.gz
@@ -117,7 +117,7 @@ jobs:
 
     steps:
       - name: "Harden Runner"
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
         with:
           egress-policy: audit
 
@@ -146,7 +146,7 @@ jobs:
           echo "tags=${TAGS[*]}" >>"$GITHUB_OUTPUT"
 
       - name: "Checkout"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
 
@@ -180,7 +180,7 @@ jobs:
 
       - if: ${{ inputs.image-action == 'build-release' }}
         name: "Attest image"
-        uses: actions/attest-build-provenance@49df96e17e918a15956db358890b08e61c704919 # v1.2.0
+        uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
         with:
           subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
           subject-digest: ${{ steps.push-image.outputs.digest }}
