@@ -1,5 +1,5 @@
 import { type InputType, brotliCompress, brotliDecompress } from 'node:zlib';
-import { errorHandler } from '../errorHandler.ts';
+import { errorHandler } from '../server/errorHandler.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 
 export const compression = {

@@ -1,12 +1,12 @@
 import { decode, encode } from 'cbor-x';
-import { errorHandler } from '../errorHandler.ts';
 import { config } from '../server.ts';
-import type { DocumentV1 } from '../types/Document.ts';
+import { errorHandler } from '../server/errorHandler.ts';
+import type { Document } from '../types/Document.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { validator } from './validator.ts';
 
 export const storage = {
-	read: async (name: string): Promise<DocumentV1> => {
+	read: async (name: string): Promise<Document> => {
 		validator.validateName(name);
 
 		const file = Bun.file(config.storagePath + name);
@@ -18,7 +18,7 @@ export const storage = {
 		return decode(Buffer.from(await file.arrayBuffer()));
 	},
 
-	write: async (name: string, document: Omit<DocumentV1, 'version'>): Promise<void> => {
-		await Bun.write(config.storagePath + name, encode({ ...document, version: 1 }));
+	write: async (name: string, document: Document): Promise<void> => {
+		await Bun.write(config.storagePath + name, encode(document));
 	}
 } as const;

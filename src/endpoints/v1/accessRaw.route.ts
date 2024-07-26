@@ -1,8 +1,8 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { compression } from '../../document/compression.ts';
 import { storage } from '../../document/storage.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
 import { config } from '../../server.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const accessRawRoute = (endpoint: OpenAPIHono): void => {
@@ -55,7 +55,7 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);

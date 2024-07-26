@@ -3,9 +3,9 @@ import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
-import { middleware } from '../../middleware.ts';
 import { config } from '../../server.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
+import { middleware } from '../../server/middleware.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const editRoute = (endpoint: OpenAPIHono): void => {
@@ -76,7 +76,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 
 			if (document.header.passwordHash) {
 				if (!headers.password) {
-					throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+					return errorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
 				validator.validatePassword(headers.password, document.header.passwordHash);
@@ -95,7 +95,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);
