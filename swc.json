@@ -1,0 +1,20 @@
+{
+	"$schema": "https://swc.rs/schema.json",
+	"isModule": true,
+	"minify": true,
+	"jsc": {
+		"target": "esnext",
+		"minify": {
+			"compress": {
+				"arguments": true,
+				"hoist_funs": true,
+				"hoist_vars": true,
+				"unsafe": true
+			},
+			"format": {
+				"comments": false
+			},
+			"mangle": true
+		}
+	}
+}
