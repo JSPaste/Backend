@@ -48,7 +48,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							removed: z.boolean().openapi({
+							edited: z.boolean().openapi({
 								description: 'Confirmation of edition',
 								example: true
 							})
@@ -86,11 +86,13 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 
 			document.data = headers.password ? crypto.encrypt(data, headers.password) : data;
 
+			const result = await storage
+				.write(params.name, document)
+				.then(() => true)
+				.catch(() => false);
+
 			return ctx.json({
-				edited: await storage
-					.write(params.name, document)
-					.then(() => true)
-					.catch(() => false)
+				edited: result
 			});
 		},
 		(result) => {
