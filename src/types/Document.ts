@@ -1,11 +1,19 @@
-type DocumentV1 = {
+enum DocumentVersion {
+	V1 = 1
+}
+
+interface Document {
 	data: Uint8Array;
 	header: {
 		name: string;
 		secretHash: string;
 		passwordHash: string | null;
 	};
-	version: 1;
-};
+	version: DocumentVersion;
+}
 
-export type { DocumentV1 };
+interface DocumentV1 extends Document {
+	version: DocumentVersion.V1;
+}
+
+export { DocumentVersion, type Document, type DocumentV1 };

@@ -1,8 +1,8 @@
 import { apiReference } from '@scalar/hono-api-reference';
 import { bodyLimit as middlewareBodyLimit } from 'hono/body-limit';
+import { config, env } from '../server.ts';
+import { ErrorCode } from '../types/ErrorHandler.ts';
 import { errorHandler } from './errorHandler.ts';
-import { config, env } from './server.ts';
-import { ErrorCode } from './types/ErrorHandler.ts';
 
 export const middleware = {
 	bodyLimit: (maxSize: number = env.documentMaxSize) => {

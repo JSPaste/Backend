@@ -3,9 +3,9 @@ import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
-import { middleware } from '../../middleware.ts';
 import { config } from '../../server.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
+import { middleware } from '../../server/middleware.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const editRoute = (endpoint: OpenAPIHono): void => {
@@ -48,7 +48,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							removed: z.boolean().openapi({
+							edited: z.boolean().openapi({
 								description: 'Confirmation of edition',
 								example: true
 							})
@@ -76,7 +76,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 
 			if (document.header.passwordHash) {
 				if (!headers.password) {
-					throw errorHandler.send(ErrorCode.documentPasswordNeeded);
+					return errorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
 				validator.validatePassword(headers.password, document.header.passwordHash);
@@ -86,16 +86,18 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 
 			document.data = headers.password ? crypto.encrypt(data, headers.password) : data;
 
+			const result = await storage
+				.write(params.name, document)
+				.then(() => true)
+				.catch(() => false);
+
 			return ctx.json({
-				edited: await storage
-					.write(params.name, document)
-					.then(() => true)
-					.catch(() => false)
+				edited: result
 			});
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);

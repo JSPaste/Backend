@@ -3,9 +3,10 @@ import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../errorHandler.ts';
-import { middleware } from '../../middleware.ts';
 import { config } from '../../server.ts';
+import { errorHandler, schema } from '../../server/errorHandler.ts';
+import { middleware } from '../../server/middleware.ts';
+import { DocumentVersion } from '../../types/Document.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 import { StringUtils } from '../../utils/StringUtils.ts';
 
@@ -123,7 +124,8 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 					name: name,
 					secretHash: crypto.hash(secret) as string,
 					passwordHash: headers.password ? (crypto.hash(headers.password) as string) : null
-				}
+				},
+				version: DocumentVersion.V1
 			});
 
 			return ctx.json({
@@ -135,7 +137,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 		},
 		(result) => {
 			if (!result.success) {
-				throw errorHandler.send(ErrorCode.validation);
+				return errorHandler.send(ErrorCode.validation);
 			}
 		}
 	);

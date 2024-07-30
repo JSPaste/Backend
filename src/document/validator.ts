@@ -1,6 +1,6 @@
-import { errorHandler } from '../errorHandler.ts';
 import { config } from '../server.ts';
-import type { DocumentV1 } from '../types/Document.ts';
+import { errorHandler } from '../server/errorHandler.ts';
+import type { Document } from '../types/Document.ts';
 import { ErrorCode } from '../types/ErrorHandler.ts';
 import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { crypto } from './crypto.ts';
@@ -28,7 +28,7 @@ export const validator = {
 		}
 	},
 
-	validatePassword: (password: string, dataHash: DocumentV1['header']['passwordHash']): void => {
+	validatePassword: (password: string, dataHash: Document['header']['passwordHash']): void => {
 		if (dataHash && !crypto.compare(password, dataHash)) {
 			errorHandler.send(ErrorCode.documentInvalidPassword);
 		}
@@ -44,7 +44,7 @@ export const validator = {
 		}
 	},
 
-	validateSecret: (secret: string, secretHash: DocumentV1['header']['secretHash']): void => {
+	validateSecret: (secret: string, secretHash: Document['header']['secretHash']): void => {
 		if (!crypto.compare(secret, secretHash)) {
 			errorHandler.send(ErrorCode.documentInvalidSecret);
 		}
