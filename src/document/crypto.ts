@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { env } from '../server.ts';
 
 const cipherAlgorithm = 'aes-256-gcm';
 const hashAlgorithm = 'blake2b256';
@@ -26,7 +27,7 @@ export const crypto = {
 	},
 
 	hash: (password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array => {
-		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(password);
+		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(password + env.salt);
 
 		switch (encoding) {
 			case 'base64': {

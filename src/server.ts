@@ -12,6 +12,7 @@ export const env = {
 	port: envvar('PORT').default(4000).asPortNumber(),
 	logLevel: envvar('LOGLEVEL').default(2).asIntPositive(),
 	tls: envvar('TLS').asBoolStrict() ?? true,
+	salt: envvar('SALT').asString(),
 	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
 	docsPath: envvar('DOCS_PATH').default('/docs').asString()
@@ -30,6 +31,12 @@ const instance = new OpenAPIHono().basePath(config.apiPath);
 
 export const server = (): typeof instance => {
 	logger.set(env.logLevel);
+
+	// Check env
+	if (!env.salt) {
+		logger.warn('“SALT” variable unspecified, disabling...');
+		logger.warn('In the future you will be required to specify this option in your .env.');
+	}
 
 	instance.use('*', cors());
 
