@@ -67,8 +67,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Setup dependencies"
-        run: bun install --production --frozen-lockfile
+      - name: "Setup production dependencies"
+        run: bun install --frozen-lockfile --production
 
       - name: "Build artifact"
         run: |
