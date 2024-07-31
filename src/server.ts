@@ -34,8 +34,10 @@ export const server = (): typeof instance => {
 
 	// Check env
 	if (!env.salt) {
-		logger.warn('“SALT” variable unspecified, disabling...');
-		logger.warn('In the future you will be required to specify this option in your .env.');
+		logger.error('"SALT" value not specified, can\'t continue...');
+		logger.warn('Update your "SALT" environment value, see more at:');
+		logger.warn('https://github.com/jspaste/backend/raw/stable/.env.example');
+		process.exit(1);
 	}
 
 	instance.use('*', cors());
