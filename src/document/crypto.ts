@@ -1,9 +1,11 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { hash } from 'bun';
 import { env } from '../server.ts';
 
 const cipherAlgorithm = 'aes-256-gcm';
 const hashAlgorithm = 'blake2b256';
 const ivLength = 12;
+const saltLength = 24;
 
 export const crypto = {
 	encrypt: (data: Uint8Array, password: string): Uint8Array => {
@@ -27,19 +29,29 @@ export const crypto = {
 	},
 
 	hash: (password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array => {
-		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(password + env.salt);
+		const salt = randomBytes(saltLength);
+
+		return crypto.hash_salted(password, salt, encoding);
+	},
+
+	hash_salted: (password: string, salt: Buffer, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array => {
+		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(Buffer.concat([Buffer.from(password), salt]));
+
+		const hash = Buffer.concat([salt, hasher.digest()]);
 
 		switch (encoding) {
 			case 'base64': {
-				return hasher.digest('base64');
+				return hash.toString('base64');
 			}
 			default: {
-				return hasher.digest() as Uint8Array;
+				return hash as Uint8Array;
 			}
 		}
 	},
 
 	compare: (password: string, hash: string, encoding: 'base64' | 'binary' = 'base64'): boolean => {
-		return crypto.hash(password, encoding) === hash;
+		const salt = Buffer.from(hash, 'base64').slice(0, saltLength);
+
+		return crypto.hash_salted(password, salt, encoding) === hash;
 	}
 } as const;
