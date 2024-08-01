@@ -1,6 +1,4 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import { hash } from 'bun';
-import { env } from '../server.ts';
 
 const cipherAlgorithm = 'aes-256-gcm';
 const hashAlgorithm = 'blake2b256';
