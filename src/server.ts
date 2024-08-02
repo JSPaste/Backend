@@ -12,7 +12,7 @@ export const env = {
 	port: envvar('PORT').default(4000).asPortNumber(),
 	logLevel: envvar('LOGLEVEL').default(2).asIntPositive(),
 	tls: envvar('TLS').asBoolStrict() ?? true,
-	salt: envvar('SALT').asString(),
+	hashSecret: envvar('HASH_SECRET').asString(),
 	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
 	docsPath: envvar('DOCS_PATH').default('/docs').asString()
@@ -33,9 +33,9 @@ export const server = (): typeof instance => {
 	logger.set(env.logLevel);
 
 	// Check env
-	if (!env.salt) {
-		logger.error('"SALT" value not specified, can\'t continue...');
-		logger.warn('Update your "SALT" environment value, see more at:');
+	if (!env.hashSecret) {
+		logger.error('"HASH_SECRET" value not specified, can\'t continue...');
+		logger.warn('Update your "HASH_SECRET" environment value, see more at:');
 		logger.warn('https://github.com/jspaste/backend/raw/stable/.env.example');
 		process.exit(1);
 	}
