@@ -44,7 +44,6 @@
 	},
 	"trustedDependencies": [
 		"@biomejs/biome",
-		"@swc/core",
 		"lefthook"
 	]
 }
