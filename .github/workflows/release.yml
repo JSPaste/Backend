@@ -163,8 +163,8 @@ jobs:
         id: build-image
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
-          archs: amd64, arm64
           containerfiles: Dockerfile
+          platforms: linux/amd64,linux/arm64
           image: ${{ github.repository }}
           layers: true
           oci: true
