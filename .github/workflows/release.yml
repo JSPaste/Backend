@@ -121,6 +121,9 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+
       - name: "Setup QEMU"
         run: |
           sudo apt-get update
@@ -150,12 +153,18 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: "Setup production dependencies"
+        run: bun install --frozen-lockfile --production
+
+      - name: "Run build"
+        run: bun run build
+
       - name: "Build image"
         id: build-image
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
-          archs: amd64, arm64
           containerfiles: Dockerfile
+          platforms: linux/amd64,linux/arm64
           image: ${{ github.repository }}
           layers: true
           oci: true
