@@ -121,6 +121,9 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+
       - name: "Setup QEMU"
         run: |
           sudo apt-get update
@@ -149,6 +152,12 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
+
+      - name: "Setup production dependencies"
+        run: bun install --frozen-lockfile --production
+
+      - name: "Run build"
+        run: bun run build
 
       - name: "Build image"
         id: build-image
