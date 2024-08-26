@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: "Harden Runner"
-        uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
         with:
           egress-policy: audit
 
@@ -97,7 +97,7 @@ jobs:
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: "Attest artifact"
-        uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
+        uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1 # v1.4.2
         with:
           subject-path: |
             dist/*.tar.gz
@@ -117,9 +117,12 @@ jobs:
 
     steps:
       - name: "Harden Runner"
-        uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
+        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
         with:
           egress-policy: audit
+
+      - name: "Setup Bun"
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
 
       - name: "Setup QEMU"
         run: |
@@ -150,12 +153,18 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: "Setup production dependencies"
+        run: bun install --frozen-lockfile --production
+
+      - name: "Run build"
+        run: bun run build
+
       - name: "Build image"
         id: build-image
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
-          archs: amd64, arm64
           containerfiles: Dockerfile
+          platforms: linux/amd64,linux/arm64
           image: ${{ github.repository }}
           layers: true
           oci: true
@@ -180,7 +189,7 @@ jobs:
 
       - if: ${{ inputs.image-action == 'build-release' }}
         name: "Attest image"
-        uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
+        uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1 # v1.4.2
         with:
           subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
           subject-digest: ${{ steps.push-image.outputs.digest }}

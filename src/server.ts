@@ -3,6 +3,7 @@ import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { logger } from './logger.ts';
+import { database } from './server/database.ts';
 import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
 import { errorHandler } from './server/errorHandler.ts';
@@ -15,17 +16,20 @@ export const env = {
 	hashSecret: envvar('HASH_SECRET').asString(),
 	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
+	debugDB: envvar('DEBUG_DB').asBoolStrict() ?? false,
 	docsPath: envvar('DOCS_PATH').default('/docs').asString()
 } as const;
 
 export const config = {
 	protocol: env.tls ? 'https://' : 'http://',
 	apiPath: '/api',
-	storagePath: 'documents/',
+	storagePath: 'storage/',
 	documentNameLengthMin: 2,
 	documentNameLengthMax: 32,
 	documentNameLengthDefault: 8
 } as const;
+
+export const db = database.open();
 
 const instance = new OpenAPIHono().basePath(config.apiPath);
 
@@ -58,9 +62,14 @@ export const server = (): typeof instance => {
 	endpoints(instance);
 	env.docsEnabled && documentation(instance);
 
-	logger.debug('Registered', instance.routes.length, 'routes');
 	logger.debug('Registered routes:', instance.routes);
 	logger.info(`Listening on: http://localhost:${env.port}`);
 
 	return instance;
 };
+
+// TODO: Support graceful shutdown
+process.on('SIGTERM', () => {
+	db.close(false);
+	process.exit(0);
+});
