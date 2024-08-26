@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.url="https://jspaste.eu" \
       org.opencontainers.image.documentation="https://docs.jspaste.eu" \
       org.opencontainers.image.licenses="EUPL-1.2"
 
-VOLUME /backend/documents/
+VOLUME /backend/storage/
 EXPOSE 4000
 
 ENTRYPOINT ["./backend"]

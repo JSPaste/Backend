@@ -1,7 +1,7 @@
+import { logger } from './logger.ts';
 import { env, server } from './server.ts';
 
-// TODO: Support graceful shutdown
-process.on('SIGTERM', () => process.exit(0));
+logger.set(env.logLevel);
 
 export default {
 	port: env.port,
