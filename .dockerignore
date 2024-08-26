@@ -1,6 +1,6 @@
 *
-!src/
-!bun.lockb
+!dist/backend.step2.tmp.js
 !bunfig.toml
+!LICENSE
 !package.json
 !tsconfig.json

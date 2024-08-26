@@ -11,10 +11,10 @@
 		"build:standalone:linux-amd64": "bun run build:standalone -- --target=bun-linux-x64-modern",
 		"build:standalone:linux-arm64": "bun run build:standalone -- --target=bun-linux-arm64",
 		"build:standalone:windows-amd64": "bun run build:standalone -- --target=bun-windows-x64-modern",
-		"build:x:step1": "bun build --target=bun src/index.ts --outfile=dist/.backend.step1.tmp.js",
-		"build:x:step2": "bun swcx compile --config-file=swc.json --out-file=dist/.backend.step2.tmp.js dist/.backend.step1.tmp.js",
-		"build:x:step3": "bun build --target=bun --minify --outfile=dist/backend.min.js dist/.backend.step2.tmp.js",
-		"build:x:step3:standalone": "bun build --compile --minify --outfile=dist/backend dist/.backend.step2.tmp.js",
+		"build:x:step1": "bun build --target=bun src/index.ts --outfile=dist/backend.step1.tmp.js",
+		"build:x:step2": "bun swc --config-file=swc.json --out-file=dist/backend.step2.tmp.js dist/backend.step1.tmp.js",
+		"build:x:step3": "bun build --target=bun --minify --outfile=dist/backend.min.js dist/backend.step2.tmp.js",
+		"build:x:step3:standalone": "bun build --compile --minify --outfile=dist/backend dist/backend.step2.tmp.js",
 		"fix": "bun run fix:biome && bun run fix:package",
 		"fix:biome": "bun biome check --write",
 		"fix:package": "bun sort-package-json --quiet",
@@ -25,21 +25,21 @@
 		"start:dev": "bun run src/index.ts"
 	},
 	"dependencies": {
-		"@hono/zod-openapi": "~0.15.1",
-		"@scalar/hono-api-reference": "~0.5.119",
-		"@types/bun": "~1.1.6",
+		"@hono/zod-openapi": "~0.16.0",
+		"@scalar/hono-api-reference": "~0.5.143",
+		"@swc/cli": "~0.4.0",
+		"@swc/core": "~1.7.18",
+		"@types/bun": "~1.1.8",
 		"chalk": "~5.3.0",
 		"env-var": "~7.5.0",
-		"hono": "~4.5.2",
+		"hono": "~4.5.9",
 		"loglevel": "~1.9.1",
 		"typescript": "~5.5.4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "~1.8.3",
-		"@swc/cli": "~0.4.0",
-		"@swc/core": "~1.7.3",
-		"lefthook": "~1.7.9",
-		"sort-package-json": "~2.10.0"
+		"lefthook": "~1.7.14",
+		"sort-package-json": "~2.10.1"
 	},
 	"trustedDependencies": [
 		"@biomejs/biome",
