@@ -13,7 +13,6 @@
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"sourceMap": true,
 
 		"strict": true,
 		"allowUnreachableCode": false,
@@ -24,11 +23,20 @@
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
-		"noPropertyAccessFromIndexSignature": true,
+		"noPropertyAccessFromIndexSignature": false,
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"verbatimModuleSyntax": true
+		"verbatimModuleSyntax": true,
+
+		"baseUrl": ".",
+		"paths": {
+			"@x-v1/*": ["./src/endpoints/v1/*"],
+			"@x-v2/*": ["./src/endpoints/v2/*"],
+			"@x-document/*": ["./src/document/*"],
+			"@x-server/*": ["./src/server/*"],
+			"@x-util/*": ["./src/utils/*"]
+		}
 	},
-	"exclude": ["dist/**", "documents/**"]
+	"exclude": ["dist/**", "storage/**"]
 }
