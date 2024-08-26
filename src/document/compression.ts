@@ -14,9 +14,9 @@ export const compression = {
 				(byte) => (byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13
 			);
 
-			const mode = isText ? zlibConstants.BROTLI_MODE_TEXT : zlibConstants.BROTLI_MODE_GENERIC;
-
-			compressOptions[zlibConstants.BROTLI_PARAM_MODE] = mode;
+			compressOptions[zlibConstants.BROTLI_PARAM_MODE] = isText
+				? zlibConstants.BROTLI_MODE_TEXT
+				: zlibConstants.BROTLI_MODE_GENERIC;
 
 			brotliCompress(data, compressOptions, (err, buffer) => {
 				if (err) {
@@ -28,7 +28,7 @@ export const compression = {
 		});
 	},
 
-	decode: (data: ArrayBuffer): Promise<Buffer> => {
+	decode: (data: Uint8Array): Promise<Buffer> => {
 		return new Promise((resolve, reject) => {
 			brotliDecompress(data, (err, buffer) => {
 				if (err) {
