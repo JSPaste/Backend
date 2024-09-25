@@ -25,6 +25,7 @@
 		"noImplicitReturns": true,
 		"noPropertyAccessFromIndexSignature": false,
 		"noUncheckedIndexedAccess": true,
+		"noUncheckedSideEffectImports": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"verbatimModuleSyntax": true,
@@ -38,5 +39,5 @@
 			"@x-util/*": ["./src/utils/*"]
 		}
 	},
-	"exclude": ["dist/**", "storage/**"]
+	"exclude": ["./dist/**", "./storage/**"]
 }

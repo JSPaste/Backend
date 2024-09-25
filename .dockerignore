@@ -1,5 +1,5 @@
 *
-!dist/backend.step2.tmp.js
+!dist/backend
 !bunfig.toml
 !LICENSE
 !package.json

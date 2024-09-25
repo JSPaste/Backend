@@ -1,10 +1,9 @@
-# Build the bundle localy before building the image: "bun run build"
 FROM docker.io/oven/bun:1-alpine AS builder
 WORKDIR /build/
 
 COPY . ./
 
-RUN bun run build:x:step3:standalone
+RUN bun run build:standalone
 
 FROM cgr.dev/chainguard/cc-dynamic:latest
 WORKDIR /backend/

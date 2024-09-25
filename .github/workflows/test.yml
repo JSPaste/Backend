@@ -1,53 +1,53 @@
-name: "CI -> Test"
+name: CI -> Test
 on:
   workflow_dispatch:
   push:
     branches:
       - dev
     paths-ignore:
-      - "*.md"
-      - ".*ignore"
+      - '*.md'
+      - '.*ignore'
 
   pull_request:
     branches:
       - dev
     paths-ignore:
-      - "*.md"
-      - ".*ignore"
+      - '*.md'
+      - '.*ignore'
 
 concurrency:
-  group: "${{ github.workflow }}-${{ github.ref }}"
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  lint:
-    name: "Lint"
-    runs-on: ubuntu-latest
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
     steps:
-      - name: "Harden Runner"
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
 
-      - name: "Setup Bun"
+      - name: Setup Bun
         uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
 
-      - name: "Checkout"
+      - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
 
-      - name: "Setup production dependencies"
+      - name: Setup production dependencies
         run: bun install --frozen-lockfile --production
 
-      - name: "Run build"
-        run: bun run build
+      - name: Run build:server
+        run: bun run build:server
 
-      - name: "Setup development dependencies"
+      - name: Setup development dependencies
         run: bun install --frozen-lockfile
 
-      - name: "Run lint"
+      - name: Run lint
         run: bun run lint

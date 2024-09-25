@@ -3,9 +3,6 @@ telemetry = false
 [install]
 auto = "disable"
 
-[install.scopes]
-"@jsr" = "https://npm.jsr.io"
-
 [run]
 bun = true
 silent = true
