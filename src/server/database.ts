@@ -34,7 +34,10 @@ export const database = {
 			if (databaseVersion < versionNumber) {
 				try {
 					migration(database);
-					database.run(`INSERT OR REPLACE INTO config (version) VALUES (${versionNumber});`);
+					database.run(`INSERT
+                    OR REPLACE INTO config (version) VALUES (
+                    ${versionNumber}
+                    );`);
 					logger.info(`Migration ${versionNumber} applied successfully.`);
 				} catch (error) {
 					logger.error(`Migration ${version} failed! Stopping...`);
@@ -59,17 +62,19 @@ const migrations = {
 	 * @param database
 	 */
 	1: (database: Database): void => {
-		database.run(`CREATE TABLE config (
-			version INTEGER PRIMARY KEY
-		);`);
+		database.run(`CREATE TABLE config
+                      (
+                          version INTEGER PRIMARY KEY
+                      );`);
 
-		database.run(`CREATE TABLE documents (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			secretHash TEXT NOT NULL,
-			passwordHash TEXT,
-			version INTEGER NOT NULL
-		);`);
+		database.run(`CREATE TABLE documents
+                      (
+                          id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                          name         TEXT    NOT NULL,
+                          secretHash   TEXT    NOT NULL,
+                          passwordHash TEXT,
+                          version      INTEGER NOT NULL
+                      );`);
 	},
 	2: (): void => {
 		// Migration 2

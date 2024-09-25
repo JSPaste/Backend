@@ -1,4 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { serve } from 'bun';
 import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
@@ -30,6 +31,13 @@ export const config = {
 } as const;
 
 export const db = database.open();
+
+logger.set(env.logLevel);
+
+process.on('SIGTERM', () => {
+	db.close(false);
+	backend.stop();
+});
 
 const instance = new OpenAPIHono().basePath(config.apiPath);
 
@@ -68,8 +76,7 @@ export const server = (): typeof instance => {
 	return instance;
 };
 
-// TODO: Support graceful shutdown
-process.on('SIGTERM', () => {
-	db.close(false);
-	process.exit(0);
+const backend = serve({
+	port: env.port,
+	fetch: server().fetch
 });
