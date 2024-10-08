@@ -25,8 +25,8 @@
 		"start:server": "bun run ./dist/server.js"
 	},
 	"dependencies": {
-		"@hono/zod-openapi": "~0.16.0",
-		"@scalar/hono-api-reference": "~0.5.148",
+		"@hono/zod-openapi": "~0.16.4",
+		"@scalar/hono-api-reference": "~0.5.152",
 		"@types/bun": "~1.1.10",
 		"chalk": "~5.3.0",
 		"env-var": "~7.5.0",
@@ -35,8 +35,8 @@
 		"typescript": "~5.6.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "~1.9.2",
-		"lefthook": "~1.7.16",
+		"@biomejs/biome": "~1.9.3",
+		"lefthook": "~1.7.18",
 		"sort-package-json": "~2.10.1"
 	},
 	"trustedDependencies": [
