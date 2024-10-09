@@ -1,7 +1,6 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { storage } from '@x-document/storage.ts';
 import { compression } from '../../document/compression.ts';
-import { crypto } from '../../document/crypto.ts';
-import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';
 import { errorHandler, schema } from '../../server/errorHandler.ts';
@@ -65,22 +64,16 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 
 			const document = await storage.read(params.name);
 
-			let data: Uint8Array;
-
 			if (document.header.passwordHash) {
 				if (!options.password) {
 					return errorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
 				validator.validatePassword(options.password, document.header.passwordHash);
-
-				data = crypto.decrypt(document.data, options.password);
-			} else {
-				data = document.data;
 			}
 
 			// @ts-ignore: Return the buffer directly
-			return ctx.text(await compression.decode(data));
+			return ctx.text(compression.decode(document.data));
 		},
 		(result) => {
 			if (!result.success) {

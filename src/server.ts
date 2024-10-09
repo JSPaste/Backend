@@ -4,7 +4,7 @@ import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { logger } from './logger.ts';
-import { database } from './server/database.ts';
+import { Database } from './server/database.ts';
 import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
 import { errorHandler } from './server/errorHandler.ts';
@@ -30,27 +30,19 @@ export const config = {
 	documentNameLengthDefault: 8
 } as const;
 
-export const db = database.open();
+export const db = new Database();
 
 logger.set(env.logLevel);
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
 	db.close(false);
-	backend.stop();
+	await backend.stop();
 });
 
 const instance = new OpenAPIHono().basePath(config.apiPath);
 
 export const server = (): typeof instance => {
 	logger.set(env.logLevel);
-
-	// Check env
-	if (!env.hashSecret) {
-		logger.error('"HASH_SECRET" value not specified, can\'t continue...');
-		logger.warn('Update your "HASH_SECRET" environment value, see more at:');
-		logger.warn('https://github.com/jspaste/backend/raw/stable/.env.example');
-		process.exit(1);
-	}
 
 	instance.use('*', cors());
 

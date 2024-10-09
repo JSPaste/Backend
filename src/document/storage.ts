@@ -15,7 +15,7 @@ export const storage = {
 			errorHandler.send(ErrorCode.documentNotFound);
 		}
 
-		return deserialize(Buffer.from(await file.arrayBuffer()));
+		return deserialize(await file.arrayBuffer());
 	},
 
 	write: async (name: string, document: Document): Promise<void> => {

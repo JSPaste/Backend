@@ -1,14 +1,14 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { storage } from '@x-document/storage.ts';
+import { StringUtils } from '@x-util/StringUtils.ts';
 import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
-import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';
 import { errorHandler, schema } from '../../server/errorHandler.ts';
 import { middleware } from '../../server/middleware.ts';
 import { DocumentVersion } from '../../types/Document.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { StringUtils } from '../../utils/StringUtils.ts';
 
 export const publishRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
@@ -83,7 +83,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 	endpoint.openapi(
 		route,
 		async (ctx) => {
-			const body = await ctx.req.arrayBuffer();
+			const body = Buffer.from(await ctx.req.arrayBuffer());
 			const headers = ctx.req.valid('header');
 
 			if (headers.password) {
@@ -116,14 +116,14 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 				name = await StringUtils.createName(headers.keylength);
 			}
 
-			const data = await compression.encode(body);
+			const data = compression.encode(body);
 
 			await storage.write(name, {
-				data: headers.password ? crypto.encrypt(data, headers.password) : data,
+				data: data,
 				header: {
 					name: name,
-					secretHash: crypto.hash(secret) as string,
-					passwordHash: headers.password ? (crypto.hash(headers.password) as string) : null
+					secretHash: crypto.hash(secret),
+					passwordHash: headers.password ? crypto.hash(headers.password) : null
 				},
 				version: DocumentVersion.V1
 			});

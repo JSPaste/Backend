@@ -1,58 +1,22 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import { env } from '../server.ts';
+import { randomBytes } from 'node:crypto';
 
-const cipherAlgorithm = 'aes-256-gcm';
 const hashAlgorithm = 'blake2b256';
-const ivLength = 12;
-const saltLength = 24;
+const saltLength = 16;
 
 export const crypto = {
-	encrypt: (data: Uint8Array, password: string): Uint8Array => {
-		const iv = randomBytes(ivLength);
-		const key = crypto.hash(password, 'binary');
-		const cipher = createCipheriv(cipherAlgorithm, key, iv);
-		const encrypted = Buffer.concat([cipher.update(data), cipher.final(), cipher.getAuthTag()]);
-
-		return Buffer.concat([iv, encrypted]);
-	},
-
-	decrypt: (data: Uint8Array, password: string): Uint8Array => {
-		const iv = data.slice(0, ivLength);
-		const encryptedData = data.slice(ivLength);
-		const key = crypto.hash(password, 'binary');
-		const decipher = createDecipheriv(cipherAlgorithm, key, iv);
-
-		decipher.setAuthTag(encryptedData.slice(-16));
-
-		return Buffer.concat([decipher.update(encryptedData.slice(0, -16)), decipher.final()]);
-	},
-
-	hash: (password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array => {
+	hash: (password: string): Buffer => {
 		const salt = randomBytes(saltLength);
+		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(salt).update(password);
 
-		return crypto.hash_salted(password, salt, encoding);
+		return Buffer.concat([salt, hasher.digest()]);
 	},
 
-	hash_salted: (password: string, salt: Buffer, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array => {
-		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(
-			Buffer.concat([Buffer.from(env.hashSecret as string), Buffer.from(password), salt])
-		);
+	compare: (password: string, hash: Buffer): boolean => {
+		const salt = hash.subarray(0, saltLength);
+		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(salt).update(password);
 
-		const hash = Buffer.concat([salt, hasher.digest()]);
+		const passwordHash = Buffer.concat([salt, hasher.digest()]);
 
-		switch (encoding) {
-			case 'base64': {
-				return hash.toString('base64');
-			}
-			default: {
-				return hash as Uint8Array;
-			}
-		}
-	},
-
-	compare: (password: string, hash: string, encoding: 'base64' | 'binary' = 'base64'): boolean => {
-		const salt = Buffer.from(hash, 'base64').slice(0, saltLength);
-
-		return crypto.hash_salted(password, salt, encoding) === hash;
+		return hash.equals(passwordHash);
 	}
 } as const;
