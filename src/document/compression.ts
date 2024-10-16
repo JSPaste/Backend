@@ -1,18 +1,11 @@
-import { constants as zlib, type BrotliOptions, brotliCompressSync, brotliDecompressSync } from 'node:zlib';
-
-const brotliOptions: BrotliOptions = {
-	params: {
-		[zlib.BROTLI_PARAM_QUALITY]: 4,
-		[zlib.BROTLI_PARAM_LGWIN]: 28 // 256mb
-	}
-};
+import { brotliCompressSync, brotliDecompressSync } from 'node:zlib';
 
 export const compression = {
 	encode: (data: Buffer): Buffer => {
-		return brotliCompressSync(data, brotliOptions);
+		return brotliCompressSync(data);
 	},
 
 	decode: (data: Buffer): Buffer => {
-		return brotliDecompressSync(data, brotliOptions);
+		return brotliDecompressSync(data);
 	}
 } as const;
