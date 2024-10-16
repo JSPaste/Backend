@@ -32,7 +32,7 @@ jobs:
   artifact:
     if: ${{ github.repository_owner == 'jspaste' && inputs.artifact-action != 'none' }}
     name: Build artifact
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       attestations: write
       contents: write
@@ -106,7 +106,7 @@ jobs:
   container:
     if: ${{ github.repository_owner == 'jspaste' && inputs.image-action != 'none' }}
     name: Build container image
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
 
