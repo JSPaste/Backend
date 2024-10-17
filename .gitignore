@@ -1,5 +1,11 @@
-# JSP specific
-documents/
+# JSPaste specific
+storage/
+
+# Databases
+*.db
+*.sql
+*.sqlite
+*.sqlite3
 
 # Logs
 logs

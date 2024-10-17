@@ -6,14 +6,11 @@ interface Document {
 	data: Uint8Array;
 	header: {
 		name: string;
-		secretHash: string;
-		passwordHash: string | null;
+		secretHash: Uint8Array;
+		passwordHash: Uint8Array | null;
 	};
 	version: DocumentVersion;
 }
 
-interface DocumentV1 extends Document {
-	version: DocumentVersion.V1;
-}
-
-export { DocumentVersion, type Document, type DocumentV1 };
+export type { Document };
+export { DocumentVersion };

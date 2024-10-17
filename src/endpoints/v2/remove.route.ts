@@ -1,6 +1,6 @@
 import { unlink } from 'node:fs/promises';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { storage } from '../../document/storage.ts';
+import { storage } from '@x-document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';
 import { errorHandler, schema } from '../../server/errorHandler.ts';
