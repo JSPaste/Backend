@@ -21,7 +21,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document',
+					description: 'The password to access the document',
 					example: 'aabbccdd11223344'
 				})
 			})
@@ -75,7 +75,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 				validator.validatePassword(headers.password, document.header.passwordHash);
 			}
 
-			const buffer = compression.decode(Buffer.from(document.data));
+			const buffer = compression.decode(document.data);
 
 			return ctx.json({
 				key: params.name,

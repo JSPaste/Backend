@@ -30,16 +30,16 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			},
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to encrypt the document',
+					description: 'The password to restrict the document',
 					example: 'aabbccdd11223344'
 				}),
 				key: z.string().optional().openapi({
 					description: 'The document name (formerly key)',
 					example: 'abc123'
 				}),
-				keylength: z.number().optional().openapi({
+				keylength: z.string().optional().openapi({
 					description: 'The document name length (formerly key length)',
-					example: config.documentNameLengthDefault
+					example: config.documentNameLengthDefault.toString()
 				}),
 				secret: z.string().optional().openapi({
 					description: 'The document secret',
@@ -110,10 +110,14 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 				}
 
 				name = headers.key;
-			} else {
-				validator.validateNameLength(headers.keylength);
+			} else if (headers.keylength) {
+				const nameLength = Number(headers.keylength);
 
-				name = await StringUtils.createName(headers.keylength);
+				validator.validateNameLength(nameLength);
+
+				name = await StringUtils.createName(nameLength);
+			} else {
+				name = await StringUtils.createName(config.documentNameLengthDefault);
 			}
 
 			const data = compression.encode(body);

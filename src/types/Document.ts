@@ -6,8 +6,8 @@ interface Document {
 	data: Uint8Array;
 	header: {
 		name: string;
-		secretHash: Buffer;
-		passwordHash: Buffer | null;
+		secretHash: Uint8Array;
+		passwordHash: Uint8Array | null;
 	};
 	version: DocumentVersion;
 }
