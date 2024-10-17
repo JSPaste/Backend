@@ -33,7 +33,8 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document',
+					deprecated: true,
+					description: 'The password to access the document (not used anymore)',
 					example: 'aabbccdd11223344'
 				}),
 				secret: z.string().openapi({
