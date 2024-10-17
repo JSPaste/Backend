@@ -32,6 +32,7 @@
 
 		"baseUrl": ".",
 		"paths": {
+			"@x-v1/*": ["./src/endpoints/v1/*"],
 			"@x-v2/*": ["./src/endpoints/v2/*"],
 			"@x-document/*": ["./src/document/*"],
 			"@x-server/*": ["./src/server/*"],

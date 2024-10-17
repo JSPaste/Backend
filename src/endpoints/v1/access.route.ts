@@ -1,7 +1,6 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { storage } from '@x-document/storage.ts';
 import { compression } from '../../document/compression.ts';
-import { validator } from '../../document/validator.ts';
+import { storage } from '../../document/storage.ts';
 import { config } from '../../server.ts';
 import { errorHandler, schema } from '../../server/errorHandler.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
@@ -10,19 +9,14 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
 		method: 'get',
 		path: '/{name}',
-		tags: ['v2'],
+		tags: ['v1'],
 		summary: 'Get document',
+		deprecated: true,
 		request: {
 			params: z.object({
 				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
 					description: 'The document name',
 					example: 'abc123'
-				})
-			}),
-			headers: z.object({
-				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document',
-					example: 'aabbccdd11223344'
 				})
 			})
 		},
@@ -38,15 +32,6 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 							data: z.string().openapi({
 								description: 'The document data',
 								example: 'Hello, World!'
-							}),
-							url: z.string().openapi({
-								description: 'The document URL',
-								example: 'https://jspaste.eu/abc123'
-							}),
-							expirationTimestamp: z.number().openapi({
-								deprecated: true,
-								description: 'The document expiration timestamp (always will be 0)',
-								example: 0
 							})
 						})
 					}
@@ -63,25 +48,19 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 		route,
 		async (ctx) => {
 			const params = ctx.req.valid('param');
-			const headers = ctx.req.valid('header');
 
 			const document = await storage.read(params.name);
 
+			// V1 Endpoint does not support document protected password
 			if (document.header.passwordHash) {
-				if (!headers.password) {
-					return errorHandler.send(ErrorCode.documentPasswordNeeded);
-				}
-
-				validator.validatePassword(headers.password, document.header.passwordHash);
+				errorHandler.send(ErrorCode.documentPasswordNeeded);
 			}
 
 			const buffer = compression.decode(document.data);
 
 			return ctx.json({
 				key: params.name,
-				data: buffer.toString('binary'),
-				url: config.protocol.concat(new URL(ctx.req.url).host.concat('/', params.name)),
-				expirationTimestamp: 0
+				data: buffer.toString('binary')
 			});
 		},
 		(result) => {

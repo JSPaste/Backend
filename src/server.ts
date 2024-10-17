@@ -4,7 +4,6 @@ import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { logger } from './logger.ts';
-import { Database } from './server/database.ts';
 import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
 import { errorHandler } from './server/errorHandler.ts';
@@ -14,10 +13,8 @@ export const env = {
 	port: envvar('PORT').default(4000).asPortNumber(),
 	logLevel: envvar('LOGLEVEL').default(2).asIntPositive(),
 	tls: envvar('TLS').asBoolStrict() ?? true,
-	hashSecret: envvar('HASH_SECRET').asString(),
 	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
-	debugDB: envvar('DEBUG_DB').asBoolStrict() ?? false,
 	docsPath: envvar('DOCS_PATH').default('/docs').asString()
 } as const;
 
@@ -30,12 +27,9 @@ export const config = {
 	documentNameLengthDefault: 8
 } as const;
 
-export const db = new Database();
-
 logger.set(env.logLevel);
 
 process.on('SIGTERM', async () => {
-	db.close(false);
 	await backend.stop();
 });
 

@@ -83,7 +83,7 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 	endpoint.openapi(
 		route,
 		async (ctx) => {
-			const body = Buffer.from(await ctx.req.arrayBuffer());
+			const body = await ctx.req.arrayBuffer();
 			const headers = ctx.req.valid('header');
 
 			if (headers.password) {

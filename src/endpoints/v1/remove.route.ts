@@ -1,30 +1,19 @@
+import { unlink } from 'node:fs/promises';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { storage } from '@x-document/storage.ts';
-import { compression } from '../../document/compression.ts';
+import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';
 import { errorHandler, schema } from '../../server/errorHandler.ts';
-import { middleware } from '../../server/middleware.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
 
-export const editRoute = (endpoint: OpenAPIHono): void => {
+export const removeRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
-		method: 'patch',
+		method: 'delete',
 		path: '/{name}',
-		tags: ['v2'],
-		summary: 'Edit document',
-		middleware: [middleware.bodyLimit()],
+		tags: ['v1'],
+		summary: 'Remove document',
+		deprecated: true,
 		request: {
-			body: {
-				content: {
-					'text/plain': {
-						schema: z.string().openapi({
-							description: 'Data to replace in the document',
-							example: 'Hello, World!'
-						})
-					}
-				}
-			},
 			params: z.object({
 				name: z.string().min(config.documentNameLengthMin).max(config.documentNameLengthMax).openapi({
 					description: 'The document name',
@@ -32,11 +21,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 				})
 			}),
 			headers: z.object({
-				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document',
-					example: 'aabbccdd11223344'
-				}),
-				secret: z.string().openapi({
+				secret: z.string().min(1).openapi({
 					description: 'The document secret',
 					example: 'aaaaa-bbbbb-ccccc-ddddd'
 				})
@@ -47,14 +32,14 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 				content: {
 					'application/json': {
 						schema: z.object({
-							edited: z.boolean().openapi({
-								description: 'Confirmation of edition',
+							removed: z.boolean().openapi({
+								description: 'Confirmation of deletion',
 								example: true
 							})
 						})
 					}
 				},
-				description: 'Confirmation of edition'
+				description: 'An object with a "removed" parameter of the deleted document'
 			},
 			400: schema,
 			404: schema,
@@ -65,7 +50,6 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 	endpoint.openapi(
 		route,
 		async (ctx) => {
-			const body = await ctx.req.arrayBuffer();
 			const params = ctx.req.valid('param');
 			const headers = ctx.req.valid('header');
 
@@ -73,16 +57,11 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 
 			validator.validateSecret(headers.secret, document.header.secretHash);
 
-			document.data = compression.encode(body);
-
-			const result = await storage
-				.write(params.name, document)
+			const result = await unlink(config.storagePath + params.name)
 				.then(() => true)
 				.catch(() => false);
 
-			return ctx.json({
-				edited: result
-			});
+			return ctx.json({ removed: result });
 		},
 		(result) => {
 			if (!result.success) {
