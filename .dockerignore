@@ -1,5 +1,6 @@
 *
-!dist/backend.step2.tmp.js
+!src/
+!bun.lockb
 !bunfig.toml
 !LICENSE
 !package.json

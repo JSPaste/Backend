@@ -1,4 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { serve } from 'bun';
 import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
@@ -20,11 +21,17 @@ export const env = {
 export const config = {
 	protocol: env.tls ? 'https://' : 'http://',
 	apiPath: '/api',
-	storagePath: 'documents/',
+	storagePath: 'storage/',
 	documentNameLengthMin: 2,
 	documentNameLengthMax: 32,
 	documentNameLengthDefault: 8
 } as const;
+
+logger.set(env.logLevel);
+
+process.on('SIGTERM', async () => {
+	await backend.stop();
+});
 
 const instance = new OpenAPIHono().basePath(config.apiPath);
 
@@ -49,9 +56,13 @@ export const server = (): typeof instance => {
 	endpoints(instance);
 	env.docsEnabled && documentation(instance);
 
-	logger.debug('Registered', instance.routes.length, 'routes');
 	logger.debug('Registered routes:', instance.routes);
 	logger.info(`Listening on: http://localhost:${env.port}`);
 
 	return instance;
 };
+
+const backend = serve({
+	port: env.port,
+	fetch: server().fetch
+});

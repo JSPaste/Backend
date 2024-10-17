@@ -1,4 +1,5 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { StringUtils } from '@x-util/StringUtils.ts';
 import { compression } from '../../document/compression.ts';
 import { crypto } from '../../document/crypto.ts';
 import { storage } from '../../document/storage.ts';
@@ -6,7 +7,6 @@ import { errorHandler, schema } from '../../server/errorHandler.ts';
 import { middleware } from '../../server/middleware.ts';
 import { DocumentVersion } from '../../types/Document.ts';
 import { ErrorCode } from '../../types/ErrorHandler.ts';
-import { StringUtils } from '../../utils/StringUtils.ts';
 
 export const publishRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({
@@ -60,10 +60,10 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			const secret = StringUtils.createSecret();
 
 			await storage.write(name, {
-				data: await compression.encode(body),
+				data: compression.encode(body),
 				header: {
 					name: name,
-					secretHash: crypto.hash(secret) as string,
+					secretHash: crypto.hash(secret),
 					passwordHash: null
 				},
 				version: DocumentVersion.V1

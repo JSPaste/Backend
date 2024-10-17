@@ -5,12 +5,18 @@
 
 ## Setup
 
-### Binaries
+### Binary
 
 - Download the [latest release](https://github.com/jspaste/backend/releases/latest)
 - Uncompress to a new folder
-- Modify the `.env.example` file to your needs and rename it to `.env`
-- Execute the binary...
+- Edit the `.env.example` file and rename it to `.env`
+- Run the binary...
+
+Linux & macOS:
+
+```shell
+./backend
+```
 
 Windows:
 
@@ -18,23 +24,16 @@ Windows:
 powershell -c ".\backend.exe"
 ```
 
-Linux & macOS:
-
-```shell
-chmod +x ./backend
-./backend
-```
-
 ### Container
 
 - Pull latest image: `docker pull ghcr.io/jspaste/backend:latest`
-- Run container: `docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 ghcr.io/jspaste/backend:latest`
+- Run the container: `docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 ghcr.io/jspaste/backend:latest`
 
 ## Validate
 
 > [!IMPORTANT]
-> ALL artifacts and images originate from [this](https://github.com/jspaste/backend) repository, no other artifacts or
-> images built and distributed outside that repository are considered secure nor trusted by the JSPaste developers.
+> ALL artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or
+> images built and distributed outside that repository are considered secure nor trusted by the JSPaste team.
 
 Artifacts are attested and can be verified using the following command:
 
