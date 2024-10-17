@@ -66,7 +66,7 @@ export const editRoute = (endpoint: OpenAPIHono): void => {
 	endpoint.openapi(
 		route,
 		async (ctx) => {
-			const body = Buffer.from(await ctx.req.arrayBuffer());
+			const body = await ctx.req.arrayBuffer();
 			const params = ctx.req.valid('param');
 			const headers = ctx.req.valid('header');
 
