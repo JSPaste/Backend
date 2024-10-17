@@ -1,5 +1,6 @@
 *
 !src/
+!bun.lockb
 !bunfig.toml
 !LICENSE
 !package.json
