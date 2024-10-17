@@ -1,5 +1,5 @@
 *
-!dist/backend
+!src/
 !bunfig.toml
 !LICENSE
 !package.json
