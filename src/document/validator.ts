@@ -6,11 +6,11 @@ import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
 import { crypto } from './crypto.ts';
 
 export const validator = {
-	validateName: (key: string): void => {
+	validateName: (name: string): void => {
 		if (
-			!ValidatorUtils.isValidBase64URL(key) ||
+			!ValidatorUtils.isValidBase64URL(name) ||
 			!ValidatorUtils.isLengthWithinRange(
-				Bun.stringWidth(key),
+				Bun.stringWidth(name),
 				config.documentNameLengthMin,
 				config.documentNameLengthMax
 			)

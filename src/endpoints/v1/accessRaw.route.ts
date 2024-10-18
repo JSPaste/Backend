@@ -45,13 +45,13 @@ export const accessRawRoute = (endpoint: OpenAPIHono): void => {
 
 			const document = await storage.read(params.name);
 
-			// V1 Endpoint does not support Server-Side Encryption
+			// V1 Endpoint does not support document protected password
 			if (document.header.passwordHash) {
 				errorHandler.send(ErrorCode.documentPasswordNeeded);
 			}
 
 			// @ts-ignore: Return the buffer directly
-			return ctx.text(await compression.decode(document.data));
+			return ctx.text(compression.decode(document.data));
 		},
 		(result) => {
 			if (!result.success) {

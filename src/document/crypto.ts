@@ -1,44 +1,22 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 
-const cipherAlgorithm = 'aes-256-gcm';
 const hashAlgorithm = 'blake2b256';
-const ivLength = 12;
+const saltLength = 16;
 
 export const crypto = {
-	encrypt: (data: Uint8Array, password: string): Uint8Array => {
-		const iv = randomBytes(ivLength);
-		const key = crypto.hash(password, 'binary');
-		const cipher = createCipheriv(cipherAlgorithm, key, iv);
-		const encrypted = Buffer.concat([cipher.update(data), cipher.final(), cipher.getAuthTag()]);
+	hash: (password: string): Uint8Array => {
+		const salt = randomBytes(saltLength);
+		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(salt).update(password);
 
-		return Buffer.concat([iv, encrypted]);
+		return Buffer.concat([salt, hasher.digest()]);
 	},
 
-	decrypt: (data: Uint8Array, password: string): Uint8Array => {
-		const iv = data.slice(0, ivLength);
-		const encryptedData = data.slice(ivLength);
-		const key = crypto.hash(password, 'binary');
-		const decipher = createDecipheriv(cipherAlgorithm, key, iv);
+	compare: (password: string, hash: Uint8Array): boolean => {
+		const salt = hash.subarray(0, saltLength);
+		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(salt).update(password);
 
-		decipher.setAuthTag(encryptedData.slice(-16));
+		const passwordHash = Buffer.concat([salt, hasher.digest()]);
 
-		return Buffer.concat([decipher.update(encryptedData.slice(0, -16)), decipher.final()]);
-	},
-
-	hash: (password: string, encoding: 'base64' | 'binary' = 'base64'): string | Uint8Array => {
-		const hasher = new Bun.CryptoHasher(hashAlgorithm).update(password);
-
-		switch (encoding) {
-			case 'base64': {
-				return hasher.digest('base64');
-			}
-			default: {
-				return hasher.digest() as Uint8Array;
-			}
-		}
-	},
-
-	compare: (password: string, hash: string, encoding: 'base64' | 'binary' = 'base64'): boolean => {
-		return crypto.hash(password, encoding) === hash;
+		return hash.every((value, index) => value === passwordHash[index]);
 	}
 } as const;
