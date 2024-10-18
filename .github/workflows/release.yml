@@ -98,7 +98,7 @@ jobs:
         with:
           name: ${{ steps.tags-artifact.outputs.extended }}
           tag: ${{ steps.tags-artifact.outputs.extended }}
-          artifacts: dist/*.tar.gz,dist/*.zip
+          artifacts: 'dist/*.tar.gz,dist/*.zip'
           makeLatest: true
           prerelease: ${{ github.ref != 'refs/heads/stable' }}
           generateReleaseNotes: true
