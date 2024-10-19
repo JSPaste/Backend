@@ -113,8 +113,6 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 			} else {
 				const nameLength = Number(headers.keylength || config.documentNameLengthDefault);
 
-				validator.validateNameLength(nameLength);
-
 				name = await StringUtils.createName(nameLength);
 			}
 
