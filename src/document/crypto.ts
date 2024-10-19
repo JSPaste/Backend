@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 
 const hashAlgorithm = 'blake2b256';
 const saltLength = 16;
+
 export const crypto = {
 	hash: (password: string): Uint8Array => {
 		const salt = randomBytes(saltLength);
