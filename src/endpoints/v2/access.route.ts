@@ -1,7 +1,6 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { storage } from '@x-document/storage.ts';
 import { compression } from '../../document/compression.ts';
-import { crypto } from '../../document/crypto.ts';
-import { storage } from '../../document/storage.ts';
 import { validator } from '../../document/validator.ts';
 import { config } from '../../server.ts';
 import { errorHandler, schema } from '../../server/errorHandler.ts';
@@ -22,7 +21,7 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 			}),
 			headers: z.object({
 				password: z.string().optional().openapi({
-					description: 'The password to decrypt the document',
+					description: 'The password to access the document',
 					example: 'aabbccdd11223344'
 				})
 			})
@@ -68,20 +67,15 @@ export const accessRoute = (endpoint: OpenAPIHono): void => {
 
 			const document = await storage.read(params.name);
 
-			let data: Uint8Array;
-
 			if (document.header.passwordHash) {
 				if (!headers.password) {
 					return errorHandler.send(ErrorCode.documentPasswordNeeded);
 				}
 
 				validator.validatePassword(headers.password, document.header.passwordHash);
-				data = crypto.decrypt(document.data, headers.password);
-			} else {
-				data = document.data;
 			}
 
-			const buffer = await compression.decode(data);
+			const buffer = compression.decode(document.data);
 
 			return ctx.json({
 				key: params.name,

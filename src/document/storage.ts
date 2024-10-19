@@ -1,4 +1,4 @@
-import { decode, encode } from 'cbor-x';
+import { deserialize, serialize } from 'bun:jsc';
 import { config } from '../server.ts';
 import { errorHandler } from '../server/errorHandler.ts';
 import type { Document } from '../types/Document.ts';
@@ -15,10 +15,10 @@ export const storage = {
 			errorHandler.send(ErrorCode.documentNotFound);
 		}
 
-		return decode(Buffer.from(await file.arrayBuffer()));
+		return deserialize(await file.arrayBuffer());
 	},
 
 	write: async (name: string, document: Document): Promise<void> => {
-		await Bun.write(config.storagePath + name, encode(document));
+		await Bun.write(config.storagePath + name, serialize(document));
 	}
 } as const;
