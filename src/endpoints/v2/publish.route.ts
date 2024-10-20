@@ -110,14 +110,10 @@ export const publishRoute = (endpoint: OpenAPIHono): void => {
 				}
 
 				name = headers.key;
-			} else if (headers.keylength) {
-				const nameLength = Number(headers.keylength);
-
-				validator.validateNameLength(nameLength);
+			} else {
+				const nameLength = Number(headers.keylength || config.documentNameLengthDefault);
 
 				name = await StringUtils.createName(nameLength);
-			} else {
-				name = await StringUtils.createName(config.documentNameLengthDefault);
 			}
 
 			const data = compression.encode(body);

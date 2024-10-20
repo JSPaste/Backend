@@ -74,17 +74,17 @@ jobs:
         run: |
           bun run build:standalone:darwin-arm64
           chmod 755 ./dist/backend
-          tar --owner=0 --group=0 --mtime='now' --utc -c .env.example LICENSE README.md -C ./dist/ backend | gzip --best >./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz
+          tar -c --owner=0 --group=0 --mtime='now' --utc .env.example LICENSE README.md -C ./dist/ backend | gzip --best >./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz
           tar -tzf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_darwin-arm64.tar.gz >/dev/null
 
           bun run build:standalone:linux-amd64
           chmod 755 ./dist/backend
-          tar --owner=0 --group=0 --mtime='now' --utc -c .env.example LICENSE README.md -C ./dist/ backend | gzip --best >./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz
+          tar -c --owner=0 --group=0 --mtime='now' --utc .env.example LICENSE README.md -C ./dist/ backend | gzip --best >./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz
           tar -tzf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-amd64.tar.gz >/dev/null
 
           bun run build:standalone:linux-arm64
           chmod 755 ./dist/backend
-          tar --owner=0 --group=0 --mtime='now' --utc -c .env.example LICENSE README.md -C ./dist/ backend | gzip --best >./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz
+          tar -c --owner=0 --group=0 --mtime='now' --utc .env.example LICENSE README.md -C ./dist/ backend | gzip --best >./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz
           tar -tzf ./dist/backend_${{ steps.tags-artifact.outputs.tag }}_linux-arm64.tar.gz >/dev/null
 
           bun run build:standalone:windows-amd64

@@ -7,8 +7,7 @@
 
 ### Binary
 
-- Download the [latest release](https://github.com/jspaste/backend/releases/latest)
-- Uncompress to a new folder
+- Download the [latest release](https://github.com/jspaste/backend/releases/latest) and uncompress it to a new folder
 - Edit the `.env.example` file and rename it to `.env`
 - Run the binary...
 
@@ -26,8 +25,13 @@ powershell -c ".\backend.exe"
 
 ### Container
 
-- Pull latest image: `docker pull ghcr.io/jspaste/backend:latest`
-- Run the container: `docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 ghcr.io/jspaste/backend:latest`
+- Pull latest image and run the container:
+
+```shell
+docker pull ghcr.io/jspaste/backend:latest
+docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 \
+  ghcr.io/jspaste/backend:latest
+```
 
 ## Validate
 
@@ -42,8 +46,8 @@ gh attestation verify backend.tar.gz \
   --owner JSPaste
 ```
 
-Since container
-version [`2024.05.06-e105023`](https://github.com/orgs/jspaste/packages/container/backend/212635273?tag=2024.05.06-e105023),
+Since container version
+[`2024.05.06-e105023`](https://github.com/orgs/jspaste/packages/container/backend/212635273?tag=2024.05.06-e105023),
 images are attested and can be verified using the following command:
 
 ```shell
@@ -53,6 +57,17 @@ gh attestation verify oci://ghcr.io/jspaste/backend:latest \
 
 You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
 at [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
+
+## Development
+
+### Maintenance
+
+Over time, local repositories can become messy with untracked files, registered hooks, and temporary files in the .git
+folder. To clean up the repository (and possibly all your uncommitted work), run the following command:
+
+```shell
+bun run clean:git:all
+```
 
 ## License
 
