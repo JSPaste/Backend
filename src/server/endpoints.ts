@@ -1,5 +1,4 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { v1 } from '@x-v1/index.ts';
 import { v2 } from '@x-v2/index.ts';
 import { config } from '../server.ts';
 
@@ -9,5 +8,4 @@ export const endpoints = (instance: OpenAPIHono): void => {
 	});
 
 	instance.route('/v2/documents', v2());
-	instance.route('/v1/documents', v1());
 };
