@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "bun run build:server",
-		"build:server": "rm -rf ./dist/ && bun build ./src/server.ts --outdir=./dist/ --target=bun --minify --sourcemap=inline",
+		"build:server": "bun build ./src/server.ts --outfile=./dist/server.js --target=bun --minify --sourcemap=inline",
 		"build:standalone": "bun build ./src/server.ts --outfile=./dist/backend --compile --minify --sourcemap=inline",
 		"build:standalone:darwin-arm64": "bun run build:standalone -- --target=bun-darwin-arm64",
 		"build:standalone:linux-amd64": "bun run build:standalone -- --target=bun-linux-x64-modern",
@@ -31,8 +31,8 @@
 		"start:server": "bun run ./dist/server.js"
 	},
 	"dependencies": {
+		"@hono/swagger-ui": "~0.4.1",
 		"@hono/zod-openapi": "~0.16.4",
-		"@scalar/hono-api-reference": "~0.5.155",
 		"@types/bun": "~1.1.11",
 		"@types/node": "~22.7.7",
 		"env-var": "~7.5.0",

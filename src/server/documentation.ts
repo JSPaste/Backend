@@ -1,6 +1,6 @@
+import { swaggerUI } from '@hono/swagger-ui';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { config, env } from '../server.ts';
-import { middleware } from './middleware.ts';
 
 export const documentation = (instance: OpenAPIHono): void => {
 	instance.doc31('/oas.json', (ctx) => ({
@@ -27,8 +27,13 @@ export const documentation = (instance: OpenAPIHono): void => {
 				url: 'https://paste.inetol.net',
 				description: 'Inetol Infrastructure instance'
 			}
-		]
+		].filter((server, index, self) => self.findIndex((x) => x.url === server.url) === index)
 	}));
 
-	instance.get(env.docsPath, middleware.scalar());
+	instance.get(
+		env.docsPath,
+		swaggerUI({
+			url: config.apiPath.concat('/oas.json')
+		})
+	);
 };

@@ -101,7 +101,7 @@ jobs:
           artifacts: dist/*.tar.gz,dist/*.zip
           makeLatest: true
           prerelease: ${{ github.ref != 'refs/heads/stable' }}
-          generateReleaseNotes: true
+          generateReleaseNotes: ${{ github.ref == 'refs/heads/stable' }}
 
       - if: ${{ inputs.artifact-action == 'build-release' }}
         name: Attest artifact
