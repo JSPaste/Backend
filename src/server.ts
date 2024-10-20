@@ -1,9 +1,9 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { LogLevels, logger } from '@x-util/logger.ts';
 import { serve } from 'bun';
 import { get as envvar } from 'env-var';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
-import { logger } from './logger.ts';
 import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
 import { errorHandler } from './server/errorHandler.ts';
@@ -11,7 +11,7 @@ import { ErrorCode } from './types/ErrorHandler.ts';
 
 export const env = {
 	port: envvar('PORT').default(4000).asPortNumber(),
-	logLevel: envvar('LOGLEVEL').default(2).asIntPositive(),
+	logLevel: envvar('LOGLEVEL').default(LogLevels.info).asIntPositive(),
 	tls: envvar('TLS').asBoolStrict() ?? true,
 	documentMaxSize: envvar('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),
 	docsEnabled: envvar('DOCS_ENABLED').asBoolStrict() ?? false,
@@ -26,12 +26,6 @@ export const config = {
 	documentNameLengthMax: 32,
 	documentNameLengthDefault: 8
 } as const;
-
-logger.set(env.logLevel);
-
-process.on('SIGTERM', async () => {
-	await backend.stop();
-});
 
 const instance = new OpenAPIHono().basePath(config.apiPath);
 
@@ -65,4 +59,8 @@ export const server = (): typeof instance => {
 const backend = serve({
 	port: env.port,
 	fetch: server().fetch
+});
+
+process.on('SIGTERM', async () => {
+	await backend.stop();
 });
