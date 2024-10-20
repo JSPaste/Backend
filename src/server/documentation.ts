@@ -27,7 +27,7 @@ export const documentation = (instance: OpenAPIHono): void => {
 				url: 'https://paste.inetol.net',
 				description: 'Inetol Infrastructure instance'
 			}
-		]
+		].filter((server, index, self) => self.findIndex((x) => x.url === server.url) === index)
 	}));
 
 	instance.get(
