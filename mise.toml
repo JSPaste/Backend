@@ -1,0 +1,209 @@
+[tools]
+deno = "latest"
+
+[tasks."install"]
+description = "Install all dependencies"
+run = [
+    { task = "install:deno" }
+]
+
+[tasks."install:deno"]
+description = "Install Deno dependencies"
+run = '''
+if [ "${GITHUB_ACTIONS}" = "true" ]; then
+  mise exec -- deno install --frozen;
+else
+  mise exec -- deno install;
+fi
+'''
+
+[tasks."clean"]
+description = "Clean project environment"
+run = [
+    { task = "clean:devel" }
+]
+
+[tasks."clean:deno"]
+description = "Clean deno artifacts"
+run = [
+    "rm -rf ./node_modules/ ./deno.lock"
+]
+
+[tasks."clean:devel"]
+description = "Clean development artifacts"
+run = [
+    "rm -rf ./dist/"
+]
+
+[tasks."clean:storage"]
+description = "Clean storage (careful)"
+run = [
+    "rm -rf ./storage/"
+]
+
+[tasks."clean:git"]
+description = "Clean git (careful)"
+run = [
+    { task = "clean:git:untracked" },
+    { task = "clean:git:gc" },
+    { task = "clean:git:hooks" },
+]
+
+[tasks."clean:git:gc"]
+run = [
+    "git gc --aggressive --prune"
+]
+
+[tasks."clean:git:hooks"]
+run = [
+    "rm -rf ./.git/hooks/"
+]
+
+[tasks."clean:git:untracked"]
+run = [
+    "git clean -d -x -i"
+]
+
+[tasks."build"]
+description = "Build (server)"
+run = [
+    { task = "build:server" },
+]
+
+[tasks."build:server"]
+description = "Build server"
+sources = ['src/**/*.ts', "deno.lock", 'rolldown.config.ts']
+outputs = ['dist/backend.js', 'dist/backend.js.map']
+run = [
+    { task = "install" },
+    "mise exec -- deno x -A rolldown -c rolldown.config.ts"
+]
+
+[tasks."build:standalone_"]
+hide = true
+run = [
+    { task = "build:server" },
+    "mise exec -- deno compile --no-check --allow-all --exclude=./node_modules/ --exclude=./package.json --include=./dist/backend.js.map --output=${STANDALONE_OUTPUT:-./dist/backend} ${STANDALONE_TARGET:+--target=${STANDALONE_TARGET}} ./dist/backend.js"
+]
+
+[tasks."build:standalone"]
+description = "Build standalone binary (current os/arch)"
+run = [
+    { task = "build:standalone_" }
+]
+
+[tasks."build:standalone:darwin-arm64"]
+description = "Build standalone binary"
+env = { STANDALONE_OUTPUT = "./dist/backend.darwin-arm64", STANDALONE_TARGET = "aarch64-apple-darwin" }
+run = [
+    { task = "build:standalone_" }
+]
+
+[tasks."build:standalone:linux-amd64"]
+description = "Build standalone binary"
+env = { STANDALONE_OUTPUT = "./dist/backend.linux-amd64", STANDALONE_TARGET = "x86_64-unknown-linux-gnu" }
+run = [
+    { task = "build:standalone_" }
+]
+
+[tasks."build:standalone:linux-arm64"]
+description = "Build standalone binary"
+env = { STANDALONE_OUTPUT = "./dist/backend.linux-arm64", STANDALONE_TARGET = "aarch64-unknown-linux-gnu" }
+run = [
+    { task = "build:standalone_" }
+]
+
+[tasks."build:standalone:windows-amd64"]
+description = "Build standalone binary"
+env = { STANDALONE_OUTPUT = "./dist/backend.windows-amd64.exe", STANDALONE_TARGET = "x86_64-pc-windows-msvc" }
+run = [
+    { task = "build:standalone_" }
+]
+
+[tasks."test"]
+description = "Run all tests"
+run = [
+    "mise exec -- deno test -A"
+]
+
+[tasks."fix"]
+description = "Run all formatters"
+run = [
+    { task = "fix:biome" },
+]
+
+[tasks."fix:biome"]
+description = "Run Biome formater"
+run = [
+    { task = "install" },
+    "mise exec -- deno x -A biome check --write"
+]
+
+[tasks."lint"]
+description = "Run all linters"
+run = [
+    { task = "lint:deno" },
+    { task = "lint:biome" },
+]
+
+[tasks."lint:deno"]
+description = "Run Deno linter"
+run = [
+    { task = "install" },
+    "mise exec -- deno check --quiet"
+]
+
+[tasks."lint:biome"]
+description = "Run Biome linter"
+run = [
+    { task = "install" },
+    "mise exec -- deno x -A biome check"
+]
+
+[tasks."tidy"]
+description = "Tidy all"
+run = [
+    { task = "tidy:deno" },
+]
+
+[tasks."tidy:deno"]
+description = "Tidy Deno dependencies"
+run = [
+    { task = "clean:deno" },
+    { task = "install:deno" },
+]
+
+[tasks."start"]
+description = "Start backend"
+run = [
+    { task = "start:server" },
+]
+
+[tasks."start:dev"]
+alias = "dev"
+description = "Start devel server"
+run = [
+    { task = "install" },
+    "JSPB_DEBUG_DATABASE_EPHEMERAL=true JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A ./src/index.ts"
+]
+
+[tasks."start:build"]
+description = "Start dedicated server"
+run = [
+    { task = "build:server" },
+    { task = "start:server" },
+]
+
+[tasks."start:server"]
+description = "Start dedicated server (requires built backend)"
+dir = "{{ config_root }}/dist/"
+run = [
+    "JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A ./backend.js"
+]
+
+[tasks."start:server:inspector"]
+description = "Start dedicated server (requires built backend)"
+dir = "{{ config_root }}/dist/"
+run = [
+    "JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A --inspect-brk ./backend.js"
+]

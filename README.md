@@ -11,13 +11,13 @@
 Linux & macOS:
 
 ```shell
-./server
+./backend.<os>-<arch>
 ```
 
 Windows:
 
 ```powershell
-powershell -c ".\server.exe"
+powershell -c ".\backend.windows-<arch>.exe"
 ```
 
 ### Container
@@ -33,11 +33,11 @@ docker run --env-file=.env -d -p 127.0.0.1:4000:4000 \
 ## Validate
 
 > [!IMPORTANT]
-> All artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or
-> images built and distributed outside that repository are considered secure nor trusted by the JSPaste team.
+> All artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or images built and
+> distributed outside that repository are considered secure nor trusted by the JSPaste team.
 
-You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
-at [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
+You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually at
+[JSPaste Attestations](https://github.com/jspaste/backend/attestations).
 
 Artifacts are attested and can be verified using the following command:
 

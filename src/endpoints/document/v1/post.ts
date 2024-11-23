@@ -1,0 +1,116 @@
+import { Hono } from "@hono/hono";
+import { describeRoute, resolver, validator } from "@hono/openapi";
+import { monotonicUlid } from "@std/ulid";
+import { type } from "arktype";
+import { constant, mutable } from "#/global.ts";
+import { DocumentVersion } from "#db/query.ts";
+import { compression } from "#document/compression.ts";
+import { storage } from "#document/storage.ts";
+import { authMiddleware } from "#http/middleware/authorization.ts";
+import { bodySize } from "#http/middleware/bodySize.ts";
+import type { Env } from "#http/type.ts";
+import { generateName } from "#util/document.ts";
+import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import {
+  validatorDocumentName,
+  validatorDocumentNameLength,
+  validatorDocumentPassword
+} from "#util/validator/document.ts";
+import { validatorHandler } from "#util/validator/handler.ts";
+
+const schemaBody = await resolver(
+  type.unknown.configure({
+    description: "Document content.",
+    examples: ["Hello, World!"]
+  })
+).toOpenAPISchema();
+
+const schemaHeader = type({
+  "x-jspaste-name-length?": validatorDocumentNameLength,
+  "x-jspaste-name?": validatorDocumentName,
+  "x-jspaste-password?": validatorDocumentPassword
+});
+
+const schemaResponse = resolver(
+  type({
+    name: validatorDocumentName
+  })
+);
+
+export default new Hono<Env>().post(
+  "/",
+  describeRoute({
+    tags: ["DOCUMENT (v1)"],
+    summary: "Post document",
+    description: "Publish a document to the instance",
+    security: [{}, { bearer: [] }],
+    requestBody: {
+      content: {
+        "text/plain": schemaBody,
+        "application/octet-stream": schemaBody
+      }
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: schemaResponse
+          }
+        },
+        description: constant.http[200]
+      },
+      400: { ...genericErrorResponse, description: constant.http[400] },
+      404: { ...genericErrorResponse, description: constant.http[404] },
+
+      // auth middleware
+      401: { ...genericErrorResponse, description: constant.http[401] },
+
+      // document name already exists
+      409: { ...genericErrorResponse, description: constant.http[409] },
+
+      // bodyLimit middleware
+      413: { ...genericErrorResponse, description: constant.http[413] }
+    }
+  }),
+  validator("header", schemaHeader, validatorHandler),
+  authMiddleware,
+  bodySize,
+  async (ctx) => {
+    const {
+      "x-jspaste-password": password = null,
+      "x-jspaste-name": name,
+      "x-jspaste-name-length": nameLength
+      // @ts-expect-error upstream
+    } = ctx.req.valid("header") as typeof schemaHeader.infer;
+
+    let setName: string;
+    if (name) {
+      if (mutable.database.document.get("name", name)?.name) {
+        return error.throw(ErrorCode.documentNameAlreadyExists);
+      }
+
+      setName = name;
+    } else {
+      setName = generateName(nameLength);
+    }
+
+    const setId = monotonicUlid();
+    await storage.write(
+      setId,
+      // ctx.req.raw.body is only null on GET/HEAD
+      compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
+    );
+
+    mutable.database.document.create({
+      id: setId,
+      user_id: ctx.get("userId") ?? null,
+      version: DocumentVersion.V1,
+      name: setName,
+      password: password
+    });
+
+    return ctx.json({
+      name: setName
+    });
+  }
+);
