@@ -35,7 +35,7 @@ export const server = (): typeof instance => {
 	oas(instance);
 	endpoints(instance);
 
-	logger.debug('Registered routes:', instance.routes);
+	logger.debug('Registered routes:', instance.routes.map((route) => route.path).join(', '));
 	logger.info(`Listening on: http://localhost:${env.port}`);
 
 	return instance;
