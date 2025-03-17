@@ -6,7 +6,7 @@ COPY . ./
 RUN bun install --frozen-lockfile && \
     bun run build:standalone
 
-FROM docker.io/library/alpine:3.20
+FROM docker.io/library/alpine:3.21
 WORKDIR /backend/
 
 # FIXME: https://github.com/oven-sh/bun/issues/15307
