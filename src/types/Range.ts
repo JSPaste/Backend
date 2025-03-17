@@ -1,5 +1,5 @@
 // https://github.com/microsoft/TypeScript/issues/43505
-type Range<
+export type Range<
 	START extends number,
 	END extends number,
 	ARR extends unknown[] = [],
@@ -7,5 +7,3 @@ type Range<
 > = ARR['length'] extends END
 	? ACC | START | END
 	: Range<START, END, [...ARR, 1], ARR[START] extends undefined ? ACC : ACC | ARR['length']>;
-
-export type { Range };

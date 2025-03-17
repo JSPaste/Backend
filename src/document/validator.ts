@@ -1,9 +1,9 @@
+import { crypto } from '#document/crypto.ts';
+import { errorHandler } from '#server/errorHandler.ts';
+import type { Document } from '#type/Document.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
+import { ValidatorUtils } from '#util/ValidatorUtils.ts';
 import { config } from '../config.ts';
-import { errorHandler } from '../server/errorHandler.ts';
-import type { Document } from '../types/Document.ts';
-import { ErrorCode } from '../types/ErrorHandler.ts';
-import { ValidatorUtils } from '../utils/ValidatorUtils.ts';
-import { crypto } from './crypto.ts';
 
 export const validator = {
 	validateName: (name: string): void => {

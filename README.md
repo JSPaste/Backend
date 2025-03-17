@@ -1,8 +1,5 @@
 # Backend
 
-![OSSF-Scorecard](https://img.shields.io/ossf-scorecard/github.com/JSPaste/Backend?label=scorecard)
-![Codacy](https://img.shields.io/codacy/grade/1a477cecd06e4007b276021962e180ae/stable)
-
 ## Setup
 
 ### Binary
@@ -14,13 +11,13 @@
 Linux & macOS:
 
 ```shell
-./backend
+./server
 ```
 
 Windows:
 
 ```powershell
-powershell -c ".\backend.exe"
+powershell -c ".\server.exe"
 ```
 
 ### Container
@@ -29,20 +26,23 @@ powershell -c ".\backend.exe"
 
 ```shell
 docker pull ghcr.io/jspaste/backend:latest
-docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 \
+docker run --env-file=.env -d -p 127.0.0.1:4000:4000 \
   ghcr.io/jspaste/backend:latest
 ```
 
 ## Validate
 
 > [!IMPORTANT]
-> ALL artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or
+> All artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or
 > images built and distributed outside that repository are considered secure nor trusted by the JSPaste team.
+
+You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
+at [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
 
 Artifacts are attested and can be verified using the following command:
 
 ```shell
-gh attestation verify backend.tar.gz \
+gh attestation verify ./backend_latest_linux-amd64.tar.xz \
   --owner JSPaste
 ```
 
@@ -55,19 +55,9 @@ gh attestation verify oci://ghcr.io/jspaste/backend:latest \
   --owner JSPaste
 ```
 
-You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
-at [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
-
 ## Development
 
-### Maintenance
-
-Over time, local repositories can become messy with untracked files, registered hooks, and temporary files in the .git
-folder. To clean up the repository (and possibly all your uncommitted work), run the following command:
-
-```shell
-bun run clean:git:all
-```
+See the [`CONTRIBUTING`](CONTRIBUTING.md) file for more details.
 
 ## License
 

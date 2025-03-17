@@ -2,6 +2,7 @@ telemetry = false
 
 [install]
 auto = "disable"
+saveTextLockfile = true
 
 [run]
 bun = true

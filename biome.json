@@ -23,7 +23,6 @@
 				"noParameterAssign": "off"
 			},
 			"suspicious": {
-				"noExplicitAny": "off",
 				"noConsoleLog": "error"
 			}
 		}

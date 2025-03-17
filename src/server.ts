@@ -1,11 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { env } from '@x-util/env.ts';
-import { logger } from '@x-util/logger.ts';
 import { serve } from 'bun';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
+import { oas } from '#server/oas.ts';
+import { env } from '#util/env.ts';
+import { logger } from '#util/logger.ts';
 import { config } from './config.ts';
-import { documentation } from './server/documentation.ts';
 import { endpoints } from './server/endpoints.ts';
 import { errorHandler } from './server/errorHandler.ts';
 import { ErrorCode } from './types/ErrorHandler.ts';
@@ -32,10 +32,10 @@ export const server = (): typeof instance => {
 		return ctx.body(null, 404);
 	});
 
+	oas(instance);
 	endpoints(instance);
-	env.docsEnabled && documentation(instance);
 
-	logger.debug('Registered routes:', instance.routes);
+	logger.debug('Registered routes:', instance.routes.map((route) => route.path).join(', '));
 	logger.info(`Listening on: http://localhost:${env.port}`);
 
 	return instance;

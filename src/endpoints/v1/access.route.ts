@@ -1,9 +1,9 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { compression } from '#document/compression.ts';
+import { storage } from '#document/storage.ts';
+import { errorHandler, schema } from '#server/errorHandler.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
 import { config } from '../../config.ts';
-import { compression } from '../../document/compression.ts';
-import { storage } from '../../document/storage.ts';
-import { errorHandler, schema } from '../../server/errorHandler.ts';
-import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const accessRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({

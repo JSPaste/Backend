@@ -1,9 +1,9 @@
 import { deserialize, serialize } from 'bun:jsc';
+import { validator } from '#document/validator.ts';
+import { errorHandler } from '#server/errorHandler.ts';
+import type { Document } from '#type/Document.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
 import { config } from '../config.ts';
-import { errorHandler } from '../server/errorHandler.ts';
-import type { Document } from '../types/Document.ts';
-import { ErrorCode } from '../types/ErrorHandler.ts';
-import { validator } from './validator.ts';
 
 export const storage = {
 	read: async (name: string): Promise<Document> => {

@@ -1,10 +1,10 @@
 import { unlink } from 'node:fs/promises';
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { storage } from '#document/storage.ts';
+import { validator } from '#document/validator.ts';
+import { errorHandler, schema } from '#server/errorHandler.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
 import { config } from '../../config.ts';
-import { storage } from '../../document/storage.ts';
-import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../server/errorHandler.ts';
-import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const removeRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({

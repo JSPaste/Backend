@@ -1,6 +1,6 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { v1 } from '@x-v1/index.ts';
-import { v2 } from '@x-v2/index.ts';
+import { v1 } from '#v1/index.ts';
+import { v2 } from '#v2/index.ts';
 import { config } from '../config.ts';
 
 export const endpoints = (instance: OpenAPIHono): void => {
