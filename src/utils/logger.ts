@@ -1,4 +1,4 @@
-import { colors } from '@x-util/colors.ts';
+import { colors } from '#util/colors.ts';
 
 export enum LogLevels {
 	none = 0,

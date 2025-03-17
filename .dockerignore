@@ -1,7 +1,11 @@
 *
-!src/
-!bun.lockb
-!bunfig.toml
-!LICENSE
-!package.json
-!tsconfig.json
+
+# Project files
+!/bun.lock
+!/bunfig.toml
+!/LICENSE
+!/package.json
+!/tsconfig.json
+
+# SRC
+!/src/**

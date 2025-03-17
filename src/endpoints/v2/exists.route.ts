@@ -1,8 +1,8 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { validator } from '#document/validator.ts';
+import { errorHandler, schema } from '#server/errorHandler.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
 import { config } from '../../config.ts';
-import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../server/errorHandler.ts';
-import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const existsRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({

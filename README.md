@@ -11,13 +11,13 @@
 Linux & macOS:
 
 ```shell
-./backend
+./server
 ```
 
 Windows:
 
 ```powershell
-powershell -c ".\backend.exe"
+powershell -c ".\server.exe"
 ```
 
 ### Container
@@ -26,7 +26,7 @@ powershell -c ".\backend.exe"
 
 ```shell
 docker pull ghcr.io/jspaste/backend:latest
-docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 \
+docker run --env-file=.env -d -p 127.0.0.1:4000:4000 \
   ghcr.io/jspaste/backend:latest
 ```
 
@@ -36,10 +36,13 @@ docker run -e DOCS_ENABLED=true -d -p 127.0.0.1:4000:4000 \
 > All artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or
 > images built and distributed outside that repository are considered secure nor trusted by the JSPaste team.
 
+You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
+at [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
+
 Artifacts are attested and can be verified using the following command:
 
 ```shell
-gh attestation verify backend.tar.gz \
+gh attestation verify ./backend_latest_linux-amd64.tar.xz \
   --owner JSPaste
 ```
 
@@ -52,36 +55,9 @@ gh attestation verify oci://ghcr.io/jspaste/backend:latest \
   --owner JSPaste
 ```
 
-You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually
-at [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
-
 ## Development
 
-### API
-
-The API is documented under OpenAPI specification and can be found at the following path:
-
-```shell
-/:apipath/oas.json
-```
-
-There are several ways to interact with the API, we will cover its use with [Scalar](https://scalar.com).
-
-We recommend using the desktop application, however,
-you can also use the [web-based environment](https://client.scalar.com). (you may need to disable the CORS Proxy)
-
-Follow these steps to import the instance's `oas.json` to Scalar:
-
-![](https://static.x.inetol.net/jspaste/backend/scalar-t1.gif)
-
-### Maintenance
-
-Over time, local repositories can become messy with untracked files, registered hooks, and temporary files in the .git
-folder. To clean up the repository (and possibly all your uncommitted work), run the following command:
-
-```shell
-bun run clean:git:all
-```
+See the [`CONTRIBUTING`](CONTRIBUTING.md) file for more details.
 
 ## License
 

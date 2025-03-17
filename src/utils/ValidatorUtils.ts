@@ -1,4 +1,5 @@
 export class ValidatorUtils {
+	// biome-ignore lint/suspicious/noExplicitAny: We don't know the type of the value
 	public static isInstanceOf<T>(value: unknown, type: new (...args: any[]) => T): value is T {
 		return value instanceof type;
 	}
