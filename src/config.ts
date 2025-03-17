@@ -1,4 +1,4 @@
-import { env } from '@x-util/env.ts';
+import { env } from '#util/env.ts';
 
 export const config = {
 	protocol: env.tls ? 'https://' : 'http://',

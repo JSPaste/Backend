@@ -1,7 +1,7 @@
-import { env } from '@x-util/env.ts';
 import { bodyLimit as middlewareBodyLimit } from 'hono/body-limit';
-import { ErrorCode } from '../types/ErrorHandler.ts';
-import { errorHandler } from './errorHandler.ts';
+import { errorHandler } from '#server/errorHandler.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
+import { env } from '#util/env.ts';
 
 export const middleware = {
 	bodyLimit: (maxSize: number = env.documentMaxSize) => {

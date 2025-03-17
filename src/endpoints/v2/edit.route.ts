@@ -1,11 +1,11 @@
 import { type OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { storage } from '@x-document/storage.ts';
+import { compression } from '#document/compression.ts';
+import { storage } from '#document/storage.ts';
+import { validator } from '#document/validator.ts';
+import { errorHandler, schema } from '#server/errorHandler.ts';
+import { middleware } from '#server/middleware.ts';
+import { ErrorCode } from '#type/ErrorHandler.ts';
 import { config } from '../../config.ts';
-import { compression } from '../../document/compression.ts';
-import { validator } from '../../document/validator.ts';
-import { errorHandler, schema } from '../../server/errorHandler.ts';
-import { middleware } from '../../server/middleware.ts';
-import { ErrorCode } from '../../types/ErrorHandler.ts';
 
 export const editRoute = (endpoint: OpenAPIHono): void => {
 	const route = createRoute({

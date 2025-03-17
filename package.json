@@ -1,16 +1,17 @@
 {
 	"$schema": "https://json.schemastore.org/package.json",
-	"name": "@jspaste/backend",
 	"private": true,
 	"license": "EUPL-1.2",
 	"type": "module",
 	"scripts": {
 		"build": "bun run build:server",
-		"build:server": "bun build ./src/server.ts --outfile=./dist/server.js --target=bun --minify --sourcemap=inline",
-		"build:standalone": "bun build ./src/server.ts --outfile=./dist/backend --compile --minify --sourcemap=inline",
+		"build:server": "bun build ./src/server.ts --target=bun --minify --sourcemap=inline --outfile=./dist/server.js",
+		"build:standalone": "bun build ./dist/server.js --compile --minify --sourcemap=inline --outfile=./dist/server",
 		"build:standalone:darwin-arm64": "bun run build:standalone -- --target=bun-darwin-arm64",
-		"build:standalone:linux-amd64": "bun run build:standalone -- --target=bun-linux-x64-modern",
-		"build:standalone:linux-arm64": "bun run build:standalone -- --target=bun-linux-arm64",
+		"build:standalone:linux-amd64-glibc": "bun run build:standalone -- --target=bun-linux-x64-modern",
+		"build:standalone:linux-amd64-musl": "bun run build:standalone -- --target=bun-linux-x64-modern-musl",
+		"build:standalone:linux-arm64-glibc": "bun run build:standalone -- --target=bun-linux-arm64",
+		"build:standalone:linux-arm64-musl": "bun run build:standalone -- --target=bun-linux-arm64-musl",
 		"build:standalone:windows-amd64": "bun run build:standalone -- --target=bun-windows-x64-modern",
 		"clean:git:all": "bun run clean:git:untracked && bun run clean:git:gc && bun run clean:git:hooks",
 		"clean:git:all:force": "bun run clean:git:untracked:force && bun run clean:git:gc && bun run clean:git:hooks",
@@ -26,23 +27,23 @@
 		"lint:biome": "bun biome lint",
 		"lint:tsc": "bun tsc --noEmit",
 		"start": "bun run start:server",
-		"start:dev": "bun run ./src/server.ts",
+		"start:dev": "mkdir -p ./dist/ && LOGLEVEL=4 bun run --cwd=./dist/ ../src/server.ts",
 		"start:rebuild": "bun run build:server && bun run start:server",
-		"start:server": "bun run ./dist/server.js"
+		"start:server": "mkdir -p ./dist/ && bun run --cwd=./dist/ ./server.js"
 	},
 	"dependencies": {
 		"@hono/zod-openapi": "~0.19.0",
 		"env-var": "~7.5.0",
-		"hono": "~4.6.10"
+		"hono": "~4.7.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "~1.9.4",
-		"@types/bun": "^1.1.13",
+		"@biomejs/biome": "~1.9.0",
+		"@types/bun": "^1.2.0",
 		"lefthook": "~1.11.0",
-		"sort-package-json": "~3.0.0"
+		"sort-package-json": "^3.0.0"
 	},
 	"peerDependencies": {
-		"typescript": "5.8.2"
+		"typescript": "~5.8.0"
 	},
 	"trustedDependencies": [
 		"@biomejs/biome",

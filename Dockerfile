@@ -1,36 +1,44 @@
-FROM docker.io/oven/bun:1-alpine AS builder
-WORKDIR /build/
+FROM --platform=$BUILDPLATFORM docker.io/oven/bun:1-alpine AS builder-standalone
 
+WORKDIR /build/
 COPY . ./
 
-RUN bun install --frozen-lockfile && \
-    bun run build:standalone
+RUN bun install --frozen-lockfile \
+ && bun run build:server
 
-FROM docker.io/library/alpine:3.21
+RUN addgroup jspaste \
+ && adduser -G jspaste -u 7777 -s /bin/false -D jspaste \
+ && grep jspaste /etc/passwd > /tmp/.backend.passwd
+
+ARG TARGETOS
+ARG TARGETARCH
+
+RUN bun run build:standalone
+
+FROM --platform=$BUILDPLATFORM docker.io/library/alpine:3.21
+
+RUN apk add --no-cache libstdc++
+
+COPY --from=builder-standalone /tmp/.backend.passwd /etc/passwd
+COPY --from=builder-standalone /etc/group /etc/group
+
 WORKDIR /backend/
+COPY --chown=jspaste:jspaste --from=builder-standalone /build/dist/server ./
+COPY --chown=jspaste:jspaste --from=builder-standalone /build/LICENSE ./
 
-# FIXME: https://github.com/oven-sh/bun/issues/15307
-RUN apk add --no-cache libgcc libstdc++
-
-RUN adduser -D -h /backend jspaste && \
-    chown jspaste:jspaste /backend/
-
-COPY --chown=jspaste:jspaste --from=builder /build/dist/backend ./
-COPY --chown=jspaste:jspaste --from=builder /build/LICENSE ./
-
-LABEL org.opencontainers.image.url="https://jspaste.eu" \
+LABEL org.opencontainers.image.created="0001-01-01T00:00:00Z" \
+      org.opencontainers.image.description="JSPaste Backend" \
+      org.opencontainers.image.licenses="EUPL-1.2" \
+      org.opencontainers.image.revision="unspecified" \
       org.opencontainers.image.source="https://github.com/jspaste/backend" \
-      org.opencontainers.image.title="@jspaste/backend" \
-      org.opencontainers.image.description="The backend for JSPaste" \
-      org.opencontainers.image.documentation="https://docs.jspaste.eu" \
-      org.opencontainers.image.licenses="EUPL-1.2"
+      org.opencontainers.image.title="jspaste-backend" \
+      org.opencontainers.image.url="https://github.com/jspaste/backend" \
+      org.opencontainers.image.version="unspecified"
 
-ARG BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
-ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=${BUN_RUNTIME_TRANSPILER_CACHE_PATH}
-
-USER jspaste
-
-VOLUME /backend/storage/
 EXPOSE 4000
 
-ENTRYPOINT ["./backend"]
+VOLUME /backend/storage/
+
+USER jspaste:jspaste
+
+ENTRYPOINT ["/backend/server"]

@@ -1,5 +1,5 @@
-import { LogLevels } from '@x-util/logger.ts';
 import { get } from 'env-var';
+import { LogLevels } from '#util/logger.ts';
 
 export const env = {
 	documentMaxSize: get('DOCUMENT_MAXSIZE').default(1024).asIntPositive(),

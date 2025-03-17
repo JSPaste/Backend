@@ -1,8 +1,8 @@
-enum DocumentVersion {
+export enum DocumentVersion {
 	V1 = 1
 }
 
-interface Document {
+export type Document = {
 	data: Uint8Array;
 	header: {
 		name: string;
@@ -10,7 +10,4 @@ interface Document {
 		passwordHash: Uint8Array | null;
 	};
 	version: DocumentVersion;
-}
-
-export type { Document };
-export { DocumentVersion };
+};

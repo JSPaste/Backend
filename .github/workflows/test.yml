@@ -1,23 +1,16 @@
-name: CI -> Test
+---
+name: CI
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - dev
-    paths-ignore:
-      - '*.md'
-      - '.*ignore'
-
+  merge_group:
   pull_request:
     branches:
       - dev
     paths-ignore:
       - '*.md'
-      - '.*ignore'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -26,11 +19,25 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.ctx.outputs.branch }}
+      sha: ${{ steps.ctx.outputs.sha }}
+      sha_short: ${{ steps.ctx.outputs.sha_short }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
         with:
           egress-policy: audit
+
+      - name: Save context information
+        id: ctx
+        env:
+          CTX_BRANCH: ${{ github.head_ref || github.ref_name }}
+          CTX_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          echo "branch=${CTX_BRANCH}" >>"$GITHUB_OUTPUT"
+          echo "sha=${CTX_SHA}" >>"$GITHUB_OUTPUT"
+          echo "sha_short=${CTX_SHA::7}" >>"$GITHUB_OUTPUT"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
@@ -40,11 +47,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Run build:server
-        run: bun run build:server
-
       - name: Run lint
         run: bun run lint
+
+      - name: Install deps & build server
+        run: |
+          bun install --frozen-lockfile
+          bun run build:server
+
+      - name: Test run server
+        run: |
+          bun run start:server &
+          SERVER_PID=$!
+          sleep 10
+          kill $SERVER_PID
