@@ -39,7 +39,7 @@
 		"@biomejs/biome": "~1.9.4",
 		"@types/bun": "^1.1.13",
 		"lefthook": "~1.11.0",
-		"sort-package-json": "~2.11.0"
+		"sort-package-json": "~3.0.0"
 	},
 	"peerDependencies": {
 		"typescript": "5.5.4"
