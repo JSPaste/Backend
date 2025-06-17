@@ -38,7 +38,7 @@
 		"hono": "~4.7.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "~1.9.0",
+		"@biomejs/biome": "~2.0.0",
 		"@types/bun": "^1.2.0",
 		"lefthook": "~1.11.0",
 		"sort-package-json": "^3.0.0"
