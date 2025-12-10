@@ -15,7 +15,7 @@ ARG TARGETARCH
 
 RUN bun run build:standalone
 
-FROM --platform=$BUILDPLATFORM docker.io/library/alpine:3.21
+FROM --platform=$BUILDPLATFORM docker.io/library/alpine:3.23
 
 RUN apk add --no-cache libstdc++
 
