@@ -1,11 +1,10 @@
 *
 
-# Project files
-!/bun.lock
-!/bunfig.toml
-!/LICENSE
-!/package.json
-!/tsconfig.json
-
-# SRC
 !/src/**
+!/.npmrc
+!/deno.json
+!/deno.lock
+!/LICENSE
+!/mise.toml
+!/package.json
+!/rolldown.config.ts

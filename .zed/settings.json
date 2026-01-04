@@ -1,0 +1,53 @@
+// -*- mode: jsonc -*-
+
+{
+  // lsp
+  "lsp": {
+    "deno": {
+      "settings": {
+        "deno": {
+          "enable": true
+        }
+      }
+    },
+    "biome": {
+      "settings": {
+        "require_config_file": true,
+        "config_path": "./biome.json"
+      }
+    },
+    "yaml-language-server": {
+      "settings": {
+        "yaml": {
+          "keyOrdering": false,
+          "format": {
+            "singleQuote": false
+          }
+        }
+      }
+    }
+  },
+
+  // language specific (overrides global)
+  "languages": {
+    "JavaScript": {
+      "formatter": "language_server",
+      "language_servers": ["biome", "deno"]
+    },
+    "TypeScript": {
+      "formatter": "language_server",
+      "language_servers": ["biome", "deno"]
+    },
+    "JSON": {
+      "language_servers": ["biome", "json-language-server"],
+      "formatter": "language_server"
+    },
+    "JSONC": {
+      "language_servers": ["biome", "json-language-server"],
+      "formatter": "language_server"
+    },
+    "YAML": {
+      "format_on_save": "off"
+    }
+  }
+}

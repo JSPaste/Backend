@@ -1,11 +1,10 @@
-import { type InputType, brotliCompressSync, brotliDecompressSync } from 'node:zlib';
-
+// node:zlib buffers the stream into memory
 export const compression = {
-	encode: (data: InputType): Buffer => {
-		return brotliCompressSync(data);
-	},
+  encode: (readable: ReadableStream<Uint8Array<ArrayBuffer>>): ReadableStream<Uint8Array> => {
+    return readable.pipeThrough(new CompressionStream("deflate"));
+  },
 
-	decode: (data: InputType): Buffer => {
-		return brotliDecompressSync(data);
-	}
+  decode: (readable: ReadableStream<Uint8Array<ArrayBuffer>>): ReadableStream<Uint8Array> => {
+    return readable.pipeThrough(new DecompressionStream("deflate"));
+  }
 } as const;

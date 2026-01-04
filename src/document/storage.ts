@@ -1,24 +1,54 @@
-import { deserialize, serialize } from 'bun:jsc';
-import { validator } from '#document/validator.ts';
-import { errorHandler } from '#server/errorHandler.ts';
-import type { Document } from '#type/Document.ts';
-import { ErrorCode } from '#type/ErrorHandler.ts';
-import { config } from '../config.ts';
+import { constant } from "#/global.ts";
 
 export const storage = {
-	read: async (name: string): Promise<Document> => {
-		validator.validateName(name);
+  delete: async (id: string): Promise<void> => {
+    try {
+      await Deno.remove(constant.path.struct.storageData + id);
+    } catch {
+      // already deleted (probably)
+    }
+  },
 
-		const file = Bun.file(config.storagePath + name);
+  read: async (id: string): Promise<Deno.FsFile> => {
+    return Deno.open(constant.path.struct.storageData + id);
+  },
 
-		if (!(await file.exists())) {
-			errorHandler.send(ErrorCode.documentNotFound);
-		}
+  write: async (id: string, data: ReadableStream<Uint8Array>): Promise<void> => {
+    await using handle = await Deno.open(constant.path.struct.storageData + id, {
+      createNew: true,
+      write: true
+    });
 
-		return deserialize(await file.arrayBuffer());
-	},
+    await data.pipeTo(handle.writable, { preventClose: true });
+  },
 
-	write: async (name: string, document: Document): Promise<void> => {
-		await Bun.write(config.storagePath + name, serialize(document));
-	}
+  overwrite: async (id: string, data: ReadableStream<Uint8Array>): Promise<void> => {
+    await using handle = await Deno.open(constant.path.struct.storageData + id, {
+      write: true,
+      truncate: true
+    });
+
+    await data.pipeTo(handle.writable, { preventClose: true });
+  },
+
+  // relaxed exists because races between fs/db may ocurr
+  list: function* (relaxed?: boolean): Iterable<string> {
+    for (const entry of Deno.readDirSync(constant.path.struct.storageData)) {
+      if (entry.isFile) {
+        if (relaxed) {
+          const info = Deno.statSync(constant.path.struct.storageData + entry.name);
+
+          if (
+            info.mtime &&
+            constant.temporal.utc().epochMilliseconds -
+              info.mtime.toTemporalInstant().toZonedDateTimeISO("Etc/UTC").epochMilliseconds <
+              10_000
+          )
+            continue;
+        }
+
+        yield entry.name;
+      }
+    }
+  }
 } as const;
