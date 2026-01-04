@@ -1,12 +1,11 @@
-import { nanoid } from "nanoid";
 import { constant, mutable } from "#/global.ts";
 
-export const generateToken = (): string => nanoid(32);
+export const generateToken = (): string => constant.nanoid(32);
 
 export const generateName = (length = 8): string => {
   let name: string;
   do {
-    name = nanoid(length);
+    name = constant.nanoid(length);
   } while (mutable.database.document.get("name", name)?.name);
 
   return name;
