@@ -52,7 +52,7 @@ export default new Hono<Env>().delete(
     }
 
     mutable.database.document.delete("name", name);
-    await storage.delete(document.id);
+    void storage.delete(document.id);
 
     return ctx.body(null);
   }
