@@ -32,8 +32,8 @@ export const bodySize = createMiddleware<Env>(async (ctx, next) => {
 
       size += value.length;
       if (size > constant.env.JSPB_DOCUMENT_SIZE) {
-        controller.error(error.get(ErrorCode.documentInvalidSize));
-        return;
+        stream.cancel();
+        return error.throw(ErrorCode.documentInvalidSize);
       }
 
       controller.enqueue(value);
