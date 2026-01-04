@@ -15,15 +15,7 @@ export const storage = {
 
   write: async (id: string, data: ReadableStream<Uint8Array>): Promise<void> => {
     await using handle = await Deno.open(constant.path.struct.storageData + id, {
-      createNew: true,
-      write: true
-    });
-
-    await data.pipeTo(handle.writable, { preventClose: true });
-  },
-
-  overwrite: async (id: string, data: ReadableStream<Uint8Array>): Promise<void> => {
-    await using handle = await Deno.open(constant.path.struct.storageData + id, {
+      create: true,
       write: true,
       truncate: true
     });

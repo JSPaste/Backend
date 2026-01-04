@@ -113,7 +113,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
     }
 
     if (ctx.get("hasBody")) {
-      await storage.overwrite(
+      await storage.write(
         document.id,
         // ctx.req.raw.body is only null on GET/HEAD
         compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
