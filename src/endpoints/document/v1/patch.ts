@@ -10,7 +10,11 @@ import { bodySize } from "#http/middleware/bodySize.ts";
 import type { Env } from "#http/type.ts";
 import { isOwner } from "#util/document.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
-import { validatorDocumentName, validatorDocumentPassword } from "#util/validator/document.ts";
+import {
+  validatorDocumentName,
+  validatorDocumentPassword,
+  validatorDocumentPasswordEmpty
+} from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
 
 const schemaBody = await resolver(
@@ -26,7 +30,7 @@ const schemaParam = type({
 
 const schemaHeader = type({
   "x-jspaste-name?": validatorDocumentName,
-  "x-jspaste-password?": validatorDocumentPassword
+  "x-jspaste-password?": validatorDocumentPassword.or(validatorDocumentPasswordEmpty)
 });
 
 export default new Hono<Env>().patch(

@@ -53,12 +53,19 @@ export const validatorDocumentNameLength = type.string.pipe(
     })
 );
 
-// an empty string is the same as null here
-export const validatorDocumentPassword = type("''")
-  .or(type.string.atLeastLength(constant.documentPasswordLengthMin).atMostLength(constant.documentPasswordLengthMax))
+export const validatorDocumentPasswordEmpty = type.string.exactlyLength(0).configure({
+  ref: "DocumentPassword.empty",
+  description: "The password for the document (should only be used to nullify an existing password)",
+  examples: [""]
+});
+
+export const validatorDocumentPassword = type.string
+  .atLeastLength(constant.documentPasswordLengthMin)
+  .atMostLength(constant.documentPasswordLengthMax)
   .configure({
-    ref: "DocumentPassword",
-    description: "The password to access the document"
+    ref: "DocumentPassword.default",
+    description: "The password for the document",
+    examples: ["myPassword"]
   });
 
 export const validatorDocumentDownload = type.unknown.configure({
