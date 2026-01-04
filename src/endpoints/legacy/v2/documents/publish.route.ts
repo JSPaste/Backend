@@ -86,11 +86,6 @@ export default new Hono<Env>().post(
 
     const id = monotonicUlid();
 
-    await storage.write(
-      id,
-      // ctx.req.raw.body is only null on GET/HEAD
-      compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
-    );
     mutable.database.document.create({
       id: id,
       user_id: null,
@@ -98,6 +93,12 @@ export default new Hono<Env>().post(
       name: setName,
       password: password
     });
+
+    await storage.write(
+      id,
+      // ctx.req.raw.body is only null on GET/HEAD
+      compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
+    );
 
     return ctx.json({
       key: setName,
