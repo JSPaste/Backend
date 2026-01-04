@@ -1,12 +1,13 @@
 import { type } from "arktype";
 import { constant } from "#/global.ts";
+import { regexBase64URL, regexHeaderBearer } from "./regex.ts";
 
-export const validatorUserToken = type(/^[A-Za-z0-9_-]+$/)
+export const validatorUserToken = type(regexBase64URL)
   .atLeastLength(constant.userTokenLengthMin)
   .atMostLength(constant.userTokenLengthMax)
   .configure({
-    description: "The user token",
-    examples: ["CW41t9I218GiXyFQtLpKJQ76In-CVK3H"],
+    description: "A user token",
+    examples: ["myUserTokenHere"],
     expected: (ctx) => {
       switch (ctx.code) {
         case "pattern": {
@@ -25,9 +26,9 @@ export const validatorUserToken = type(/^[A-Za-z0-9_-]+$/)
     }
   });
 
-export const validatorUserHeader = type(/^Bearer .+$/)
+export const validatorUserHeader = type(regexHeaderBearer)
   .configure({
-    description: "The Bearer token",
+    description: "A RFC 6750 structured Bearer header",
     expected: "a valid header"
   })
   .pipe((string) => string.split(" ")[1], validatorUserToken);

@@ -50,8 +50,8 @@ export default new Hono<Env>().delete(
       return error.throw(ErrorCode.documentNotFound);
     }
 
-    await storage.delete(document.id);
     mutable.database.document.delete("name", param.name);
+    void storage.delete(document.id);
 
     return ctx.json({ removed: true });
   }

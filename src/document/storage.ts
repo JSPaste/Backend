@@ -1,4 +1,5 @@
 import { constant } from "#/global.ts";
+import { ErrorCode, error } from "../utils/error.ts";
 
 export const storage = {
   delete: async (id: string): Promise<void> => {
@@ -15,20 +16,22 @@ export const storage = {
 
   write: async (id: string, data: ReadableStream<Uint8Array>): Promise<void> => {
     await using handle = await Deno.open(constant.path.struct.storageData + id, {
-      createNew: true,
-      write: true
-    });
-
-    await data.pipeTo(handle.writable, { preventClose: true });
-  },
-
-  overwrite: async (id: string, data: ReadableStream<Uint8Array>): Promise<void> => {
-    await using handle = await Deno.open(constant.path.struct.storageData + id, {
+      create: true,
       write: true,
       truncate: true
     });
 
-    await data.pipeTo(handle.writable, { preventClose: true });
+    try {
+      await data.pipeTo(handle.writable, { preventClose: true });
+    } catch (why) {
+      void storage.delete(id);
+
+      if (why instanceof Deno.errors.BrokenPipe) {
+        return error.throw(ErrorCode.documentInvalidSize);
+      }
+
+      throw why;
+    }
   },
 
   // relaxed exists because races between fs/db may ocurr
