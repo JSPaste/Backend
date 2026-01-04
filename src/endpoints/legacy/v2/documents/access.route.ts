@@ -87,11 +87,11 @@ export default new Hono<Env>().get(
       }
     }
 
-    await using file = await storage.read(document.id);
+    await using fileHandle = await storage.read(document.id);
 
     return ctx.json({
       key: param.name,
-      data: await toText(compression.decode(file.readable)),
+      data: await toText(compression.decode(fileHandle.readable)),
       url: new URL(ctx.req.url).host.concat("/", param.name),
       expirationTimestamp: 0
     });

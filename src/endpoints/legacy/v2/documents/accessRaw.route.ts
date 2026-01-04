@@ -79,20 +79,19 @@ export default new Hono<Env>().get(
       }
     }
 
-    const file = await storage.read(document.id);
+    const fileHandle = await storage.read(document.id);
 
-    let streamData: ReadableStream<Uint8Array>;
-    if (ctx.req.header("Accept-Encoding")?.includes("deflate")) {
-      streamData = file.readable;
+    let fileContent: ReadableStream<Uint8Array>;
+    if (ctx.req.header("accept-encoding")?.includes("deflate")) {
+      fileContent = fileHandle.readable;
       ctx.res.headers.set("Content-Encoding", "deflate");
     } else {
-      streamData = compression.decode(file.readable);
+      fileContent = compression.decode(fileHandle.readable);
     }
 
-    ctx.res.headers.append("Cache-Control", "no-cache");
-    ctx.res.headers.set("Content-Type", "text/plain");
-    ctx.res.headers.set("Transfer-Encoding", "chunked");
+    ctx.res.headers.set("content-type", "text/plain");
+    ctx.res.headers.set("transfer-encoding", "chunked");
 
-    return stream(ctx, async (stream) => await stream.pipe(streamData));
+    return stream(ctx, async (stream) => await stream.pipe(fileContent));
   }
 );
