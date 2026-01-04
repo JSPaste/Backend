@@ -1,4 +1,5 @@
 import { constant } from "#/global.ts";
+import { ErrorCode, error } from "../utils/error.ts";
 
 export const storage = {
   delete: async (id: string): Promise<void> => {
@@ -20,7 +21,17 @@ export const storage = {
       truncate: true
     });
 
-    await data.pipeTo(handle.writable, { preventClose: true });
+    try {
+      await data.pipeTo(handle.writable, { preventClose: true });
+    } catch (why) {
+      void storage.delete(id);
+
+      if (why instanceof Deno.errors.BrokenPipe) {
+        return error.throw(ErrorCode.documentInvalidSize);
+      }
+
+      throw why;
+    }
   },
 
   // relaxed exists because races between fs/db may ocurr
