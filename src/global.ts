@@ -79,10 +79,8 @@ export const constant = {
     instant: Temporal.Now.instant
   },
   http: STATUS_CODES as Record<StatusCode, string>,
-  text: {
-    decode: new TextDecoder().decode,
-    encode: new TextEncoder().encode
-  },
+  textEncoder: new TextEncoder(),
+  textDecoder: new TextDecoder(),
   ulid: {
     userRoot: "0000000000FFFF000000000000"
   }
