@@ -70,14 +70,14 @@ The API is documented under OpenAPI specification and can be found at the follow
 /api/oas.json
 ```
 
-There are several ways to interact with the API, we will cover its use with [Scalar](https://scalar.com).
+You can get a quick overview with:
+- [Swagger Editor](https://editor.swagger.io/?url=https://jspaste.eu/api/oas.json)
+- [Scalar Client](https://client.scalar.com/?url=https://jspaste.eu/api/oas.json)
 
-We recommend using the desktop application, however, you can also use the
-[web-based environment](https://client.scalar.com). (you may need to disable the CORS Proxy)
+If using Scalar Client, disable the CORS proxy and follow these steps to import the
+instance `oas.json`..:
 
-Follow these steps to import the instance's `oas.json` to Scalar..:
-
-![](https://static.x.inetol.net/jspaste/backend/scalar-t1.gif)
+![](https://static.x.inetol.net/jspaste/backend/scalar-t1.webp)
 
 ## Maintenance
 
