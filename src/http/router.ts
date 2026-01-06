@@ -2,12 +2,12 @@ import { cors } from "@hono/hono/cors";
 import { HTTPException } from "@hono/hono/http-exception";
 import { Hono } from "@hono/hono/tiny";
 import { openAPIRouteHandler } from "@hono/openapi";
+import { constant } from "#/global.ts";
 import { v1DocumentRouter } from "#endpoint/document/v1/index.ts";
 import { v2LegacyDocumentRouter } from "#endpoint/legacy/v2/documents/index.ts";
+import { v1UserRouter } from "#endpoint/user/v1/index.ts";
 import { Logger } from "#util/console.ts";
 import { ErrorCode, error } from "#util/error.ts";
-import { v1UserRouter } from "../endpoints/user/v1/index.ts";
-import { constant } from "../global.ts";
 import type { Env } from "./type.ts";
 
 const log: Logger = new Logger("http");

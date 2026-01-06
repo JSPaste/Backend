@@ -21,9 +21,7 @@ export const constant = {
   documentNameLengthMin: 2,
   documentPasswordLengthMax: 128,
   documentPasswordLengthMin: 2,
-  userTokenLengthDefault: 16,
-  userTokenLengthMax: 64,
-  userTokenLengthMin: 16,
+  userTokenLength: 59,
   env: env(
     {
       JSPB_LOG_VERBOSITY: type.keywords.number.integer.atLeast(0).atMost(4).default(3),
@@ -47,8 +45,8 @@ export const constant = {
       JSPB_DOCUMENT_ANONYMOUS_AGE: type.string.pipe(humanizeTime).default("7d"),
 
       // user
-      "JSPB_USER_ROOT_TOKEN?": type.string,
       JSPB_USER_REGISTER: type.boolean.default(true),
+      JSPB_USER_ROOT_RECOVERY: type.boolean.default(false),
 
       // task
       JSPB_TASK_SWEEPER: type(
@@ -79,8 +77,5 @@ export const constant = {
   },
   http: STATUS_CODES as Record<StatusCode, string>,
   textEncoder: new TextEncoder(),
-  textDecoder: new TextDecoder(),
-  ulid: {
-    userRoot: "0000000000FFFF000000000000"
-  }
+  textDecoder: new TextDecoder()
 } as const;

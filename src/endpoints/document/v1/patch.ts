@@ -8,6 +8,7 @@ import { authMiddleware } from "#http/middleware/authorization.ts";
 import { bodyCheck } from "#http/middleware/bodyCheck.ts";
 import { bodySize } from "#http/middleware/bodySize.ts";
 import type { Env } from "#http/type.ts";
+import { generateHash } from "#util/crypto.ts";
 import { isOwner } from "#util/document.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
 import {
@@ -77,7 +78,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
   bodySize,
   bodyCheck,
   async (ctx) => {
-    let {
+    const {
       actualName
       // @ts-expect-error upstream
     } = ctx.req.valid("param") as typeof schemaParam.infer;
@@ -102,7 +103,9 @@ Note: To remove (nullify) a value, send the header with an empty value`,
       if (newPassword === "") {
         mutable.database.document.update("name", actualName, "password", null);
       } else {
-        mutable.database.document.update("name", actualName, "password", newPassword);
+        const hash = await generateHash(newPassword);
+
+        mutable.database.document.update("name", actualName, "password", hash.combo);
       }
     }
 
@@ -113,7 +116,6 @@ Note: To remove (nullify) a value, send the header with an empty value`,
       }
 
       mutable.database.document.update("name", actualName, "name", newName);
-      actualName = newName;
     }
 
     if (ctx.get("hasBody")) {

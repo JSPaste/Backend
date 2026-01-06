@@ -45,11 +45,7 @@ const initDatabase = async (): Promise<void> => {
 
   constant.store.dispose.set(id, [0, async () => mutable.database[Symbol.dispose]()]);
 
-  mutable.database.migration();
-
-  if (constant.env.JSPB_USER_ROOT_TOKEN) {
-    mutable.database.user.update("id", constant.ulid.userRoot, "token", constant.env.JSPB_USER_ROOT_TOKEN);
-  }
+  await mutable.database.migration();
 };
 
 const initTask = async (): Promise<void> => {
@@ -58,7 +54,7 @@ const initTask = async (): Promise<void> => {
   });
 };
 
-export const init = async () => {
+export const init = async (): Promise<void> => {
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "SIGUSR1", "SIGUSR2"] satisfies Deno.Signal[]) {
     Deno.addSignalListener(signal, async () => {
       if (mutable.shutdown) return;

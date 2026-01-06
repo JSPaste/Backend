@@ -9,6 +9,7 @@ import { storage } from "#document/storage.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { bodySize } from "#http/middleware/bodySize.ts";
 import type { Env } from "#http/type.ts";
+import { generateHash } from "#util/crypto.ts";
 import { generateName } from "#util/document.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
 import {
@@ -82,7 +83,7 @@ export default new Hono<Env>().post(
   bodySize,
   async (ctx) => {
     const {
-      "x-jspaste-password": password = null,
+      "x-jspaste-password": password,
       "x-jspaste-name": name,
       "x-jspaste-name-length": nameLength
       // @ts-expect-error upstream
@@ -101,12 +102,19 @@ export default new Hono<Env>().post(
 
     const setId = monotonicUlid();
 
+    let hashCombo: string | null;
+    if (password) {
+      hashCombo = (await generateHash(password)).combo;
+    } else {
+      hashCombo = null;
+    }
+
     mutable.database.document.create({
       id: setId,
       user_id: ctx.get("userId") ?? null,
       version: DocumentVersion.V1,
       name: setName,
-      password: password
+      password: hashCombo
     });
 
     await storage.write(

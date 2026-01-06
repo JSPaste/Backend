@@ -1,5 +1,5 @@
 import { constant } from "#/global.ts";
-import { ErrorCode, error } from "../utils/error.ts";
+import { ErrorCode, error } from "#util/error.ts";
 
 export const storage = {
   delete: async (id: string): Promise<void> => {
@@ -34,7 +34,7 @@ export const storage = {
     }
   },
 
-  // relaxed exists because races between fs/db may ocurr
+  // relaxed exists because races between fs/db may occur
   list: function* (relaxed?: boolean): Iterable<string> {
     for (const entry of Deno.readDirSync(constant.path.struct.storageData)) {
       if (entry.isFile) {
@@ -42,15 +42,16 @@ export const storage = {
           const info = Deno.statSync(constant.path.struct.storageData + entry.name);
 
           if (
-            info.mtime &&
+            !info.mtime ||
             constant.temporal.utc().epochMilliseconds -
-              info.mtime.toTemporalInstant().toZonedDateTimeISO("Etc/UTC").epochMilliseconds <
+              info.mtime.toTemporalInstant().toZonedDateTimeISO("Etc/UTC").epochMilliseconds >=
               10_000
-          )
-            continue;
+          ) {
+            yield entry.name;
+          }
+        } else {
+          yield entry.name;
         }
-
-        yield entry.name;
       }
     }
   }

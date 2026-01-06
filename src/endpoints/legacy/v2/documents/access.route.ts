@@ -6,6 +6,7 @@ import { constant, mutable } from "#/global.ts";
 import { compression } from "#document/compression.ts";
 import { storage } from "#document/storage.ts";
 import type { Env } from "#http/type.ts";
+import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentName, validatorDocumentPassword } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -82,7 +83,7 @@ export default new Hono<Env>().get(
         return error.throw(ErrorCode.documentPasswordNeeded);
       }
 
-      if (header.password !== document.password) {
+      if (!(await verifyHash(header.password, document.password))) {
         return error.throw(ErrorCode.documentInvalidPassword);
       }
     }

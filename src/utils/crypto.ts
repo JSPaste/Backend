@@ -1,9 +1,13 @@
 import { crypto } from "@std/crypto";
 import { decodeAscii85, encodeAscii85 } from "@std/encoding";
-import { constant } from "../global.ts";
+import { constant } from "#/global.ts";
+
+export const generateSalt = (length: number): Uint8Array<ArrayBuffer> => {
+  return crypto.getRandomValues(new Uint8Array(length));
+};
 
 export const generateHash = async (input: string, salt?: Uint8Array) => {
-  const defaultSalt = salt ?? crypto.getRandomValues(new Uint8Array(4));
+  const defaultSalt = salt ?? generateSalt(4);
 
   const dataBytes = constant.textEncoder.encode(input);
   const combo = new Uint8Array(defaultSalt.length + dataBytes.length);
