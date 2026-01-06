@@ -4,7 +4,7 @@ import { constant } from "#/global.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateToken } from "#util/user.ts";
-import { migrations } from "./migrations.ts";
+import { migrations } from "./migration.ts";
 import { DocumentQuery, UserQuery } from "./query.ts";
 
 const log: Logger = new Logger("database");
@@ -69,13 +69,13 @@ export class Database {
 
       if (constant.env.JSPB_USER_ROOT_RECOVERY && rootId) {
         const token = generateToken(rootId);
-        const hash = await generateHash(token);
+        const hash = generateHash(token);
 
         this.user.update("id", rootId, "token", hash.combo);
 
         log.warn("+-- The root user token was regenerated.", "|", `+--> "${token}"`);
       } else if (!rootId?.startsWith("0000000001")) {
-        const token = await this.user.create(ulid(1));
+        const token = this.user.create(ulid(1));
 
         log.warn("+-- Note the root user token as it won't be shown again.", "|", `+--> "${token}"`);
       }

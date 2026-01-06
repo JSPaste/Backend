@@ -83,7 +83,7 @@ export default new Hono<Env>().get(
         return error.throw(ErrorCode.documentPasswordNeeded);
       }
 
-      if (!(await verifyHash(header.password, document.password))) {
+      if (!verifyHash(header.password, document.password)) {
         return error.throw(ErrorCode.documentInvalidPassword);
       }
     }

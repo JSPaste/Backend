@@ -103,7 +103,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
       if (newPassword === "") {
         mutable.database.document.update("name", actualName, "password", null);
       } else {
-        const hash = await generateHash(newPassword);
+        const hash = generateHash(newPassword);
 
         mutable.database.document.update("name", actualName, "password", hash.combo);
       }

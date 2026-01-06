@@ -88,7 +88,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
         return error.throw(ErrorCode.documentPasswordNeeded);
       }
 
-      if (!(await verifyHash(password, document.password))) {
+      if (!verifyHash(password, document.password)) {
         return error.throw(ErrorCode.documentInvalidPassword);
       }
     }

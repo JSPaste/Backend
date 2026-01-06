@@ -75,7 +75,7 @@ export default new Hono<Env>().get(
         return error.throw(ErrorCode.documentPasswordNeeded);
       }
 
-      if (!(await verifyHash(options.password, document.password))) {
+      if (!verifyHash(options.password, document.password)) {
         return error.throw(ErrorCode.documentInvalidPassword);
       }
     }

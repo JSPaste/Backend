@@ -34,7 +34,7 @@ export default new Hono<Env>().delete(
   }),
   validator("param", schemaParam, validatorHandler),
   authMiddleware,
-  async (ctx) => {
+  (ctx) => {
     const {
       name
       // @ts-expect-error upstream

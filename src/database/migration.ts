@@ -35,12 +35,12 @@ export const migrations: Migration[] = [
    */
   {
     id: "0002.hashingStage1",
-    preMigration: async (database: Database) => {
+    preMigration: (database: Database) => {
       // migrate document passwords
       const documentsHashed = mapNotNullish(database.document.getAll(["id", "password"]), ({ id, password }) => {
         if (!password) return;
 
-        const hash = await generateHash(password);
+        const hash = generateHash(password);
         database.document.update("id", id, "password", hash.combo);
       });
 
@@ -53,7 +53,7 @@ export const migrations: Migration[] = [
       const userRootToken = database.user.get("id", userRootIdOld)?.token;
       if (userRootToken) {
         const id = ulid(1);
-        await database.user.create(id);
+        database.user.create(id);
 
         for (const document of database.user.getDocuments(userRootIdOld)) {
           database.document.update("id", document.id, "user_id", id);

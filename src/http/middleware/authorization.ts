@@ -41,7 +41,7 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
 
   // trying to minimize timing attacks by always calling verifyHash
   const combo = mutable.database.user.get("id", id)?.token ?? "0 0";
-  if (!(await verifyHash(token, combo))) {
+  if (!verifyHash(token, combo)) {
     return error.throw(ErrorCode.userInvalidToken);
   }
 

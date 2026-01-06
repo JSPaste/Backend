@@ -89,7 +89,7 @@ export default new Hono<Env>().post(
 
     let hashCombo: string | null;
     if (password) {
-      hashCombo = (await generateHash(password)).combo;
+      hashCombo = generateHash(password).combo;
     } else {
       hashCombo = null;
     }

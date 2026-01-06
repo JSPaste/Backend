@@ -37,13 +37,13 @@ export default new Hono<Env>().post(
     }
   }),
   authMiddleware,
-  async (ctx) => {
+  (ctx) => {
     if (!constant.env.JSPB_USER_REGISTER && ctx.get("userId") !== mutable.database.user.getRoot()?.id) {
       return error.throw(ErrorCode.userInvalidToken);
     }
 
     return ctx.json({
-      token: await mutable.database.user.create()
+      token: mutable.database.user.create()
     });
   }
 );

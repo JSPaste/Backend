@@ -124,9 +124,9 @@ export class UserQuery extends Query<User> {
     super(database, "user");
   }
 
-  public async create(id: string = monotonicUlid()): Promise<string> {
+  public create(id: string = monotonicUlid()): string {
     const token = generateToken(id);
-    const hash = await generateHash(token);
+    const hash = generateHash(token);
 
     this.database
       .prepare(`INSERT INTO user (id, token)
