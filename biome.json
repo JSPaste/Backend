@@ -79,6 +79,14 @@
         "noNestedTernary": "error",
         "noParameterAssign": "error",
         "noParameterProperties": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "@hono/hono": "Use `@hono/hono/tiny` instead"
+            }
+          }
+        },
         "noSubstr": "error",
         "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",

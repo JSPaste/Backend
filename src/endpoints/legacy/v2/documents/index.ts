@@ -1,4 +1,4 @@
-import { Hono } from "@hono/hono";
+import { Hono } from "@hono/hono/tiny";
 import type { Env } from "#http/type.ts";
 import access from "./access.route.ts";
 import accessRaw from "./accessRaw.route.ts";
