@@ -7,7 +7,6 @@ import { type } from "arktype";
 import { customAlphabet } from "nanoid";
 import type { Database } from "#db/database";
 import { humanizeSize, humanizeTime } from "#util/humanize.ts";
-import { IPQ } from "#util/ipq.ts";
 
 export const mutable = {
   database: undefined as unknown as Database,
@@ -72,7 +71,7 @@ export const constant = {
   },
   store: {
     statements: new LruCache<string, StatementSync>(200),
-    dispose: new IPQ<string, () => Promise<void>>()
+    dispose: new Map<string, [number, () => Promise<void>]>()
   },
   temporal: {
     utc: () => Temporal.Now.zonedDateTimeISO("Etc/UTC"),
