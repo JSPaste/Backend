@@ -19,28 +19,31 @@ const initDirStruct = async (): Promise<void> => {
 const initHTTPServer = async (handler?: Deno.ServeHandler<Deno.Addr>): Promise<void> => {
   const id = "__httpServer";
 
-  await constant.store.dispose.get(id)?.();
+  await constant.store.dispose.get(id)?.[1]();
 
   mutable.http = server({
     handler: handler
   });
 
-  constant.store.dispose.set(10, id, async () => {
-    mutable.http?.unref();
+  constant.store.dispose.set(id, [
+    10,
+    async () => {
+      mutable.http?.unref();
 
-    // Deno.serve will deadlock on shutdown under pressure
-    await mutable.http?.shutdown();
-  });
+      // Deno.serve will deadlock on shutdown under pressure
+      await mutable.http?.shutdown();
+    }
+  ]);
 };
 
 const initDatabase = async (): Promise<void> => {
   const id = "__databaseServer";
 
-  await constant.store.dispose.get(id)?.();
+  await constant.store.dispose.get(id)?.[1]();
 
   mutable.database = new Database();
 
-  constant.store.dispose.set(0, id, async () => mutable.database[Symbol.dispose]());
+  constant.store.dispose.set(id, [0, async () => mutable.database[Symbol.dispose]()]);
 
   mutable.database.migration();
 
@@ -63,8 +66,13 @@ export const init = async () => {
 
       log.debug(`Received ${signal}.`);
 
+      const storeDispose = constant.store.dispose
+        .entries()
+        .toArray()
+        .sort(([, [pa]], [, [pb]]) => pb - pa);
+
       try {
-        for (const [, key, dispose] of constant.store.dispose.drain()) {
+        for (const [key, [, dispose]] of storeDispose) {
           log.debug(`Closing "${key}"...`);
 
           try {
@@ -91,6 +99,8 @@ export const init = async () => {
     await Promise.all([initTask(), initHTTPServer(router().fetch)]);
   } catch (error) {
     log.error(error);
+
+    Deno.exitCode = 1;
     Deno.kill(Deno.pid, "SIGTERM");
   }
 };
