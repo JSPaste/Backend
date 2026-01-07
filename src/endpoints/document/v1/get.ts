@@ -28,7 +28,7 @@ const schemaHeader = type({
   "x-jspaste-password?": validatorDocumentPassword
 });
 
-const schemaBodyResponse = await resolver(type(type.unknown)).toOpenAPISchema();
+const schemaBodyResponse = await resolver(type.unknown).toOpenAPISchema();
 
 const schemaHeaderResponse = await resolver(
   type({

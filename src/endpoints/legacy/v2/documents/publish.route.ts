@@ -14,12 +14,10 @@ import { validatorDocumentName, validatorDocumentPassword } from "#util/validato
 import { validatorHandler } from "#util/validator/handler.ts";
 
 const schemaBody = await resolver(
-  type(
-    type.string.configure({
-      description: "Data to replace in the document",
-      examples: ["Hello world!"]
-    })
-  )
+  type.string.configure({
+    description: "Data to replace in the document",
+    examples: ["Hello world!"]
+  })
 ).toOpenAPISchema();
 
 const schemaHeader = type({

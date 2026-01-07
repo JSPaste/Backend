@@ -15,12 +15,10 @@ const schemaParam = type({
 });
 
 const schemaBody = await resolver(
-  type(
-    type.string.configure({
-      description: "Data to replace in the document",
-      examples: ["Hello world!"]
-    })
-  )
+  type.string.configure({
+    description: "Data to replace in the document",
+    examples: ["Hello world!"]
+  })
 ).toOpenAPISchema();
 
 const schemaBodyResponse = await resolver(
