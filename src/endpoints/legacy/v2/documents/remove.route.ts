@@ -12,14 +12,14 @@ const schemaParam = type({
   name: validatorDocumentName
 });
 
-const schemaResponse = resolver(
+const schemaBodyResponse = await resolver(
   type({
     removed: type.true.configure({
       description: "Confirmation of deletion",
       examples: [true]
     })
   })
-);
+).toOpenAPISchema();
 
 export default new Hono<Env>().delete(
   "/:name",
@@ -31,7 +31,7 @@ export default new Hono<Env>().delete(
       200: {
         content: {
           "application/json": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]

@@ -13,14 +13,6 @@ import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentName, validatorDocumentPassword } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
 
-const schemaHeader = type({
-  "password?": validatorDocumentPassword,
-  "key?": validatorDocumentName,
-  "keylength?": type.number.atLeast(constant.documentNameLengthMin).atMost(constant.documentNameLengthMax).configure({
-    description: "The document name length"
-  })
-});
-
 const schemaBody = await resolver(
   type(
     type.string.configure({
@@ -30,14 +22,22 @@ const schemaBody = await resolver(
   )
 ).toOpenAPISchema();
 
-const schemaResponse = resolver(
+const schemaHeader = type({
+  "password?": validatorDocumentPassword,
+  "key?": validatorDocumentName,
+  "keylength?": type.number.atLeast(constant.documentNameLengthMin).atMost(constant.documentNameLengthMax).configure({
+    description: "The document name length"
+  })
+});
+
+const schemaBodyResponse = await resolver(
   type({
     key: type.string.configure({
       description: "The document name (formerly key)",
       examples: ["abc123"]
     })
   })
-);
+).toOpenAPISchema();
 
 export default new Hono<Env>().post(
   "/",
@@ -47,14 +47,16 @@ export default new Hono<Env>().post(
     summary: "Publish document",
     requestBody: {
       content: {
-        "text/plain": schemaBody
+        "text/plain": {
+          schema: schemaBody.schema
+        }
       }
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]

@@ -18,7 +18,7 @@ const schemaHeader = type({
   "password?": validatorDocumentPassword
 });
 
-const schemaResponse = resolver(
+const schemaBodyResponse = await resolver(
   type({
     key: type.string.configure({
       description: "The document name (formerly key)",
@@ -39,7 +39,7 @@ const schemaResponse = resolver(
       examples: [0]
     })
   })
-);
+).toOpenAPISchema();
 
 export default new Hono<Env>().get(
   "/:name",
@@ -51,7 +51,7 @@ export default new Hono<Env>().get(
       200: {
         content: {
           "application/json": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]
