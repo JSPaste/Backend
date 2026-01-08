@@ -1,13 +1,14 @@
 import { type } from "arktype";
 import { constant } from "#/global.ts";
 import { regexBase64URL } from "./regex.ts";
+import { validatorCreationTimestamp } from "./shared.ts";
 
 export const validatorDocumentName = type(regexBase64URL)
   .atLeastLength(constant.documentNameLengthMin)
   .atMostLength(constant.documentNameLengthMax)
   .configure({
     ref: "DocumentName",
-    description: "A name for the document",
+    description: "The document name",
     examples: ["myDocumentNameHere"],
     expected: (ctx) => {
       switch (ctx.code) {
@@ -31,7 +32,7 @@ export const validatorDocumentNameLength = type.keywords.string.integer.parse
   .to(type.number.atLeast(constant.documentNameLengthMin).atMost(constant.documentNameLengthMax))
   .configure({
     ref: "DocumentNameLength",
-    description: "The name length for a document",
+    description: "The name length for the document",
     expected: (ctx) => {
       switch (ctx.code) {
         case "domain": {
@@ -55,7 +56,7 @@ export const validatorDocumentPassword = type.string
   .atMostLength(constant.documentPasswordLengthMax)
   .configure({
     ref: "DocumentPassword.default",
-    description: "A password for the document (for read access)",
+    description: "The password for the document (read access)",
     examples: ["myDocumentPasswordHere"]
   });
 
@@ -68,4 +69,14 @@ export const validatorDocumentPasswordEmpty = type.string.exactlyLength(0).confi
 export const validatorDocumentDownload = type.unknown.configure({
   ref: "DocumentDownload",
   description: "Indicate the client that downloads the document as a file attachment (only useful in web browsers)"
+});
+
+export const validatorDocumentListObject = type({
+  name: validatorDocumentName,
+  created: validatorCreationTimestamp
+}).configure({
+  // FIXME: schema references not being generated when using toOpenAPISchema()
+  // Invalid object key "DocumentListMetadata" at position 2 in "/components/schemas/DocumentListMetadata": key not found in object
+  //ref: "DocumentListMetadata",
+  description: "An object with document metadata"
 });

@@ -14,39 +14,47 @@ import {
   validatorDocumentPassword
 } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
+import { validatorCreationTimestamp } from "#util/validator/shared.ts";
 
 const schemaParam = type({
   name: validatorDocumentName
-});
-
-const schemaHeader = type({
-  "x-jspaste-password?": validatorDocumentPassword
 });
 
 const schemaQuery = type({
   "dl?": validatorDocumentDownload
 });
 
-const schemaResponse = resolver(type(type.unknown));
+const schemaHeader = type({
+  "x-jspaste-password?": validatorDocumentPassword
+});
+
+const schemaBodyResponse = await resolver(type.unknown).toOpenAPISchema();
+
+const schemaHeaderResponse = await resolver(
+  type({
+    "x-jspaste-created": validatorCreationTimestamp
+  })
+).toOpenAPISchema();
 
 export default new Hono<Env>().get(
   "/:name",
   describeRoute({
     tags: ["DOCUMENT (v1)"],
     summary: "Get document",
-    description: `Get the content/metadata of a published document in the instance.
+    description: `Get the content/metadata of a published document in the instance
 
 Note: If you only need to query the document metadata, you should use HEAD method instead`,
     responses: {
       200: {
         content: {
           "text/plain": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           },
           "application/octet-stream": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
+        headers: schemaHeaderResponse.components,
         description: constant.http[200]
       },
       400: { ...genericErrorResponse, description: constant.http[400] },

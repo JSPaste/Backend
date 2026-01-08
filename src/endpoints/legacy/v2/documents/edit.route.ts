@@ -14,23 +14,21 @@ const schemaParam = type({
   name: validatorDocumentName
 });
 
-const schemaRequest = await resolver(
-  type(
-    type.string.configure({
-      description: "Data to replace in the document",
-      examples: ["Hello world!"]
-    })
-  )
+const schemaBody = await resolver(
+  type.string.configure({
+    description: "Data to replace in the document",
+    examples: ["Hello world!"]
+  })
 ).toOpenAPISchema();
 
-const schemaResponse = resolver(
+const schemaBodyResponse = await resolver(
   type({
     edited: type.boolean.configure({
       description: "Confirmation of edition",
       examples: [true]
     })
   })
-);
+).toOpenAPISchema();
 
 export default new Hono<Env>().patch(
   "/:name",
@@ -40,14 +38,16 @@ export default new Hono<Env>().patch(
     summary: "Edit document",
     requestBody: {
       content: {
-        "text/plain": schemaRequest
+        "text/plain": {
+          schema: schemaBody.schema
+        }
       }
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]

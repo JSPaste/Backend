@@ -1,25 +1,21 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver } from "@hono/openapi";
-import { type } from "arktype";
+import { decodeTime } from "@std/ulid";
 import { constant, mutable } from "#/global.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import type { Env } from "#http/type.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
-import { validatorUserToken } from "#util/validator/user.ts";
+import { validatorDocumentListObject } from "#util/validator/document.ts";
 
-const schemaBodyResponse = await resolver(
-  type({
-    token: validatorUserToken
-  })
-).toOpenAPISchema();
+const schemaBodyResponse = await resolver(validatorDocumentListObject.array()).toOpenAPISchema();
 
-export default new Hono<Env>().post(
+export default new Hono<Env>().get(
   "/",
   describeRoute({
-    tags: ["USER (v1)"],
-    summary: "Create user",
-    description: "Create a user to the instance",
-    security: [{}, { bearer: [] }],
+    tags: ["DOCUMENT (v1)"],
+    summary: "List documents",
+    description: "List all user documents in the instance",
+    security: [{ bearer: [] }],
     responses: {
       200: {
         content: {
@@ -38,12 +34,23 @@ export default new Hono<Env>().post(
   }),
   authMiddleware,
   async (ctx) => {
-    if (!constant.env.JSPB_USER_REGISTER && ctx.get("userId") !== constant.ulid.userRoot) {
+    const userId = ctx.get("userId");
+    if (!userId) {
       return error.throw(ErrorCode.userInvalidToken);
     }
 
-    return ctx.json({
-      token: mutable.database.user.create()
+    // https://github.com/honojs/hono/issues/1130
+    if (ctx.req.method === "HEAD") {
+      return ctx.body(null);
+    }
+
+    const documents = mutable.database.user.getDocuments(userId).map((document) => {
+      return {
+        name: document.name,
+        created: Temporal.Instant.fromEpochMilliseconds(decodeTime(document.id)).toString()
+      };
     });
+
+    return ctx.json(documents);
   }
 );

@@ -31,11 +31,12 @@ const schemaHeader = type({
   "x-jspaste-password?": validatorDocumentPassword
 });
 
-const schemaResponse = resolver(
+// Object includes not allowed fields
+const schemaBodyResponse = await resolver(
   type({
     name: validatorDocumentName
   })
-);
+).toOpenAPISchema();
 
 export default new Hono<Env>().post(
   "/",
@@ -46,15 +47,19 @@ export default new Hono<Env>().post(
     security: [{}, { bearer: [] }],
     requestBody: {
       content: {
-        "text/plain": schemaBody,
-        "application/octet-stream": schemaBody
+        "text/plain": {
+          schema: schemaBody.schema
+        },
+        "application/octet-stream": {
+          schema: schemaBody.schema
+        }
       }
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]

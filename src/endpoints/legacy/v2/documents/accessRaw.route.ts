@@ -22,7 +22,7 @@ const schemaQuery = type({
   "p?": validatorDocumentPassword
 });
 
-const schemaResponse = resolver(type(type.unknown));
+const schemaBodyResponse = await resolver(type.unknown).toOpenAPISchema();
 
 export default new Hono<Env>().get(
   "/:name/raw",
@@ -34,10 +34,10 @@ export default new Hono<Env>().get(
       200: {
         content: {
           "text/plain": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           },
           "application/octet-stream": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]

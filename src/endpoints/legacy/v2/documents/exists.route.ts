@@ -11,7 +11,7 @@ const schemaParam = type({
   name: validatorDocumentName
 });
 
-const schemaResponse = resolver(type(type.boolean));
+const schemaBodyResponse = await resolver(type.boolean).toOpenAPISchema();
 
 export default new Hono<Env>().get(
   "/:name/exists",
@@ -23,7 +23,7 @@ export default new Hono<Env>().get(
       200: {
         content: {
           "text/plain": {
-            schema: schemaResponse
+            schema: schemaBodyResponse.schema
           }
         },
         description: constant.http[200]
