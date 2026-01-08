@@ -1,5 +1,5 @@
-import { Hono } from "@hono/hono";
 import { stream } from "@hono/hono/streaming";
+import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { constant, mutable } from "#/global.ts";

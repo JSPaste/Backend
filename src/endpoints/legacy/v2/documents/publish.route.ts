@@ -1,4 +1,4 @@
-import { Hono } from "@hono/hono";
+import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { monotonicUlid } from "@std/ulid";
 import { type } from "arktype";
