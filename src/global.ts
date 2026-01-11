@@ -8,6 +8,14 @@ import { customAlphabet } from "nanoid";
 import type { Database } from "#db/database";
 import { humanizeSize, humanizeTime } from "#util/humanize.ts";
 
+export const DocumentVersion = {
+  // deflate
+  V1: 1,
+  // no compression
+  V2: 2
+} as const;
+export type DocumentVersionType = (typeof DocumentVersion)[keyof typeof DocumentVersion];
+
 export const mutable = {
   database: undefined as unknown as Database,
   http: undefined as Deno.HttpServer<Deno.NetAddr> | undefined,
@@ -41,6 +49,9 @@ export const constant = {
 
       // document
       JSPB_DOCUMENT_SIZE: type.string.pipe(humanizeSize).default("1mb"),
+      JSPB_DOCUMENT_COMPRESSION: type.boolean
+        .pipe((boolean): DocumentVersionType => (boolean ? DocumentVersion.V1 : DocumentVersion.V2))
+        .default(true),
       JSPB_DOCUMENT_AGE: type.string.pipe(humanizeTime).default("0"),
       JSPB_DOCUMENT_ANONYMOUS_AGE: type.string.pipe(humanizeTime).default("7d"),
 

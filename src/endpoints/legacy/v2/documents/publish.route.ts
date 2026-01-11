@@ -2,8 +2,7 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { monotonicUlid } from "@std/ulid";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
-import { DocumentVersion } from "#db/query.ts";
+import { constant, DocumentVersion, mutable } from "#/global.ts";
 import { compression } from "#document/compression.ts";
 import { storage } from "#document/storage.ts";
 import { bodySize } from "#http/middleware/bodySize.ts";
@@ -97,16 +96,21 @@ export default new Hono<Env>().post(
     mutable.database.document.create({
       id: id,
       user_id: null,
-      version: DocumentVersion.V1,
+      version: constant.env.JSPB_DOCUMENT_COMPRESSION,
       name: setName,
       password: hashCombo
     });
 
-    await storage.write(
-      id,
+    let contentStream: ReadableStream<Uint8Array>;
+    if (constant.env.JSPB_DOCUMENT_COMPRESSION === DocumentVersion.V1) {
       // ctx.req.raw.body is only null on GET/HEAD
-      compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
-    );
+      contentStream = compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>);
+    } else {
+      // ctx.req.raw.body is only null on GET/HEAD
+      contentStream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
+    }
+
+    await storage.write(id, contentStream);
 
     return ctx.json({
       key: setName,

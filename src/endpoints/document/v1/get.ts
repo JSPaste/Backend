@@ -3,7 +3,7 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
+import { constant, DocumentVersion, mutable } from "#/global.ts";
 import { compression } from "#document/compression.ts";
 import { storage } from "#document/storage.ts";
 import type { Env } from "#http/type.ts";
@@ -105,10 +105,15 @@ Note: If you only need to query the document metadata, you should use HEAD metho
 
     const fileHandle = await storage.read(document.id);
 
+    const clientHasDeflate = ctx.req.header("accept-encoding")?.includes("deflate");
+
     let fileContent: ReadableStream<Uint8Array>;
-    if (ctx.req.header("accept-encoding")?.includes("deflate")) {
+    if (document.version === DocumentVersion.V2 || clientHasDeflate) {
       fileContent = fileHandle.readable;
-      ctx.res.headers.set("content-encoding", "deflate");
+
+      if (document.version === DocumentVersion.V1 && clientHasDeflate) {
+        ctx.res.headers.set("content-encoding", "deflate");
+      }
     } else {
       fileContent = compression.decode(fileHandle.readable);
     }

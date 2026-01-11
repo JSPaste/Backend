@@ -1,7 +1,7 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
+import { constant, DocumentVersion, mutable } from "#/global.ts";
 import { compression } from "#document/compression.ts";
 import { storage } from "#document/storage.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
@@ -78,7 +78,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
   bodySize,
   bodyCheck,
   async (ctx) => {
-    const {
+    let {
       actualName
       // @ts-expect-error upstream
     } = ctx.req.valid("param") as typeof schemaParam.infer;
@@ -116,14 +116,23 @@ Note: To remove (nullify) a value, send the header with an empty value`,
       }
 
       mutable.database.document.update("name", actualName, "name", newName);
+
+      actualName = newName;
     }
 
     if (ctx.get("hasBody")) {
-      await storage.write(
-        document.id,
+      mutable.database.document.update("name", actualName, "version", constant.env.JSPB_DOCUMENT_COMPRESSION);
+
+      let contentStream: ReadableStream<Uint8Array>;
+      if (constant.env.JSPB_DOCUMENT_COMPRESSION === DocumentVersion.V1) {
         // ctx.req.raw.body is only null on GET/HEAD
-        compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
-      );
+        contentStream = compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>);
+      } else {
+        // ctx.req.raw.body is only null on GET/HEAD
+        contentStream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
+      }
+
+      await storage.write(document.id, contentStream);
     }
 
     return ctx.body(null);

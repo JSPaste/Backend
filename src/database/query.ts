@@ -1,15 +1,10 @@
 import type { SQLInputValue } from "node:sqlite";
 import { chunk } from "@std/collections";
 import { monotonicUlid } from "@std/ulid";
-import { constant } from "#/global.ts";
+import { constant, type DocumentVersionType } from "#/global.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateToken } from "#util/user.ts";
 import type { Database } from "./database.ts";
-
-export const DocumentVersion = {
-  V1: 1
-} as const;
-export type DocumentVersionType = (typeof DocumentVersion)[keyof typeof DocumentVersion];
 
 export type Document = {
   id: string;
