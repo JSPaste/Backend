@@ -1,7 +1,5 @@
 import { constant, mutable } from "#/global.ts";
 
-export const generateToken = (): string => constant.nanoid(32);
-
 export const generateName = (length = 8): string => {
   let name: string;
   do {
@@ -24,7 +22,7 @@ export const isOwner = (userId?: string | null, documentUserId?: string | null):
     }
 
     // the root user can alter everything
-    if (userId === constant.ulid.userRoot) {
+    if (userId === mutable.database.user.getRoot()?.id) {
       return true;
     }
   }

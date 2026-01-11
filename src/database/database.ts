@@ -1,8 +1,10 @@
 import { DatabaseSync, type StatementSync } from "node:sqlite";
-import { monotonicUlid } from "@std/ulid";
+import { monotonicUlid, ulid } from "@std/ulid";
 import { constant } from "#/global.ts";
 import { Logger } from "#util/console.ts";
-import { migrations } from "./migrations.ts";
+import { generateHash } from "#util/crypto.ts";
+import { generateToken } from "#util/user.ts";
+import { migrations } from "./migration.ts";
 import { DocumentQuery, UserQuery } from "./query.ts";
 
 const log: Logger = new Logger("database");
@@ -17,12 +19,12 @@ export class Database {
 
   private readonly database: DatabaseSync;
 
-  public constructor(options?: Options) {
-    const ephemeral = options?.ephemeral ?? constant.env.JSPB_DEBUG_DATABASE_EPHEMERAL;
+  public constructor(options: Options = {}) {
+    options.ephemeral ??= constant.env.JSPB_DEBUG_DATABASE_EPHEMERAL;
 
-    this.database = new DatabaseSync(ephemeral ? ":memory:" : constant.path.databaseFile);
+    this.database = new DatabaseSync(options.ephemeral ? ":memory:" : constant.path.databaseFile);
 
-    if (ephemeral) {
+    if (options.ephemeral) {
       log.warn("Using ephemeral. No changes will persist.");
       return;
     }
@@ -31,44 +33,55 @@ export class Database {
                PRAGMA wal_autocheckpoint = 1024;`);
   }
 
-  public migration(): void {
+  public async migration(): Promise<void> {
     const query = this.prepare("PRAGMA user_version;", false).get();
     if (typeof query?.user_version !== "number") {
       throw new Deno.errors.InvalidData("Failed to get version.");
     }
-    if (query.user_version === migrations.length) {
-      log.debug("Already up to date.");
-      return;
-    }
-    if (query.user_version > migrations.length) {
-      throw new Deno.errors.InvalidData("Version is higher than available migrations. Update your JSPaste instance.");
-    }
 
-    migrations.slice(query.user_version).forEach((migration, delta) => {
-      try {
-        this.transaction(() => {
-          this.exec(migration.sql);
-          this.exec(`PRAGMA user_version = ${(query.user_version as number) + delta + 1};`);
-        });
-      } catch (error) {
-        log.error(`Error while running migration "${migration.id}"..:`);
-        throw error;
+    if (query.user_version !== migrations.length) {
+      if (query.user_version > migrations.length) {
+        throw new Deno.errors.InvalidData("Version is higher than available migrations. Update your JSPaste instance.");
       }
 
-      log.info(`Migration "${migration.id}" ran successfully.`);
-    });
-
-    if (query.user_version === 0) {
-      try {
-        const token = this.user.create(constant.ulid.userRoot, constant.env.JSPB_USER_ROOT_TOKEN);
-
-        if (!constant.env.JSPB_USER_ROOT_TOKEN) {
-          log.warn("Note the root user token as it won't be shown again", `     >> "${token}" <<`);
+      for (const [delta, migration] of migrations.slice(query.user_version).entries()) {
+        try {
+          // biome-ignore lint/performance/noAwaitInLoops: serialized
+          await this.transaction(async () => {
+            await migration.preMigration?.(this);
+            this.exec(migration.sql);
+            await migration.postMigration?.(this);
+            this.exec(`PRAGMA user_version = ${(query.user_version as number) + delta + 1};`);
+          });
+        } catch (error) {
+          log.error(`Error while running migration "${migration.id}"..:`);
+          throw error;
         }
-      } catch (error) {
-        log.error("Failed to create root user..:");
-        throw error;
+
+        log.info(`Migration "${migration.id}" ran successfully.`);
       }
+    } else {
+      log.debug("Already up to date.");
+    }
+
+    try {
+      const rootId = this.user.getRoot()?.id;
+
+      if (constant.env.JSPB_USER_ROOT_RECOVERY && rootId) {
+        const token = generateToken(rootId);
+        const hash = generateHash(token);
+
+        this.user.update("id", rootId, "token", hash.combo);
+
+        log.warn("+-- The root user token was regenerated.", "|", `+--> "${token}"`);
+      } else if (!rootId?.startsWith("0000000001")) {
+        const token = this.user.create(ulid(1));
+
+        log.warn("+-- Note the root user token as it won't be shown again.", "|", `+--> "${token}"`);
+      }
+    } catch (error) {
+      log.error("Failed to handle the root user..:");
+      throw error;
     }
   }
 
@@ -92,7 +105,7 @@ export class Database {
 
   public transaction<T>(callback: () => T): T {
     if (this.database.isTransaction) {
-      const name = monotonicUlid();
+      const name = `_${monotonicUlid()}`;
 
       this.exec(`SAVEPOINT ${name};`);
       try {

@@ -2,7 +2,8 @@ import type { SQLInputValue } from "node:sqlite";
 import { chunk } from "@std/collections";
 import { monotonicUlid } from "@std/ulid";
 import { constant } from "#/global.ts";
-import { generateToken } from "#util/document.ts";
+import { generateHash } from "#util/crypto.ts";
+import { generateToken } from "#util/user.ts";
 import type { Database } from "./database.ts";
 
 export const DocumentVersion = {
@@ -25,7 +26,7 @@ export type User = {
   token: string;
 };
 export type UserColumn<T extends keyof User> = Pick<User, T>;
-export type UserIndex = UserColumn<"id" | "token">;
+export type UserIndex = UserColumn<"id">;
 
 abstract class Query<Table extends Record<string, SQLInputValue>> {
   protected readonly database: Database;
@@ -47,32 +48,48 @@ abstract class Query<Table extends Record<string, SQLInputValue>> {
     this.database.transaction(() => {
       for (const batch of chunk(defaultValues, constant.databaseMaxElements)) {
         this.database
-          .prepare(`DELETE FROM ${this.table} WHERE ${column} IN (${batch.map(() => "?").join(", ")})`, false)
+          .prepare(
+            `DELETE
+             FROM ${this.table}
+             WHERE ${column} IN (${batch.map(() => "?").join(", ")})`,
+            false
+          )
           .run(...batch);
       }
     });
   }
 
-  protected updateByColumn<K extends keyof Table & string>(
-    whereColumn: K,
-    whereValue: Table[K],
-    setColumn: K,
-    setValue: Table[K]
+  protected updateByColumn<WK extends keyof Table & string, SK extends keyof Table & string = keyof Table & string>(
+    whereColumn: WK,
+    whereValue: Table[WK],
+    setColumn: SK,
+    setValue: Table[SK]
   ): void {
-    this.database.prepare(`UPDATE ${this.table} SET ${setColumn} = :setValue WHERE ${whereColumn} = :whereValue`).run({
-      setValue: setValue,
-      whereValue: whereValue
-    });
+    this.database
+      .prepare(`UPDATE ${this.table}
+                SET ${setColumn} = :setValue
+                WHERE ${whereColumn} = :whereValue`)
+      .run({
+        setValue: setValue,
+        whereValue: whereValue
+      });
   }
 
   protected selectByColumn<K extends keyof Table & string>(column: K, value: Table[K]): Table | undefined {
-    return this.database.prepare(`SELECT * FROM ${this.table} WHERE ${column} = :value`).get({
-      value: value
-    }) as Table | undefined;
+    return this.database
+      .prepare(`SELECT *
+                FROM ${this.table}
+                WHERE ${column} = :value`)
+      .get({
+        value: value
+      }) as Table | undefined;
   }
 
   protected selectColumns<K extends keyof Table & string>(columns: K[]): Pick<Table, K>[] {
-    return this.database.prepare(`SELECT ${columns.join(", ")} FROM ${this.table}`).all() as Pick<Table, K>[];
+    return this.database
+      .prepare(`SELECT ${columns.join(", ")}
+                FROM ${this.table}`)
+      .all() as Pick<Table, K>[];
   }
 }
 
@@ -84,7 +101,8 @@ export class DocumentQuery extends Query<Document> {
   public create(params: Document): void {
     this.database
       .prepare(
-        "INSERT INTO document (id, user_id, version, name, password) VALUES (:id, :user_id, :version, :name, :password)"
+        `INSERT INTO document (id, user_id, version, name, password)
+         VALUES (:id, :user_id, :version, :name, :password)`
       )
       .run({
         id: params.id,
@@ -96,7 +114,7 @@ export class DocumentQuery extends Query<Document> {
   }
 
   public delete = this.deleteByColumn<keyof DocumentIndex>;
-  public update = this.updateByColumn;
+  public update = this.updateByColumn<keyof DocumentIndex>;
   public get = this.selectByColumn<keyof DocumentIndex>;
   public getAll = this.selectColumns;
 }
@@ -106,18 +124,36 @@ export class UserQuery extends Query<User> {
     super(database, "user");
   }
 
-  public create(id: string = monotonicUlid(), token: string = generateToken()): string {
-    this.database.prepare("INSERT INTO user (id, token) VALUES (:id, :token)").run({ id: id, token: token });
+  public create(id: string = monotonicUlid()): string {
+    const token = generateToken(id);
+    const hash = generateHash(token);
+
+    this.database
+      .prepare(`INSERT INTO user (id, token)
+                VALUES (:id, :token)`)
+      .run({ id: id, token: hash.combo });
+
     return token;
   }
 
   public delete = this.deleteByColumn<keyof UserIndex>;
-  public update = this.updateByColumn;
+  public update = this.updateByColumn<keyof UserIndex>;
   public get = this.selectByColumn<keyof UserIndex>;
+
+  public getRoot(): User | undefined {
+    return this.database
+      .prepare(`SELECT *
+                FROM user
+                WHERE user.id
+                LIKE '0000000001%'
+                LIMIT 1`)
+      .get() as User | undefined;
+  }
 
   public getDocuments(id: string): DocumentColumn<"id" | "name">[] {
     return this.database
-      .prepare("SELECT document.id, document.name FROM document WHERE document.user_id = :id")
+      .prepare(`SELECT document.id, document.name
+                FROM document WHERE document.user_id = :id`)
       .all({ id: id }) as DocumentColumn<"id" | "name">[];
   }
 
@@ -125,8 +161,11 @@ export class UserQuery extends Query<User> {
 
   public getAllWithoutDocuments(): UserColumn<"id">[] {
     return this.database
-      .prepare(`SELECT user.id FROM user WHERE NOT EXISTS (
-                  SELECT 1 FROM document WHERE document.user_id = user.id
+      .prepare(`SELECT user.id
+                FROM user
+                WHERE NOT EXISTS (SELECT 1
+                  FROM document
+                  WHERE document.user_id = user.id
                 )`)
       .all() as UserColumn<"id">[];
   }

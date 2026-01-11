@@ -41,7 +41,7 @@ export default new Hono<Env>().delete(
     }
   }),
   validator("param", schemaParam, validatorHandler),
-  async (ctx) => {
+  (ctx) => {
     // @ts-expect-error upstream
     const param = ctx.req.valid("param") as typeof schemaParam.infer;
 

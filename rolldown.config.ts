@@ -1,4 +1,7 @@
 import type { RolldownOptions } from "rolldown";
+import { analyzer, unstableRolldownAdapter } from "vite-bundle-analyzer";
+
+const analyze = false;
 
 export default {
   input: "./src/index.ts",
@@ -11,8 +14,8 @@ export default {
     sourcemap: true
   },
   resolve: {
-    conditionNames: ["import", "require", "node", "default"],
-    mainFields: ["main", "module"]
+    conditionNames: ["import", "default"],
+    mainFields: ["module", "main"]
   },
   platform: "neutral",
   external: [/^(node:)/],
@@ -27,5 +30,14 @@ export default {
     typescript: {
       onlyRemoveTypeImports: true
     }
-  }
+  },
+  plugins: [
+    unstableRolldownAdapter(
+      analyzer({
+        enabled: analyze,
+        analyzerPort: "auto",
+        summary: true
+      })
+    )
+  ]
 } satisfies RolldownOptions;

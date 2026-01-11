@@ -7,6 +7,7 @@ import { constant, mutable } from "#/global.ts";
 import { compression } from "#document/compression.ts";
 import { storage } from "#document/storage.ts";
 import type { Env } from "#http/type.ts";
+import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
 import {
   validatorDocumentDownload,
@@ -87,7 +88,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
         return error.throw(ErrorCode.documentPasswordNeeded);
       }
 
-      if (password !== document.password) {
+      if (!verifyHash(password, document.password)) {
         return error.throw(ErrorCode.documentInvalidPassword);
       }
     }

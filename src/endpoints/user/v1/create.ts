@@ -7,11 +7,11 @@ import type { Env } from "#http/type.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
 import { validatorUserToken } from "#util/validator/user.ts";
 
-const schemaBodyResponse = await resolver(
+const schemaBodyResponse = resolver(
   type({
     token: validatorUserToken
   })
-).toOpenAPISchema();
+);
 
 export default new Hono<Env>().post(
   "/",
@@ -24,7 +24,7 @@ export default new Hono<Env>().post(
       200: {
         content: {
           "application/json": {
-            schema: schemaBodyResponse.schema
+            schema: schemaBodyResponse
           }
         },
         description: constant.http[200]
@@ -37,8 +37,8 @@ export default new Hono<Env>().post(
     }
   }),
   authMiddleware,
-  async (ctx) => {
-    if (!constant.env.JSPB_USER_REGISTER && ctx.get("userId") !== constant.ulid.userRoot) {
+  (ctx) => {
+    if (!constant.env.JSPB_USER_REGISTER && ctx.get("userId") !== mutable.database.user.getRoot()?.id) {
       return error.throw(ErrorCode.userInvalidToken);
     }
 

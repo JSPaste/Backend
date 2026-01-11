@@ -1,6 +1,6 @@
 import { constant } from "#/global.ts";
 import { Logger } from "#util/console.ts";
-import { ErrorCode, error } from "../utils/error.ts";
+import { ErrorCode, error } from "#util/error.ts";
 
 const log: Logger = new Logger("http");
 
@@ -24,16 +24,18 @@ type Options = {
   handler?: Deno.ServeHandler<Deno.NetAddr>;
 };
 
-export const server = (options?: Options): Deno.HttpServer<Deno.NetAddr> => {
-  const handlerDefault: Deno.ServeHandler<Deno.NetAddr> = options?.handler ?? dummyHandler;
+export const server = (options: Options = {}): Deno.HttpServer<Deno.NetAddr> => {
+  const usingHandler: boolean = typeof options.handler !== "undefined";
+
+  options.handler ??= dummyHandler;
 
   return Deno.serve({
     transport: "tcp",
     hostname: constant.env.JSPB_HOSTNAME.root,
     port: constant.env.JSPB_PORT,
-    handler: handlerDefault,
+    handler: options.handler,
     onListen: () => {
-      if (options?.handler) {
+      if (usingHandler) {
         log.info(
           `Listening on ${constant.env.JSPB_HOSTNAME.isIPv6 ? `[${constant.env.JSPB_HOSTNAME.root}]` : constant.env.JSPB_HOSTNAME.root}:${constant.env.JSPB_PORT}`
         );

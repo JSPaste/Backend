@@ -1,11 +1,11 @@
 import { mapNotNullish } from "@std/collections";
 import { decodeTime } from "@std/ulid";
-import { constant } from "#/global.ts";
+import { constant, mutable } from "#/global.ts";
 import { Database } from "#db/database.ts";
 import { storage } from "#document/storage.ts";
 import { Logger } from "#util/console.ts";
 
-const log = new Logger("task::sweeper");
+const log: Logger = new Logger("task::sweeper");
 
 export const sweeper = async (): Promise<void> => {
   sweeperDatabaseUser();
@@ -24,7 +24,7 @@ const sweeperDatabaseUser = (): void => {
 
   const users = mapNotNullish(database.user.getAllWithoutDocuments(), ({ id }) => {
     if (!id) return;
-    if (id === constant.ulid.userRoot) return;
+    if (id === mutable.database.user.getRoot()?.id) return;
 
     if (temporalFuture.epochMilliseconds > decodeTime(id)) {
       return id;
