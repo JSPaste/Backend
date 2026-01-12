@@ -83,7 +83,8 @@ export const constant = {
     dispose: new Map<string, [number, () => Promise<void>]>()
   },
   temporal: {
-    utc: () => Temporal.Now.zonedDateTimeISO("Etc/UTC"),
+    UTC: () => Temporal.Now.zonedDateTimeISO("Etc/UTC"),
+    toUTC: (temporal: Temporal.Instant) => temporal.toZonedDateTimeISO("Etc/UTC"),
     instant: Temporal.Now.instant
   },
   http: STATUS_CODES as Record<StatusCode, string>,

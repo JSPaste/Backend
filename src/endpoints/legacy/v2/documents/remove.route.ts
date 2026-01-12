@@ -2,9 +2,9 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { constant, mutable } from "#/global.ts";
-import { storage } from "#document/storage.ts";
 import type { Env } from "#http/type.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { fsDelete } from "#util/fs.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
 
@@ -51,7 +51,7 @@ export default new Hono<Env>().delete(
     }
 
     mutable.database.document.delete("name", param.name);
-    void storage.delete(document.id);
+    void fsDelete(document);
 
     return ctx.json({ removed: true });
   }
