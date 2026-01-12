@@ -1,7 +1,7 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
+import { constant, DocumentVersion, mutable } from "#/global.ts";
 import { compression } from "#document/compression.ts";
 import { storage } from "#document/storage.ts";
 import { bodySize } from "#http/middleware/bodySize.ts";
@@ -67,11 +67,18 @@ export default new Hono<Env>().patch(
       return error.throw(ErrorCode.documentNotFound);
     }
 
-    await storage.write(
-      document.id,
+    mutable.database.document.update("name", param.name, "version", constant.env.JSPB_DOCUMENT_COMPRESSION);
+
+    let contentStream: ReadableStream<Uint8Array>;
+    if (constant.env.JSPB_DOCUMENT_COMPRESSION === DocumentVersion.V1) {
       // ctx.req.raw.body is only null on GET/HEAD
-      compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>)
-    );
+      contentStream = compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>);
+    } else {
+      // ctx.req.raw.body is only null on GET/HEAD
+      contentStream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
+    }
+
+    await storage.write(document.id, contentStream);
 
     return ctx.json({
       edited: true
