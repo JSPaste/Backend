@@ -1,6 +1,6 @@
 import { mapNotNullish } from "@std/collections";
 import { blue, gray, red, yellow } from "@std/fmt/colors";
-import { constant } from "#/global.ts";
+import { env } from "./env.ts";
 
 export class Logger {
   public static readonly level = {
@@ -36,11 +36,11 @@ export class Logger {
   private flush(level: Exclude<keyof typeof Logger.level, "none">, message: unknown[]): void {
     const [levelNumber, color] = Logger.level[level];
 
-    if (levelNumber > constant.env.JSPB_LOG_VERBOSITY) return;
+    if (levelNumber > env.JSPB_LOG_VERBOSITY) return;
 
     const prefix: string[] = [];
 
-    if (constant.env.JSPB_LOG_TIME) {
+    if (env.JSPB_LOG_TIME) {
       const temporalLocal = Temporal.Now.zonedDateTimeISO();
       const temporalYear = temporalLocal.year;
       const temporalMonth = temporalLocal.month.toString().padStart(2, "0");

@@ -1,13 +1,13 @@
-import { constant } from "#/global.ts";
 import { Logger } from "#util/console.ts";
-import { ErrorCode, error } from "#util/error.ts";
+import { env } from "../utils/env.ts";
+import { errorCodeUnknown, errorGet } from "../utils/error.ts";
 
 const log: Logger = new Logger("http");
 
 const dummyHandler = (): Response => {
   return Response.json(
     {
-      ...error.get(ErrorCode.unknown)
+      ...errorGet(errorCodeUnknown)
     },
     {
       status: 503,
@@ -24,20 +24,20 @@ type Options = {
   handler?: Deno.ServeHandler<Deno.NetAddr>;
 };
 
-export const server = (options: Options = {}): Deno.HttpServer<Deno.NetAddr> => {
+export const http = (options: Options = {}): Deno.HttpServer<Deno.NetAddr> => {
   const usingHandler: boolean = typeof options.handler !== "undefined";
 
   options.handler ??= dummyHandler;
 
   return Deno.serve({
     transport: "tcp",
-    hostname: constant.env.JSPB_HOSTNAME.root,
-    port: constant.env.JSPB_PORT,
+    hostname: env.JSPB_HOSTNAME.root,
+    port: env.JSPB_PORT,
     handler: options.handler,
     onListen: () => {
       if (usingHandler) {
         log.info(
-          `Listening on ${constant.env.JSPB_HOSTNAME.isIPv6 ? `[${constant.env.JSPB_HOSTNAME.root}]` : constant.env.JSPB_HOSTNAME.root}:${constant.env.JSPB_PORT}`
+          `Listening on ${env.JSPB_HOSTNAME.isIPv6 ? `[${env.JSPB_HOSTNAME.root}]` : env.JSPB_HOSTNAME.root}:${env.JSPB_PORT}`
         );
       }
     }

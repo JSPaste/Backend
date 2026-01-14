@@ -1,6 +1,6 @@
 import { decodeAscii85, encodeAscii85 } from "@std/encoding";
 import { createBLAKE3 } from "hash-wasm";
-import { constant } from "#/global.ts";
+import { constantTextEncoder } from "../global.ts";
 
 const hasher = await createBLAKE3();
 
@@ -13,7 +13,7 @@ export const generateHash = (input: string, salt?: Uint8Array) => {
 
   hasher.init();
   hasher.update(defaultSalt);
-  hasher.update(constant.textEncoder.encode(input));
+  hasher.update(constantTextEncoder.encode(input));
 
   const encodedHash = encodeAscii85(hasher.digest("binary"), { standard: "Z85" });
 

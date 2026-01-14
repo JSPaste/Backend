@@ -1,9 +1,9 @@
 import { type } from "arktype";
-import { constant } from "#/global.ts";
-import { regexBase64URL, regexHeaderBearer } from "./regex.ts";
+import { constantUserTokenLength } from "#/global.ts";
+import { regexBase64URL, regexHeaderBearer } from "../regex.ts";
 
 // FIXME: schema references not being generated when using toOpenAPISchema()
-export const validatorUserToken = type.string.exactlyLength(constant.userTokenLength).configure({
+export const validatorUserToken = type.string.exactlyLength(constantUserTokenLength).configure({
   ref: "UserToken.default",
   description: "A user token",
   examples: ["myUserTokenHere"],

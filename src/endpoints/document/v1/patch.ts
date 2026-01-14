@@ -1,13 +1,20 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
-import type { Env } from "#http/type.ts";
 import { generateHash } from "#util/crypto.ts";
 import { isOwner } from "#util/document.ts";
-import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { env } from "#util/env.ts";
+import {
+  errorCodeDocumentNameAlreadyExists,
+  errorCodeDocumentNotFound,
+  errorCodeUserInvalidToken,
+  errorThrow,
+  genericErrorResponse
+} from "#util/error.ts";
 import { fsWrite } from "#util/fs.ts";
 import {
   validatorDocumentName,
@@ -55,19 +62,19 @@ Note: To remove (nullify) a value, send the header with an empty value`,
     },
     responses: {
       200: {
-        description: constant.http[200]
+        description: constantHttpStatusCodes[200]
       },
-      400: { ...genericErrorResponse, description: constant.http[400] },
-      404: { ...genericErrorResponse, description: constant.http[404] },
+      400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
+      404: { ...genericErrorResponse, description: constantHttpStatusCodes[404] },
 
       // auth middleware
-      401: { ...genericErrorResponse, description: constant.http[401] },
+      401: { ...genericErrorResponse, description: constantHttpStatusCodes[401] },
 
       // document name already exists
-      409: { ...genericErrorResponse, description: constant.http[409] },
+      409: { ...genericErrorResponse, description: constantHttpStatusCodes[409] },
 
       // bodyLimit middleware
-      413: { ...genericErrorResponse, description: constant.http[413] }
+      413: { ...genericErrorResponse, description: constantHttpStatusCodes[413] }
     }
   }),
   validator("param", schemaParam, validatorHandler),
@@ -87,13 +94,13 @@ Note: To remove (nullify) a value, send the header with an empty value`,
 
     const document = mutable.database.document.get("name", actualName);
     if (!document?.id) {
-      return error.throw(ErrorCode.documentNotFound);
+      return errorThrow(errorCodeDocumentNotFound);
     }
 
     const userId = ctx.get("userId");
     const owner = isOwner(userId, document.user_id);
     if (!owner) {
-      return error.throw(ErrorCode.userInvalidToken);
+      return errorThrow(errorCodeUserInvalidToken);
     }
 
     if (newPassword !== undefined) {
@@ -109,7 +116,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
     // keep newName last thing to alter in case of race conditions
     if (newName) {
       if (mutable.database.document.get("name", newName)?.name) {
-        return error.throw(ErrorCode.documentNameAlreadyExists);
+        return errorThrow(errorCodeDocumentNameAlreadyExists);
       }
 
       mutable.database.document.update("name", actualName, "name", newName);
@@ -118,7 +125,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
     }
 
     if (ctx.get("hasBody")) {
-      mutable.database.document.update("name", actualName, "version", constant.env.JSPB_DOCUMENT_COMPRESSION);
+      mutable.database.document.update("name", actualName, "version", env.JSPB_DOCUMENT_COMPRESSION);
       await fsWrite(ctx, document);
     }
 

@@ -3,10 +3,16 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
-import type { Env } from "#http/type.ts";
+import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
-import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import {
+  errorCodeDocumentInvalidPassword,
+  errorCodeDocumentNotFound,
+  errorCodeDocumentPasswordNeeded,
+  errorThrow,
+  genericErrorResponse
+} from "#util/error.ts";
 import { fsRead } from "#util/fs.ts";
 import {
   validatorDocumentDownload,
@@ -55,10 +61,10 @@ Note: If you only need to query the document metadata, you should use HEAD metho
           }
         },
         headers: schemaHeaderResponse.components,
-        description: constant.http[200]
+        description: constantHttpStatusCodes[200]
       },
-      400: { ...genericErrorResponse, description: constant.http[400] },
-      404: { ...genericErrorResponse, description: constant.http[404] }
+      400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
+      404: { ...genericErrorResponse, description: constantHttpStatusCodes[404] }
     }
   }),
   validator("param", schemaParam, validatorHandler),
@@ -80,15 +86,15 @@ Note: If you only need to query the document metadata, you should use HEAD metho
 
     const document = mutable.database.document.get("name", name);
     if (!document?.id) {
-      return error.throw(ErrorCode.documentNotFound);
+      return errorThrow(errorCodeDocumentNotFound);
     }
     if (document.password) {
       if (!password) {
-        return error.throw(ErrorCode.documentPasswordNeeded);
+        return errorThrow(errorCodeDocumentPasswordNeeded);
       }
 
       if (!verifyHash(password, document.password)) {
-        return error.throw(ErrorCode.documentInvalidPassword);
+        return errorThrow(errorCodeDocumentInvalidPassword);
       }
     }
 

@@ -1,15 +1,15 @@
 import { Hono } from "@hono/hono/tiny";
-import type { Env } from "#http/type.ts";
+import type { Env } from "#http/handler.ts";
 import delete_ from "./delete.ts";
 import get from "./get.ts";
 import list from "./list.ts";
 import patch from "./patch.ts";
 import post from "./post.ts";
 
-export const v1DocumentRouter = new Hono<Env>();
+export const v1DocumentHandler = new Hono<Env>();
 
-v1DocumentRouter.route("/", delete_);
-v1DocumentRouter.route("/", get);
-v1DocumentRouter.route("/", list);
-v1DocumentRouter.route("/", patch);
-v1DocumentRouter.route("/", post);
+v1DocumentHandler.route("/", delete_);
+v1DocumentHandler.route("/", get);
+v1DocumentHandler.route("/", list);
+v1DocumentHandler.route("/", patch);
+v1DocumentHandler.route("/", post);

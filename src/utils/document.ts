@@ -1,9 +1,16 @@
-import { constant, mutable } from "#/global.ts";
+import { constantDocumentNameLengthDefault, constantNanoid, mutable } from "#/global.ts";
 
-export const generateName = (length = 8): string => {
+// deflate
+export const documentVersionV1 = 1;
+// no compression
+export const documentVersionV2 = 2;
+
+export type DocumentVersionType = typeof documentVersionV1 | typeof documentVersionV2;
+
+export const generateName = (length = constantDocumentNameLengthDefault): string => {
   let name: string;
   do {
-    name = constant.nanoid(length);
+    name = constantNanoid(length);
   } while (mutable.database.document.get("name", name)?.name);
 
   return name;

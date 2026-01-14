@@ -1,7 +1,7 @@
 import { Hono } from "@hono/hono/tiny";
-import type { Env } from "#http/type.ts";
+import type { Env } from "#http/handler.ts";
 import create from "./create.ts";
 
-export const v1UserRouter = new Hono<Env>();
+export const v1UserHandler = new Hono<Env>();
 
-v1UserRouter.route("/", create);
+v1UserHandler.route("/", create);

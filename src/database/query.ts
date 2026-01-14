@@ -1,10 +1,11 @@
 import type { SQLInputValue } from "node:sqlite";
 import { chunk } from "@std/collections";
 import { monotonicUlid } from "@std/ulid";
-import { constant, type DocumentVersionType } from "#/global.ts";
+import type { Database } from "#db/index.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateToken } from "#util/user.ts";
-import type { Database } from "./database.ts";
+import { constantDatabaseMaxElements } from "../global.ts";
+import type { DocumentVersionType } from "../utils/document.ts";
 
 export type Document = {
   id: string;
@@ -39,7 +40,7 @@ abstract class Query<Table extends Record<string, SQLInputValue>> {
     }
 
     this.database.transaction(() => {
-      for (const batch of chunk(defaultValues, constant.databaseMaxElements)) {
+      for (const batch of chunk(defaultValues, constantDatabaseMaxElements)) {
         this.database
           .prepare(
             `DELETE

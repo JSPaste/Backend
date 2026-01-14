@@ -2,9 +2,9 @@ import { createMiddleware } from "@hono/hono/factory";
 import { type } from "arktype";
 import { mutable } from "#/global.ts";
 import { verifyHash } from "#util/crypto.ts";
-import { ErrorCode, error } from "#util/error.ts";
+import { errorCodeUserInvalidToken, errorCodeValidation, errorThrow } from "#util/error.ts";
 import { validatorUserHeader } from "#util/validator/user.ts";
-import type { Env } from "../type.ts";
+import type { Env } from "../handler.ts";
 
 export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
   const authorization = ctx.req.header("authorization");
@@ -14,7 +14,7 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
 
   const token = validatorUserHeader(authorization);
   if (token instanceof type.errors) {
-    return error.throw(ErrorCode.validation, token.summary);
+    return errorThrow(errorCodeValidation, token.summary);
   }
 
   if (!token.includes(".")) {
@@ -23,7 +23,7 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
       // @ts-expect-error unindexed select
       const id = mutable.database.user.get("token", token)?.id;
       if (!id) {
-        return error.throw(ErrorCode.userInvalidToken);
+        return errorThrow(errorCodeUserInvalidToken);
       }
 
       ctx.set("userId", id);
@@ -31,18 +31,18 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
       return next();
     }
 
-    return error.throw(ErrorCode.userInvalidToken);
+    return errorThrow(errorCodeUserInvalidToken);
   }
 
   const [id] = token.split(".");
   if (!id) {
-    return error.throw(ErrorCode.userInvalidToken);
+    return errorThrow(errorCodeUserInvalidToken);
   }
 
   // trying to minimize timing attacks by always calling verifyHash
   const combo = mutable.database.user.get("id", id)?.token ?? "0 0";
   if (!verifyHash(token, combo)) {
-    return error.throw(ErrorCode.userInvalidToken);
+    return errorThrow(errorCodeUserInvalidToken);
   }
 
   ctx.set("userId", id);

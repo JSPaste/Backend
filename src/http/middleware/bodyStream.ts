@@ -1,7 +1,7 @@
 import { createMiddleware } from "@hono/hono/factory";
-import { constant } from "#/global.ts";
-import { ErrorCode, error } from "#util/error.ts";
-import type { Env } from "../type.ts";
+import { env } from "#util/env.ts";
+import { errorCodeDocumentInvalidSize, errorThrow } from "#util/error.ts";
+import type { Env } from "../handler.ts";
 
 export const bodyStream = createMiddleware<Env>(async (ctx, next) => {
   if (!ctx.req.raw.body) {
@@ -13,8 +13,8 @@ export const bodyStream = createMiddleware<Env>(async (ctx, next) => {
   const contentLengthHeader = ctx.req.raw.headers.get("content-length");
   if (contentLengthHeader !== null && !ctx.req.raw.headers.has("transfer-encoding")) {
     const size = Number.parseInt(contentLengthHeader, 10);
-    if (size > constant.env.JSPB_DOCUMENT_SIZE) {
-      return error.throw(ErrorCode.documentInvalidSize);
+    if (size > env.JSPB_DOCUMENT_SIZE) {
+      return errorThrow(errorCodeDocumentInvalidSize);
     }
 
     ctx.set("hasBody", size > 0);
@@ -44,7 +44,7 @@ export const bodyStream = createMiddleware<Env>(async (ctx, next) => {
     transform: (chunk, controller) => {
       size += chunk.length;
 
-      if (size > constant.env.JSPB_DOCUMENT_SIZE) {
+      if (size > env.JSPB_DOCUMENT_SIZE) {
         controller.error(new Deno.errors.BrokenPipe());
         return;
       }

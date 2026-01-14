@@ -2,13 +2,14 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { monotonicUlid } from "@std/ulid";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
-import type { Env } from "#http/type.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateName } from "#util/document.ts";
-import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { env } from "#util/env.ts";
+import { errorCodeDocumentNameAlreadyExists, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsWrite } from "#util/fs.ts";
 import {
   validatorDocumentName,
@@ -61,19 +62,19 @@ export default new Hono<Env>().post(
             schema: schemaBodyResponse.schema
           }
         },
-        description: constant.http[200]
+        description: constantHttpStatusCodes[200]
       },
-      400: { ...genericErrorResponse, description: constant.http[400] },
-      404: { ...genericErrorResponse, description: constant.http[404] },
+      400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
+      404: { ...genericErrorResponse, description: constantHttpStatusCodes[404] },
 
       // auth middleware
-      401: { ...genericErrorResponse, description: constant.http[401] },
+      401: { ...genericErrorResponse, description: constantHttpStatusCodes[401] },
 
       // document name already exists
-      409: { ...genericErrorResponse, description: constant.http[409] },
+      409: { ...genericErrorResponse, description: constantHttpStatusCodes[409] },
 
       // bodyLimit middleware
-      413: { ...genericErrorResponse, description: constant.http[413] }
+      413: { ...genericErrorResponse, description: constantHttpStatusCodes[413] }
     }
   }),
   validator("header", schemaHeader, validatorHandler),
@@ -90,7 +91,7 @@ export default new Hono<Env>().post(
     let setName: string;
     if (name) {
       if (mutable.database.document.get("name", name)?.name) {
-        return error.throw(ErrorCode.documentNameAlreadyExists);
+        return errorThrow(errorCodeDocumentNameAlreadyExists);
       }
 
       setName = name;
@@ -110,7 +111,7 @@ export default new Hono<Env>().post(
     mutable.database.document.create({
       id: setId,
       user_id: ctx.get("userId") ?? null,
-      version: constant.env.JSPB_DOCUMENT_COMPRESSION,
+      version: env.JSPB_DOCUMENT_COMPRESSION,
       name: setName,
       password: hashCombo
     });

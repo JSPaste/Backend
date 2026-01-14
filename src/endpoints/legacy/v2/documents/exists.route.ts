@@ -1,8 +1,8 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
-import type { Env } from "#http/type.ts";
+import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -26,10 +26,10 @@ export default new Hono<Env>().get(
             schema: schemaBodyResponse.schema
           }
         },
-        description: constant.http[200]
+        description: constantHttpStatusCodes[200]
       },
-      400: { ...genericErrorResponse, description: constant.http[400] },
-      404: { ...genericErrorResponse, description: constant.http[404] }
+      400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
+      404: { ...genericErrorResponse, description: constantHttpStatusCodes[404] }
     }
   }),
   validator("param", schemaParam, validatorHandler),
