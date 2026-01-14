@@ -9,13 +9,9 @@ run = [
 
 [tasks."install:deno"]
 description = "Install Deno dependencies"
-run = '''
-if [ "${GITHUB_ACTIONS}" = "true" ]; then
-  mise exec -- deno install --frozen;
-else
-  mise exec -- deno install;
-fi
-'''
+run = [
+    "mise exec -- deno install"
+]
 
 [tasks."clean"]
 description = "Clean project environment"
