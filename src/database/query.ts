@@ -13,15 +13,13 @@ export type Document = {
   name: string;
   password: string | null;
 };
-export type DocumentColumn<T extends keyof Document> = Pick<Document, T>;
-export type DocumentIndex = DocumentColumn<"id" | "name">;
+export type DocumentIndex = Pick<Document, "id" | "name">;
 
 export type User = {
   id: string;
   token: string;
 };
-export type UserColumn<T extends keyof User> = Pick<User, T>;
-export type UserIndex = UserColumn<"id">;
+export type UserIndex = Pick<User, "id">;
 
 abstract class Query<Table extends Record<string, SQLInputValue>> {
   protected readonly database: Database;
@@ -145,16 +143,16 @@ export class UserQuery extends Query<User> {
       .get() as User | undefined;
   }
 
-  public getDocuments(id: string): DocumentColumn<"id" | "name">[] {
+  public getDocuments(id: string): Pick<Document, "id" | "name">[] {
     return this.database
       .prepare(`SELECT document.id, document.name
                 FROM document WHERE document.user_id = :id`)
-      .all({ id: id }) as DocumentColumn<"id" | "name">[];
+      .all({ id: id }) as Pick<Document, "id" | "name">[];
   }
 
   public getAll = this.selectColumns;
 
-  public getAllWithoutDocuments(): UserColumn<"id">[] {
+  public getAllWithoutDocuments(): Pick<User, "id">[] {
     return this.database
       .prepare(`SELECT user.id
                 FROM user
@@ -162,6 +160,6 @@ export class UserQuery extends Query<User> {
                   FROM document
                   WHERE document.user_id = user.id
                 )`)
-      .all() as UserColumn<"id">[];
+      .all() as Pick<User, "id">[];
   }
 }

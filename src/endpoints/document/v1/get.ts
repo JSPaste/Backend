@@ -3,12 +3,11 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
 import { type } from "arktype";
-import { constant, DocumentVersion, mutable } from "#/global.ts";
-import { compression } from "#document/compression.ts";
-import { storage } from "#document/storage.ts";
+import { constant, mutable } from "#/global.ts";
 import type { Env } from "#http/type.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { fsRead } from "#util/fs.ts";
 import {
   validatorDocumentDownload,
   validatorDocumentName,
@@ -103,21 +102,6 @@ Note: If you only need to query the document metadata, you should use HEAD metho
       return ctx.body(null);
     }
 
-    const fileHandle = await storage.read(document.id);
-
-    const clientHasDeflate = ctx.req.header("accept-encoding")?.includes("deflate");
-
-    let fileContent: ReadableStream<Uint8Array>;
-    if (document.version === DocumentVersion.V2 || clientHasDeflate) {
-      fileContent = fileHandle.readable;
-
-      if (document.version === DocumentVersion.V1 && clientHasDeflate) {
-        ctx.res.headers.set("content-encoding", "deflate");
-      }
-    } else {
-      fileContent = compression.decode(fileHandle.readable);
-    }
-
     if (typeof dl !== "undefined") {
       ctx.res.headers.set("content-disposition", `attachment; filename="jspaste_${name}"`);
     }
@@ -125,6 +109,6 @@ Note: If you only need to query the document metadata, you should use HEAD metho
     ctx.res.headers.set("content-type", "text/plain");
     ctx.res.headers.set("transfer-encoding", "chunked");
 
-    return stream(ctx, async (stream) => await stream.pipe(fileContent));
+    return stream(ctx, async (stream) => await stream.pipe(await fsRead(ctx, document)));
   }
 );

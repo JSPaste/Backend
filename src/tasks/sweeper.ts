@@ -2,8 +2,8 @@ import { mapNotNullish } from "@std/collections";
 import { decodeTime } from "@std/ulid";
 import { constant, mutable } from "#/global.ts";
 import { Database } from "#db/database.ts";
-import { storage } from "#document/storage.ts";
 import { Logger } from "#util/console.ts";
+import { fsDelete, fsList } from "../utils/fs.ts";
 
 const log: Logger = new Logger("task::sweeper");
 
@@ -20,7 +20,7 @@ export const sweeper = async (): Promise<void> => {
 const sweeperDatabaseUser = (): void => {
   using database = new Database();
 
-  const temporalFuture = constant.temporal.utc().add({ days: 3 });
+  const temporalFuture = constant.temporal.UTC().add({ days: 3 });
 
   const users = mapNotNullish(database.user.getAllWithoutDocuments(), ({ id }) => {
     if (!id) return;
@@ -42,7 +42,7 @@ const sweeperDatabaseUser = (): void => {
 const sweeperDatabaseDocument = (): void => {
   using database = new Database();
 
-  const temporalNow = constant.temporal.utc();
+  const temporalNow = constant.temporal.UTC();
 
   const documents = mapNotNullish(database.document.getAll(["id", "user_id"]), ({ id, user_id }) => {
     if (!id) return;
@@ -68,7 +68,7 @@ const sweeperDangling = async (): Promise<void> => {
   using database = new Database();
 
   const databaseDocuments = mapNotNullish(database.document.getAll(["id"]), ({ id }) => id);
-  const storageDocuments = storage.list(true);
+  const storageDocuments = fsList(true);
 
   const databaseDocumentsSet = new Set(databaseDocuments);
   const storageDocumentsSet = new Set(storageDocuments);
@@ -85,7 +85,7 @@ const sweeperDangling = async (): Promise<void> => {
 
   if (storageDocumentsDangling.size > 0) {
     for (const id of storageDocumentsDangling) {
-      queue.push(storage.delete(id));
+      queue.push(fsDelete({ id: id }));
     }
 
     await Promise.all(queue);

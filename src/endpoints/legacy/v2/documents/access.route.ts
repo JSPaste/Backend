@@ -2,12 +2,11 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { toText } from "@std/streams";
 import { type } from "arktype";
-import { constant, DocumentVersion, mutable } from "#/global.ts";
-import { compression } from "#document/compression.ts";
-import { storage } from "#document/storage.ts";
+import { constant, mutable } from "#/global.ts";
 import type { Env } from "#http/type.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { fsRead } from "#util/fs.ts";
 import { validatorDocumentName, validatorDocumentPassword } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
 
@@ -88,18 +87,9 @@ export default new Hono<Env>().get(
       }
     }
 
-    await using fileHandle = await storage.read(document.id);
-
-    let fileContent: ReadableStream<Uint8Array>;
-    if (document.version === DocumentVersion.V2) {
-      fileContent = fileHandle.readable;
-    } else {
-      fileContent = compression.decode(fileHandle.readable);
-    }
-
     return ctx.json({
       key: param.name,
-      data: await toText(fileContent),
+      data: await toText(await fsRead(ctx, document, true)),
       url: new URL(ctx.req.url).host.concat("/", param.name),
       expirationTimestamp: 0
     });

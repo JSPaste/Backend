@@ -1,16 +1,14 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, DocumentVersion, mutable } from "#/global.ts";
-import { compression } from "#document/compression.ts";
-import { storage } from "#document/storage.ts";
+import { constant, mutable } from "#/global.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
-import { bodyCheck } from "#http/middleware/bodyCheck.ts";
-import { bodySize } from "#http/middleware/bodySize.ts";
+import { bodyStream } from "#http/middleware/bodyStream.ts";
 import type { Env } from "#http/type.ts";
 import { generateHash } from "#util/crypto.ts";
 import { isOwner } from "#util/document.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { fsWrite } from "#util/fs.ts";
 import {
   validatorDocumentName,
   validatorDocumentPassword,
@@ -75,8 +73,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
   validator("param", schemaParam, validatorHandler),
   validator("header", schemaHeader, validatorHandler),
   authMiddleware,
-  bodySize,
-  bodyCheck,
+  bodyStream,
   async (ctx) => {
     let {
       actualName
@@ -122,17 +119,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
 
     if (ctx.get("hasBody")) {
       mutable.database.document.update("name", actualName, "version", constant.env.JSPB_DOCUMENT_COMPRESSION);
-
-      let contentStream: ReadableStream<Uint8Array>;
-      if (constant.env.JSPB_DOCUMENT_COMPRESSION === DocumentVersion.V1) {
-        // ctx.req.raw.body is only null on GET/HEAD
-        contentStream = compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>);
-      } else {
-        // ctx.req.raw.body is only null on GET/HEAD
-        contentStream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
-      }
-
-      await storage.write(document.id, contentStream);
+      await fsWrite(ctx, document);
     }
 
     return ctx.body(null);

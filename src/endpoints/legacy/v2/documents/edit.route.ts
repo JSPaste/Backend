@@ -1,12 +1,11 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, DocumentVersion, mutable } from "#/global.ts";
-import { compression } from "#document/compression.ts";
-import { storage } from "#document/storage.ts";
-import { bodySize } from "#http/middleware/bodySize.ts";
+import { constant, mutable } from "#/global.ts";
+import { bodyStream } from "#http/middleware/bodyStream.ts";
 import type { Env } from "#http/type.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { fsWrite } from "#util/fs.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
 
@@ -57,7 +56,7 @@ export default new Hono<Env>().patch(
     }
   }),
   validator("param", schemaParam, validatorHandler),
-  bodySize,
+  bodyStream,
   async (ctx) => {
     // @ts-expect-error upstream
     const param = ctx.req.valid("param") as typeof schemaParam.infer;
@@ -68,17 +67,7 @@ export default new Hono<Env>().patch(
     }
 
     mutable.database.document.update("name", param.name, "version", constant.env.JSPB_DOCUMENT_COMPRESSION);
-
-    let contentStream: ReadableStream<Uint8Array>;
-    if (constant.env.JSPB_DOCUMENT_COMPRESSION === DocumentVersion.V1) {
-      // ctx.req.raw.body is only null on GET/HEAD
-      contentStream = compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>);
-    } else {
-      // ctx.req.raw.body is only null on GET/HEAD
-      contentStream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
-    }
-
-    await storage.write(document.id, contentStream);
+    await fsWrite(ctx, document);
 
     return ctx.json({
       edited: true

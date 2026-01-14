@@ -2,15 +2,14 @@ import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { monotonicUlid } from "@std/ulid";
 import { type } from "arktype";
-import { constant, DocumentVersion, mutable } from "#/global.ts";
-import { compression } from "#document/compression.ts";
-import { storage } from "#document/storage.ts";
+import { constant, mutable } from "#/global.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
-import { bodySize } from "#http/middleware/bodySize.ts";
+import { bodyStream } from "#http/middleware/bodyStream.ts";
 import type { Env } from "#http/type.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateName } from "#util/document.ts";
 import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { fsWrite } from "#util/fs.ts";
 import {
   validatorDocumentName,
   validatorDocumentNameLength,
@@ -79,7 +78,7 @@ export default new Hono<Env>().post(
   }),
   validator("header", schemaHeader, validatorHandler),
   authMiddleware,
-  bodySize,
+  bodyStream,
   async (ctx) => {
     const {
       "x-jspaste-password": password,
@@ -115,17 +114,7 @@ export default new Hono<Env>().post(
       name: setName,
       password: hashCombo
     });
-
-    let contentStream: ReadableStream<Uint8Array>;
-    if (constant.env.JSPB_DOCUMENT_COMPRESSION === DocumentVersion.V1) {
-      // ctx.req.raw.body is only null on GET/HEAD
-      contentStream = compression.encode(ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>);
-    } else {
-      // ctx.req.raw.body is only null on GET/HEAD
-      contentStream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
-    }
-
-    await storage.write(setId, contentStream);
+    await fsWrite(ctx, { id: setId });
 
     return ctx.json({
       name: setName

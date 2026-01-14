@@ -83,7 +83,10 @@
           "level": "error",
           "options": {
             "paths": {
-              "@hono/hono": "Use `@hono/hono/tiny` instead"
+              "@hono/hono": {
+                "message": "Use `@hono/hono/tiny` instead",
+                "allowImportNames": ["Context"]
+              }
             }
           }
         },
