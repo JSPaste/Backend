@@ -1,11 +1,16 @@
 import { type } from "arktype";
-import { constant } from "#/global.ts";
-import { regexBase64URL } from "./regex.ts";
+import {
+  constantDocumentNameLengthMax,
+  constantDocumentNameLengthMin,
+  constantDocumentPasswordLengthMax,
+  constantDocumentPasswordLengthMin
+} from "#/global.ts";
+import { regexBase64URL } from "../regex.ts";
 import { validatorCreationTimestamp } from "./shared.ts";
 
 export const validatorDocumentName = type(regexBase64URL)
-  .atLeastLength(constant.documentNameLengthMin)
-  .atMostLength(constant.documentNameLengthMax)
+  .atLeastLength(constantDocumentNameLengthMin)
+  .atMostLength(constantDocumentNameLengthMax)
   .configure({
     ref: "DocumentName",
     description: "The document name",
@@ -29,7 +34,7 @@ export const validatorDocumentName = type(regexBase64URL)
   });
 
 export const validatorDocumentNameLength = type.keywords.string.integer.parse
-  .to(type.number.atLeast(constant.documentNameLengthMin).atMost(constant.documentNameLengthMax))
+  .to(type.number.atLeast(constantDocumentNameLengthMin).atMost(constantDocumentNameLengthMax))
   .configure({
     ref: "DocumentNameLength",
     description: "The name length for the document",
@@ -52,8 +57,8 @@ export const validatorDocumentNameLength = type.keywords.string.integer.parse
   });
 
 export const validatorDocumentPassword = type.string
-  .atLeastLength(constant.documentPasswordLengthMin)
-  .atMostLength(constant.documentPasswordLengthMax)
+  .atLeastLength(constantDocumentPasswordLengthMin)
+  .atMostLength(constantDocumentPasswordLengthMax)
   .configure({
     ref: "DocumentPassword.default",
     description: "The password for the document (read access)",

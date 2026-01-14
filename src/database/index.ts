@@ -1,9 +1,10 @@
 import { DatabaseSync, type StatementSync } from "node:sqlite";
 import { monotonicUlid, ulid } from "@std/ulid";
-import { constant } from "#/global.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateToken } from "#util/user.ts";
+import { constantPathDatabaseFile, constantStoreStatements } from "../global.ts";
+import { env } from "../utils/env.ts";
 import { migrations } from "./migration.ts";
 import { DocumentQuery, UserQuery } from "./query.ts";
 
@@ -20,9 +21,9 @@ export class Database {
   private readonly database: DatabaseSync;
 
   public constructor(options: Options = {}) {
-    options.ephemeral ??= constant.env.JSPB_DEBUG_DATABASE_EPHEMERAL;
+    options.ephemeral ??= env.JSPB_DEBUG_DATABASE_EPHEMERAL;
 
-    this.database = new DatabaseSync(options.ephemeral ? ":memory:" : constant.path.databaseFile);
+    this.database = new DatabaseSync(options.ephemeral ? ":memory:" : constantPathDatabaseFile);
 
     if (options.ephemeral) {
       log.warn("Using ephemeral. No changes will persist.");
@@ -67,7 +68,7 @@ export class Database {
     try {
       const rootId = this.user.getRoot()?.id;
 
-      if (constant.env.JSPB_USER_ROOT_RECOVERY && rootId) {
+      if (env.JSPB_USER_ROOT_RECOVERY && rootId) {
         const token = generateToken(rootId);
         const hash = generateHash(token);
 
@@ -94,10 +95,10 @@ export class Database {
       return this.database.prepare(sql);
     }
 
-    let statement = constant.store.statements.get(sql);
+    let statement = constantStoreStatements.get(sql);
     if (!statement) {
       statement = this.database.prepare(sql);
-      constant.store.statements.set(sql, statement);
+      constantStoreStatements.set(sql, statement);
     }
 
     return statement;
@@ -134,7 +135,7 @@ export class Database {
   }
 
   public [Symbol.dispose](): void {
-    constant.store.statements.clear();
+    constantStoreStatements.clear();
     this.database.close();
   }
 }

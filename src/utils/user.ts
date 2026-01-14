@@ -1,7 +1,7 @@
-import { constant } from "#/global.ts";
+import { constantNanoid } from "../global.ts";
 
 export const generateToken = (id: string): string => {
-  const noise = constant.nanoid(32);
+  const noise = constantNanoid(32);
 
   return `${id}.${noise}`;
 };

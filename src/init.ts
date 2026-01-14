@@ -1,31 +1,32 @@
 import { abortable } from "@std/async";
 import { ensureDir } from "@std/fs";
-import { Database } from "#db/database.ts";
-import { router } from "#http/router.ts";
-import { server } from "#http/server.ts";
+import { Database } from "#db/index.ts";
 import { sweeper } from "#task/sweeper.ts";
 import { Logger } from "#util/console.ts";
-import { constant, mutable } from "./global.ts";
+import { constantPathStructStorage, constantPathStructStorageData, constantStoreDispose, mutable } from "./global.ts";
+import { handler } from "./http/handler.ts";
+import { http } from "./http/index.ts";
 import { taskRegister } from "./task.ts";
+import { env } from "./utils/env.ts";
 
 const log: Logger = new Logger();
 
-const initDirStruct = async (): Promise<void> => {
-  const paths = Object.values(constant.path.struct);
+let shutdown = false;
 
-  await Promise.all(paths.map((path) => ensureDir(path)));
+const initDirStruct = async (): Promise<void> => {
+  await Promise.all([await ensureDir(constantPathStructStorage), await ensureDir(constantPathStructStorageData)]);
 };
 
 const initHTTPServer = async (handler?: Deno.ServeHandler<Deno.Addr>): Promise<void> => {
   const id = "__httpServer";
 
-  await constant.store.dispose.get(id)?.[1]();
+  await constantStoreDispose.get(id)?.[1]();
 
-  mutable.http = server({
+  mutable.http = http({
     handler: handler
   });
 
-  constant.store.dispose.set(id, [
+  constantStoreDispose.set(id, [
     10,
     async () => {
       mutable.http?.unref();
@@ -39,17 +40,17 @@ const initHTTPServer = async (handler?: Deno.ServeHandler<Deno.Addr>): Promise<v
 const initDatabase = async (): Promise<void> => {
   const id = "__databaseServer";
 
-  await constant.store.dispose.get(id)?.[1]();
+  await constantStoreDispose.get(id)?.[1]();
 
   mutable.database = new Database();
 
-  constant.store.dispose.set(id, [0, async () => mutable.database[Symbol.dispose]()]);
+  constantStoreDispose.set(id, [0, async () => mutable.database[Symbol.dispose]()]);
 
   await mutable.database.migration();
 };
 
 const initTask = async (): Promise<void> => {
-  taskRegister(constant.env.JSPB_TASK_SWEEPER, sweeper, {
+  taskRegister(env.JSPB_TASK_SWEEPER, sweeper, {
     name: "sweeper"
   });
 };
@@ -57,12 +58,12 @@ const initTask = async (): Promise<void> => {
 export const init = async (): Promise<void> => {
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "SIGUSR1", "SIGUSR2"] satisfies Deno.Signal[]) {
     Deno.addSignalListener(signal, async () => {
-      if (mutable.shutdown) return;
-      mutable.shutdown = true;
+      if (shutdown) return;
+      shutdown = true;
 
       log.debug(`Received ${signal}.`);
 
-      const storeDispose = constant.store.dispose
+      const storeDispose = constantStoreDispose
         .entries()
         .toArray()
         .sort(([, [pa]], [, [pb]]) => pb - pa);
@@ -92,7 +93,7 @@ export const init = async (): Promise<void> => {
   try {
     await Promise.all([initDirStruct(), initHTTPServer()]);
     await Promise.all([initDatabase()]);
-    await Promise.all([initTask(), initHTTPServer(router().fetch)]);
+    await Promise.all([initTask(), initHTTPServer(handler().fetch)]);
   } catch (error) {
     log.error(error);
 

@@ -1,9 +1,9 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { constant, mutable } from "#/global.ts";
-import type { Env } from "#http/type.ts";
-import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
+import { errorCodeDocumentNotFound, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsDelete } from "#util/fs.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -34,10 +34,10 @@ export default new Hono<Env>().delete(
             schema: schemaBodyResponse.schema
           }
         },
-        description: constant.http[200]
+        description: constantHttpStatusCodes[200]
       },
-      400: { ...genericErrorResponse, description: constant.http[400] },
-      404: { ...genericErrorResponse, description: constant.http[404] }
+      400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
+      404: { ...genericErrorResponse, description: constantHttpStatusCodes[404] }
     }
   }),
   validator("param", schemaParam, validatorHandler),
@@ -47,7 +47,7 @@ export default new Hono<Env>().delete(
 
     const document = mutable.database.document.get("name", param.name);
     if (!document?.id || document.user_id) {
-      return error.throw(ErrorCode.documentNotFound);
+      return errorThrow(errorCodeDocumentNotFound);
     }
 
     mutable.database.document.delete("name", param.name);

@@ -1,32 +1,34 @@
 import type { Context } from "@hono/hono";
 import type { Document } from "#db/query.ts";
-import { constant, DocumentVersion } from "../global.ts";
-import type { Env } from "../http/type.ts";
-import { ErrorCode, error } from "./error.ts";
+import { constantPathStructStorageData, constantTemporalToUTC, constantTemporalUTC } from "../global.ts";
+import type { Env } from "../http/handler.ts";
+import { documentVersionV1, documentVersionV2 } from "./document.ts";
+import { env } from "./env.ts";
+import { errorCodeDocumentCorrupted, errorCodeDocumentInvalidSize, errorThrow } from "./error.ts";
 
 export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): Promise<void> => {
-  await using handle = await Deno.open(constant.path.struct.storageData + id, {
+  await using handle = await Deno.open(constantPathStructStorageData + id, {
     create: true,
     write: true,
     truncate: true
   });
 
   let stream: ReadableStream<Uint8Array>;
-  switch (constant.env.JSPB_DOCUMENT_COMPRESSION) {
-    case DocumentVersion.V1: {
+  switch (env.JSPB_DOCUMENT_COMPRESSION) {
+    case documentVersionV1: {
       // ctx.req.raw.body is only null on GET/HEAD
       stream = (ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>).pipeThrough(new CompressionStream("deflate"));
 
       break;
     }
-    case DocumentVersion.V2: {
+    case documentVersionV2: {
       // ctx.req.raw.body is only null on GET/HEAD
       stream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
 
       break;
     }
     default: {
-      return error.throw(ErrorCode.documentCorrupted);
+      return errorThrow(errorCodeDocumentCorrupted);
     }
   }
 
@@ -36,7 +38,7 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
     void fsDelete({ id: id });
 
     if (why instanceof Deno.errors.BrokenPipe) {
-      return error.throw(ErrorCode.documentInvalidSize);
+      return errorThrow(errorCodeDocumentInvalidSize);
     }
 
     throw why;
@@ -45,7 +47,7 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
 
 export const fsDelete = async ({ id }: Pick<Document, "id">): Promise<void> => {
   try {
-    await Deno.remove(constant.path.struct.storageData + id);
+    await Deno.remove(constantPathStructStorageData + id);
   } catch (why) {
     // already deleted
     if (why instanceof Deno.errors.NotFound) return;
@@ -59,13 +61,13 @@ export const fsRead = async (
   { id, version }: Pick<Document, "id" | "version">,
   clientIgnoreCapabilities = false
 ): Promise<ReadableStream<Uint8Array<ArrayBufferLike>>> => {
-  const handle = await Deno.open(constant.path.struct.storageData + id);
+  const handle = await Deno.open(constantPathStructStorageData + id);
 
   const hasClientDeflate = clientIgnoreCapabilities ? false : ctx.req.header("accept-encoding")?.includes("deflate");
 
   let stream: ReadableStream<Uint8Array>;
   switch (version) {
-    case DocumentVersion.V1: {
+    case documentVersionV1: {
       if (hasClientDeflate) {
         ctx.res.headers.set("content-encoding", "deflate");
         stream = handle.readable;
@@ -75,13 +77,13 @@ export const fsRead = async (
 
       break;
     }
-    case DocumentVersion.V2: {
+    case documentVersionV2: {
       stream = handle.readable;
 
       break;
     }
     default: {
-      return error.throw(ErrorCode.documentCorrupted);
+      return errorThrow(errorCodeDocumentCorrupted);
     }
   }
 
@@ -90,15 +92,15 @@ export const fsRead = async (
 
 // relaxed exists because races between fs/db may occur
 export function* fsList(relaxed?: boolean): Iterable<string> {
-  for (const entry of Deno.readDirSync(constant.path.struct.storageData)) {
+  for (const entry of Deno.readDirSync(constantPathStructStorageData)) {
     if (entry.isFile) {
       if (relaxed) {
-        const info = Deno.statSync(constant.path.struct.storageData + entry.name);
+        const info = Deno.statSync(constantPathStructStorageData + entry.name);
 
         if (
           !info.mtime ||
-          constant.temporal.UTC().epochMilliseconds -
-            constant.temporal.toUTC(info.mtime.toTemporalInstant()).epochMilliseconds >=
+          constantTemporalUTC().epochMilliseconds -
+            constantTemporalToUTC(info.mtime.toTemporalInstant()).epochMilliseconds >=
             10_000
         ) {
           yield entry.name;

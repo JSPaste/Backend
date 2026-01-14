@@ -1,8 +1,9 @@
 import { mapNotNullish } from "@std/collections";
 import { decodeTime } from "@std/ulid";
-import { constant, mutable } from "#/global.ts";
-import { Database } from "#db/database.ts";
+import { constantTemporalUTC, mutable } from "#/global.ts";
+import { Database } from "#db/index.ts";
 import { Logger } from "#util/console.ts";
+import { env } from "../utils/env.ts";
 import { fsDelete, fsList } from "../utils/fs.ts";
 
 const log: Logger = new Logger("task::sweeper");
@@ -12,7 +13,7 @@ export const sweeper = async (): Promise<void> => {
   sweeperDatabaseDocument();
 
   // sweeper will remove everything in storage on ephemeral
-  if (!constant.env.JSPB_DEBUG_DATABASE_EPHEMERAL) {
+  if (!env.JSPB_DEBUG_DATABASE_EPHEMERAL) {
     await sweeperDangling();
   }
 };
@@ -20,7 +21,7 @@ export const sweeper = async (): Promise<void> => {
 const sweeperDatabaseUser = (): void => {
   using database = new Database();
 
-  const temporalFuture = constant.temporal.UTC().add({ days: 3 });
+  const temporalFuture = constantTemporalUTC().add({ days: 3 });
 
   const users = mapNotNullish(database.user.getAllWithoutDocuments(), ({ id }) => {
     if (!id) return;
@@ -42,14 +43,14 @@ const sweeperDatabaseUser = (): void => {
 const sweeperDatabaseDocument = (): void => {
   using database = new Database();
 
-  const temporalNow = constant.temporal.UTC();
+  const temporalNow = constantTemporalUTC();
 
   const documents = mapNotNullish(database.document.getAll(["id", "user_id"]), ({ id, user_id }) => {
     if (!id) return;
 
     const ageType = user_id
-      ? constant.env.JSPB_DOCUMENT_AGE.total("milliseconds")
-      : constant.env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("milliseconds");
+      ? env.JSPB_DOCUMENT_AGE.total("milliseconds")
+      : env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("milliseconds");
 
     if (ageType > 0 && temporalNow.epochMilliseconds - decodeTime(id) > ageType) {
       return id;

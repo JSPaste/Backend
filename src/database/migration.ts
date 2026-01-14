@@ -1,9 +1,9 @@
 import { mapNotNullish } from "@std/collections";
 import { ulid } from "@std/ulid";
+import type { Database } from "#db/index.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
 import { mutable } from "../global.ts";
-import type { Database } from "./database.ts";
 
 const log: Logger = new Logger("database::migration");
 

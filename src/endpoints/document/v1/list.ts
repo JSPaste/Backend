@@ -1,10 +1,10 @@
 import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
-import { constant, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
-import type { Env } from "#http/type.ts";
-import { ErrorCode, error, genericErrorResponse } from "#util/error.ts";
+import { errorCodeUserInvalidToken, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentListObject } from "#util/validator/document.ts";
 
 const schemaBodyResponse = await resolver(validatorDocumentListObject.array()).toOpenAPISchema();
@@ -23,20 +23,20 @@ export default new Hono<Env>().get(
             schema: schemaBodyResponse.schema
           }
         },
-        description: constant.http[200]
+        description: constantHttpStatusCodes[200]
       },
-      400: { ...genericErrorResponse, description: constant.http[400] },
-      404: { ...genericErrorResponse, description: constant.http[404] },
+      400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
+      404: { ...genericErrorResponse, description: constantHttpStatusCodes[404] },
 
       // auth middleware
-      401: { ...genericErrorResponse, description: constant.http[401] }
+      401: { ...genericErrorResponse, description: constantHttpStatusCodes[401] }
     }
   }),
   authMiddleware,
   async (ctx) => {
     const userId = ctx.get("userId");
     if (!userId) {
-      return error.throw(ErrorCode.userInvalidToken);
+      return errorThrow(errorCodeUserInvalidToken);
     }
 
     // https://github.com/honojs/hono/issues/1130

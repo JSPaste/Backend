@@ -2,24 +2,30 @@ import { cors } from "@hono/hono/cors";
 import { HTTPException } from "@hono/hono/http-exception";
 import { Hono } from "@hono/hono/tiny";
 import { openAPIRouteHandler } from "@hono/openapi";
-import { constant } from "#/global.ts";
-import { v1DocumentRouter } from "#endpoint/document/v1/index.ts";
-import { v2LegacyDocumentRouter } from "#endpoint/legacy/v2/documents/index.ts";
-import { v1UserRouter } from "#endpoint/user/v1/index.ts";
+import { v1DocumentHandler } from "#endpoint/document/v1/index.ts";
+import { v2LegacyDocumentHandler } from "#endpoint/legacy/v2/documents/index.ts";
+import { v1UserHandler } from "#endpoint/user/v1/index.ts";
 import { Logger } from "#util/console.ts";
-import { ErrorCode, error } from "#util/error.ts";
-import type { Env } from "./type.ts";
+import { env } from "../utils/env.ts";
+import { errorCodeCrash, errorCodeDocumentCorrupted, errorGet } from "../utils/error.ts";
 
 const log: Logger = new Logger("http");
 
-export const router = (): Hono<Env> => {
-  const router = new Hono<Env>().basePath("/api");
+export type Env = {
+  Variables: {
+    userId: string | undefined;
+    hasBody: boolean | undefined;
+  };
+};
 
-  router.notFound((ctx) => {
+export const handler = (): Hono<Env> => {
+  const handler = new Hono<Env>().basePath("/api");
+
+  handler.notFound((ctx) => {
     return ctx.body(null, 404);
   });
 
-  router.onError((instance, ctx) => {
+  handler.onError((instance, ctx) => {
     if (instance instanceof HTTPException) {
       return instance.getResponse();
     }
@@ -35,16 +41,16 @@ export const router = (): Hono<Env> => {
     ) {
       log.debug(instance);
 
-      return ctx.json(error.get(ErrorCode.documentCorrupted));
+      return ctx.json(errorGet(errorCodeDocumentCorrupted));
     }
 
     log.error(instance);
 
-    return ctx.json(error.get(ErrorCode.crash));
+    return ctx.json(errorGet(errorCodeCrash));
   });
 
-  router.use("*", cors());
-  router.use(async (ctx, next) => {
+  handler.use("*", cors());
+  handler.use(async (ctx, next) => {
     await next();
 
     // disable compression
@@ -52,9 +58,9 @@ export const router = (): Hono<Env> => {
     ctx.res.headers.append("Cache-Control", "no-transform");
   });
 
-  router.get(
+  handler.get(
     "/oas.json",
-    openAPIRouteHandler(router, {
+    openAPIRouteHandler(handler, {
       documentation: {
         openapi: "3.1.0",
         info: {
@@ -72,10 +78,10 @@ export const router = (): Hono<Env> => {
 Each instance can impose restrictions to the API usage. These restrictions may include, but not limited to:
 
 (the following values might change without notice)
-- Instance registration policy: ${constant.env.JSPB_USER_REGISTER ? "OPEN" : "CLOSED"}
-- Document size limit: ${constant.env.JSPB_DOCUMENT_SIZE === 0 ? "unlimited" : (constant.env.JSPB_DOCUMENT_SIZE ?? "unknown")}
-- Document lifetime: ${constant.env.JSPB_DOCUMENT_AGE.total("minutes") === 0 ? "unlimited" : (constant.env.JSPB_DOCUMENT_AGE.total("minutes") ?? "unknown")}
-- Document anonymous lifetime: ${constant.env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") === 0 ? "unlimited" : (constant.env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") ?? "unknown")}
+- Instance registration policy: ${env.JSPB_USER_REGISTER ? "OPEN" : "CLOSED"}
+- Document size limit: ${env.JSPB_DOCUMENT_SIZE === 0 ? "unlimited" : (env.JSPB_DOCUMENT_SIZE ?? "unknown")}
+- Document lifetime: ${env.JSPB_DOCUMENT_AGE.total("minutes") === 0 ? "unlimited" : (env.JSPB_DOCUMENT_AGE.total("minutes") ?? "unknown")}
+- Document anonymous lifetime: ${env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") === 0 ? "unlimited" : (env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") ?? "unknown")}
 `,
           license: {
             name: "EUPL-1.2",
@@ -111,15 +117,15 @@ Each instance can impose restrictions to the API usage. These restrictions may i
   );
 
   // deprecated
-  router.get("/documents/*", (ctx) => {
+  handler.get("/documents/*", (ctx) => {
     return ctx.redirect(ctx.req.path.replace(/\/documents\//g, "/v2/documents/"), 307);
   });
 
-  router.route("/document/v1", v1DocumentRouter);
-  router.route("/user/v1", v1UserRouter);
+  handler.route("/document/v1", v1DocumentHandler);
+  handler.route("/user/v1", v1UserHandler);
 
   // deprecated
-  router.route("/v2/documents", v2LegacyDocumentRouter);
+  handler.route("/v2/documents", v2LegacyDocumentHandler);
 
-  return router;
+  return handler;
 };
