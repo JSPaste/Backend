@@ -5,6 +5,8 @@
 !/.github/workflows/*.yml
 !/.zed/
 !/.zed/settings.json
+!/lib/
+!/lib/**
 !/src/
 !/src/**
 !/.dockerignore
@@ -23,3 +25,4 @@
 !/package.json
 !/README.md
 !/rolldown.config.ts
+!/tsconfig.json

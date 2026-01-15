@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "deno.window", "deno.unstable"],
+    "types": ["node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+
+    "checkJs": false,
+    "skipLibCheck": true,
+
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": false,
+    "isolatedDeclarations": false,
+    "noErrorTruncation": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "#/*": ["./src/*"],
+      "#db/*": ["./src/database/*"],
+      "#document/*": ["./src/document/*"],
+      "#endpoint/*": ["./src/endpoints/*"],
+      "#http/*": ["./src/http/*"],
+      "#task/*": ["./src/tasks/*"],
+      "#util/*": ["./src/utils/*"]
+    }
+  },
+  "exclude": ["./dist/", "./node_modules/", "./storage/"]
+}
