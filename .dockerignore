@@ -1,5 +1,6 @@
 *
 
+!/lib/**
 !/src/**
 !/.npmrc
 !/deno.json
@@ -8,3 +9,4 @@
 !/mise.toml
 !/package.json
 !/rolldown.config.ts
+!/tsconfig.json

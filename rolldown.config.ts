@@ -1,5 +1,6 @@
 import type { RolldownOptions } from "rolldown";
 import { analyzer, unstableRolldownAdapter } from "vite-bundle-analyzer";
+import deno from "./lib/deno-rolldown/mod.ts";
 
 const analyze = false;
 
@@ -25,13 +26,8 @@ export default {
   optimization: {
     inlineConst: true
   },
-  transform: {
-    // deno.json compilerOptions
-    typescript: {
-      onlyRemoveTypeImports: true
-    }
-  },
   plugins: [
+    deno(),
     unstableRolldownAdapter(
       analyzer({
         enabled: analyze,
