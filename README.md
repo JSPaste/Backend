@@ -22,12 +22,16 @@ powershell -c ".\backend.windows-<arch>.exe"
 
 ### Container
 
-- Pull latest image and run the container:
+We publish images to multiple registries for redundancy:
+
+- [`docker.io`](https://hub.docker.com/r/jspaste/backend)
+- [`ghcr.io`](https://github.com/jspaste/backend/pkgs/container/backend)
+
+To pull and run the container:
 
 ```shell
-docker pull ghcr.io/jspaste/backend:latest
-docker run --env-file=.env -d -p 127.0.0.1:4000:4000 \
-  ghcr.io/jspaste/backend:latest
+docker pull docker.io/jspaste/backend:latest
+docker run --env-file=.env -d -p [::1]:4000:4000 docker.io/jspaste/backend:latest
 ```
 
 ## Validate
@@ -36,23 +40,13 @@ docker run --env-file=.env -d -p 127.0.0.1:4000:4000 \
 > All artifacts and images originate from GitHub `JSPaste/Backend` repository, no other artifacts or images built and
 > distributed outside that repository are considered secure nor trusted by the JSPaste team.
 
-You can verify the integrity and origin of an artifact and/or image using the GitHub CLI or manually at
+You can verify the integrity and origin of an artifact using the GitHub CLI or manually at
 [JSPaste Attestations](https://github.com/jspaste/backend/attestations).
 
 Artifacts are attested and can be verified using the following command:
 
 ```shell
-gh attestation verify ./backend_latest_linux-amd64.tar.xz \
-  --owner JSPaste
-```
-
-Since container version
-[`2024.05.06-e105023`](https://github.com/orgs/jspaste/packages/container/backend/212635273?tag=2024.05.06-e105023),
-images are attested and can be verified using the following command:
-
-```shell
-gh attestation verify oci://ghcr.io/jspaste/backend:latest \
-  --owner JSPaste
+gh attestation verify ./backend_latest_linux-amd64.tar.xz --owner JSPaste
 ```
 
 ## Development

@@ -125,9 +125,6 @@ jobs:
     if: github.repository_owner == 'jspaste' && inputs.image-action != 'none'
     name: Release container image
     runs-on: ubuntu-latest
-    env:
-      REGISTRY: ghcr.io
-
     permissions:
       attestations: write
       id-token: write
@@ -139,83 +136,51 @@ jobs:
         with:
           egress-policy: "audit"
 
-      - name: Save context
-        id: ctx
+      - name: Setup mise-en-place
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+
+      - name: Setup podman
         env:
-          CTX_BRANCH: "${{ github.head_ref || github.ref_name }}"
-          CTX_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"
+          PODMAN_VERSION: "v5.8.2"
         run: |
-          echo "branch=${CTX_BRANCH}" >>"$GITHUB_OUTPUT"
-          echo "sha=${CTX_SHA}" >>"$GITHUB_OUTPUT"
-          echo "sha_short=${CTX_SHA::7}" >>"$GITHUB_OUTPUT"
+          sudo apt-get purge -y podman runc crun conmon
 
-      - name: Save tags
-        id: tags
-        env:
-          BRANCH: "${{ steps.ctx.outputs.branch }}"
-          SHA: "${{ steps.ctx.outputs.sha }}"
-          SHA_SHORT: "${{ steps.ctx.outputs.sha_short }}"
-        run: |
-          TIMESTAMP="$(date +%Y.%m.%d)"
-          TIMESTAMP_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          curl -fsSLO "https://github.com/mgoltzsche/podman-static/releases/download/${{ env.PODMAN_VERSION }}/podman-linux-amd64.tar.gz"
+          curl -fsSLO "https://github.com/mgoltzsche/podman-static/releases/download/${{ env.PODMAN_VERSION }}/podman-linux-amd64.tar.gz.asc"
+          gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 0CCF102C4F95D89E583FF1D4F8B5AF50344BB503
+          gpg --batch --verify "podman-linux-amd64.tar.gz.asc" "podman-linux-amd64.tar.gz"
 
-          if [[ "${BRANCH}" == "stable" ]]; then
-            TAGS+=("latest")
-          else
-            TAGS+=("snapshot")
-          fi
+          tar -xzf "podman-linux-amd64.tar.gz"
+          sudo cp -rfv ./podman-linux-amd64/etc/. /etc/
+          sudo cp -rfv ./podman-linux-amd64/usr/. /usr/
 
-          TAGS+=("${SHA}")
-          TAGS+=("${TIMESTAMP}-${SHA_SHORT}")
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-          echo "timestamp=${TIMESTAMP}" >>"$GITHUB_OUTPUT"
-          echo "timestamp_iso=${TIMESTAMP_ISO}" >>"$GITHUB_OUTPUT"
-          echo "version=${TIMESTAMP}-${SHA_SHORT}" >>"$GITHUB_OUTPUT"
-          echo "list=${TAGS[*]}" >>"$GITHUB_OUTPUT"
+      - if: inputs.image-action == 'build-release'
+        name: Login to GHCR
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          username: "${{ github.repository_owner }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+          registry: "ghcr.io"
+
+      - if: inputs.image-action == 'build-release'
+        name: Login to Docker Hub
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          username: "${{ secrets.DOCKERHUB_USERNAME }}"
+          password: "${{ secrets.DOCKERHUB_TOKEN }}"
+          registry: "docker.io"
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: "false"
 
-      - name: Build image
-        id: build-image
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
-        with:
-          containerfiles: "Dockerfile"
-          platforms: "linux/amd64,linux/arm64"
-          image: "${{ github.repository }}"
-          layers: "true"
-          oci: "true"
-          tags: "${{ steps.tags.outputs.list }}"
-          extra-args: |
-            --squash
-            --identity-label=false
-            --label=org.opencontainers.image.created=${{ steps.tags.outputs.timestamp_iso }}
-            --label=org.opencontainers.image.revision=${{ steps.ctx.outputs.sha }}
-            --label=org.opencontainers.image.version=${{ steps.tags.outputs.version }}
-
-      - if: inputs.image-action == 'build-release'
-        name: Login to GHCR
-        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1.7
-        with:
-          username: "${{ github.repository_owner }}"
-          password: "${{ secrets.GITHUB_TOKEN }}"
-          registry: "${{ env.REGISTRY }}"
-
-      - if: inputs.image-action == 'build-release'
-        name: Push to GHCR
-        id: push-image
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
-        with:
-          image: "${{ steps.build-image.outputs.image }}"
-          tags: "${{ steps.build-image.outputs.tags }}"
-          registry: "${{ env.REGISTRY }}"
-
-      - if: inputs.image-action == 'build-release'
-        name: Attest image
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
-        with:
-          subject-name: "${{ env.REGISTRY }}/${{ steps.build-image.outputs.image }}"
-          subject-digest: "${{ steps.push-image.outputs.digest }}"
-          push-to-registry: "false"
+      - name: Build container image
+        run: |
+          if [ "${{ inputs.image-action }}" = "build-release" ]; then
+            mise run build:container --release
+          else
+            mise run build:container
+          fi
