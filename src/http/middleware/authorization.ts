@@ -1,5 +1,5 @@
-import { createMiddleware } from "@hono/hono/factory";
 import { type } from "arktype";
+import { createMiddleware } from "hono/factory";
 import { mutable } from "#/global.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { errorCodeUserInvalidToken, errorCodeValidation, errorThrow } from "#util/error.ts";

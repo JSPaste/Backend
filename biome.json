@@ -51,6 +51,7 @@
         "noMultiAssign": "warn",
         "noMultiStr": "warn",
         "noParametersOnlyUsedInRecursion": "warn",
+        "noRedundantDefaultExport": "warn",
         "noReturnAssign": "warn",
         "noUselessCatchBinding": "warn",
         "noUselessUndefined": "warn",
@@ -84,8 +85,8 @@
           "level": "error",
           "options": {
             "paths": {
-              "@hono/hono": {
-                "message": "Use `@hono/hono/tiny` instead",
+              "hono": {
+                "message": "Use `hono/tiny` instead",
                 "allowImportNames": ["Context"]
               }
             }

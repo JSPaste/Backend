@@ -1,6 +1,6 @@
-import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver } from "@hono/openapi";
 import { type } from "arktype";
+import { Hono } from "hono/tiny";
 import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";

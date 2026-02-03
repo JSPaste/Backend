@@ -1,7 +1,7 @@
 import { STATUS_CODES } from "node:http";
 import type { StatementSync } from "node:sqlite";
-import type { StatusCode } from "@hono/hono/utils/http-status";
 import { LruCache } from "@std/cache";
+import type { StatusCode } from "hono/utils/http-status";
 import { customAlphabet } from "nanoid";
 import type { Database } from "#db/index.ts";
 

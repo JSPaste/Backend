@@ -1,4 +1,4 @@
-import { Hono } from "@hono/hono/tiny";
+import { Hono } from "hono/tiny";
 import type { Env } from "#http/handler.ts";
 import delete_ from "./delete.ts";
 import get from "./get.ts";

@@ -1,7 +1,7 @@
-import { HTTPException } from "@hono/hono/http-exception";
-import type { ContentfulStatusCode } from "@hono/hono/utils/http-status";
 import { resolver } from "@hono/openapi";
 import { type } from "arktype";
+import { HTTPException } from "hono/http-exception";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 // allow const enum in the future
 // https://github.com/rolldown/rolldown/issues/7676
