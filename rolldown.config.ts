@@ -9,10 +9,11 @@ export default {
   output: {
     file: "./dist/backend.js",
     format: "es",
-    inlineDynamicImports: true,
     legalComments: "none",
+    sourcemap: true,
     minify: true,
-    sourcemap: true
+    codeSplitting: false,
+    topLevelVar: true
   },
   resolve: {
     conditionNames: ["import", "default"],
