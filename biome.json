@@ -55,6 +55,7 @@
         "noUselessCatchBinding": "warn",
         "noUselessUndefined": "warn",
         "useAwaitThenable": "off",
+        "useConsistentEnumValueType": "warn",
         "useDestructuring": "warn",
         "useExhaustiveSwitchCases": "warn",
         "useExplicitType": "off",
