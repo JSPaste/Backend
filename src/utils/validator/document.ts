@@ -71,9 +71,9 @@ export const validatorDocumentPasswordEmpty = type.string.exactlyLength(0).confi
   examples: [""]
 });
 
-export const validatorDocumentDownload = type.unknown.configure({
-  ref: "DocumentDownload",
-  description: "Indicate the client that downloads the document as a file attachment (only useful in web browsers)"
+export const validatorDocumentPreview = type.unknown.configure({
+  ref: "DocumentPreview",
+  description: "View document as plain text"
 });
 
 export const validatorDocumentListObject = type({

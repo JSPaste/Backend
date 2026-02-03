@@ -15,9 +15,9 @@ import {
 } from "#util/error.ts";
 import { fsRead } from "#util/fs.ts";
 import {
-  validatorDocumentDownload,
   validatorDocumentName,
-  validatorDocumentPassword
+  validatorDocumentPassword,
+  validatorDocumentPreview
 } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
 import { validatorCreationTimestamp } from "#util/validator/shared.ts";
@@ -27,7 +27,7 @@ const schemaParam = type({
 });
 
 const schemaQuery = type({
-  "dl?": validatorDocumentDownload
+  "preview?": validatorDocumentPreview
 });
 
 const schemaHeader = type({
@@ -53,9 +53,6 @@ Note: If you only need to query the document metadata, you should use HEAD metho
     responses: {
       200: {
         content: {
-          "text/plain": {
-            schema: schemaBodyResponse.schema
-          },
           "application/octet-stream": {
             schema: schemaBodyResponse.schema
           }
@@ -80,7 +77,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
       // @ts-expect-error upstream
     } = ctx.req.valid("header") as typeof schemaHeader.infer;
     const {
-      dl
+      preview
       // @ts-expect-error upstream
     } = ctx.req.valid("query") as typeof schemaQuery.infer;
 
@@ -108,11 +105,12 @@ Note: If you only need to query the document metadata, you should use HEAD metho
       return ctx.body(null);
     }
 
-    if (typeof dl !== "undefined") {
-      ctx.res.headers.set("content-disposition", `attachment; filename="jspaste_${name}"`);
+    if (typeof preview !== "undefined") {
+      ctx.res.headers.set("content-type", "text/plain");
+    } else {
+      ctx.res.headers.set("content-type", "application/octet-stream");
     }
 
-    ctx.res.headers.set("content-type", "text/plain");
     ctx.res.headers.set("transfer-encoding", "chunked");
 
     return stream(ctx, async (stream) => await stream.pipe(await fsRead(ctx, document)));
