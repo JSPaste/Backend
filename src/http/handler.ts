@@ -1,7 +1,7 @@
-import { cors } from "@hono/hono/cors";
-import { HTTPException } from "@hono/hono/http-exception";
-import { Hono } from "@hono/hono/tiny";
 import { openAPIRouteHandler } from "@hono/openapi";
+import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
+import { Hono } from "hono/tiny";
 import { v1DocumentHandler } from "#endpoint/document/v1/index.ts";
 import { v2LegacyDocumentHandler } from "#endpoint/legacy/v2/documents/index.ts";
 import { v1UserHandler } from "#endpoint/user/v1/index.ts";

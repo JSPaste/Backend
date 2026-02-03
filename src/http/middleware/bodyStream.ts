@@ -1,4 +1,4 @@
-import { createMiddleware } from "@hono/hono/factory";
+import { createMiddleware } from "hono/factory";
 import { env } from "#util/env.ts";
 import { errorCodeDocumentInvalidSize, errorThrow } from "#util/error.ts";
 import type { Env } from "../handler.ts";

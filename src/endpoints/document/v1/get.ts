@@ -1,8 +1,8 @@
-import { stream } from "@hono/hono/streaming";
-import { Hono } from "@hono/hono/tiny";
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
 import { type } from "arktype";
+import { stream } from "hono/streaming";
+import { Hono } from "hono/tiny";
 import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";

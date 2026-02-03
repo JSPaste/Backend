@@ -1,4 +1,4 @@
-import type { Context } from "@hono/hono";
+import type { Context } from "hono";
 import type { Document } from "#db/query.ts";
 import { constantPathStructStorageData, constantTemporalToUTC, constantTemporalUTC } from "../global.ts";
 import type { Env } from "../http/handler.ts";

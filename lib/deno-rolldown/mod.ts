@@ -55,12 +55,26 @@ export interface DenoPlugin extends Disposable {
   };
 }
 
+function isBareSpecifier(source: string): boolean {
+  return !(
+    source.startsWith(".") ||
+    source.startsWith("/") ||
+    source.startsWith("file:") ||
+    source.startsWith("http:") ||
+    source.startsWith("https:") ||
+    source.startsWith("npm:") ||
+    source.startsWith("jsr:") ||
+    source.startsWith("node:")
+  );
+}
+
 /**
  * Creates a deno plugin for use with rolldown.
  * @returns The plugin.
  */
 export default function denoPlugin(pluginOptions: DenoPluginOptions = {}): DenoPlugin {
   let loader: Loader | undefined;
+  let primaryEntrypoint: string | undefined;
   const loads = new Map<string, Promise<LoadResponse | undefined>>();
   const modules = new Map<string, Module | undefined>();
 
@@ -91,6 +105,8 @@ export default function denoPlugin(pluginOptions: DenoPluginOptions = {}): DenoP
 
       if (inputs.length === 0) return;
 
+      [primaryEntrypoint] = inputs;
+
       const workspace = new Workspace({ ...pluginOptions });
       loader = await workspace.createLoader();
       await loader.addEntrypoints(inputs);
@@ -107,37 +123,48 @@ export default function denoPlugin(pluginOptions: DenoPluginOptions = {}): DenoP
         const resolutionMode = resolveKindToResolutionMode(options.kind);
         const normalizedImporter = importer != null ? (modules.get(importer)?.specifier ?? importer) : undefined;
 
-        let resolvedSpecifier: string;
+        let resolvedSpecifier: string | undefined;
+
         try {
           resolvedSpecifier = await loader.resolve(source, normalizedImporter, resolutionMode);
         } catch (error: unknown) {
-          if ((error as { code?: string })?.code === "ERR_MODULE_NOT_FOUND") {
-            if (pluginOptions.externalPatterns) {
-              for (const pattern of pluginOptions.externalPatterns) {
-                if (typeof pattern === "string") {
-                  if (source === pattern || source.startsWith(`${pattern}/`)) {
-                    return { id: source, external: true };
-                  }
-                } else if (pattern.test(source)) {
+          if ((error as { code?: string })?.code !== "ERR_MODULE_NOT_FOUND") {
+            throw error;
+          }
+        }
+
+        if (resolvedSpecifier === undefined && isBareSpecifier(source)) {
+          if (primaryEntrypoint) {
+            try {
+              resolvedSpecifier = await loader.resolve(source, primaryEntrypoint, resolutionMode);
+            } catch {}
+          }
+
+          if (resolvedSpecifier === undefined) {
+            try {
+              resolvedSpecifier = await loader.resolve(source, undefined, resolutionMode);
+            } catch {}
+          }
+        }
+
+        if (resolvedSpecifier === undefined) {
+          if (pluginOptions.externalPatterns) {
+            for (const pattern of pluginOptions.externalPatterns) {
+              if (typeof pattern === "string") {
+                if (source === pattern || source.startsWith(`${pattern}/`)) {
                   return { id: source, external: true };
                 }
+              } else if (pattern.test(source)) {
+                return { id: source, external: true };
               }
             }
-
-            if (
-              !(
-                source.startsWith(".") ||
-                source.startsWith("/") ||
-                source.startsWith("file:") ||
-                source.startsWith("http")
-              )
-            ) {
-              return { id: source, external: true };
-            }
-
-            return;
           }
-          throw error;
+
+          if (isBareSpecifier(source)) {
+            return { id: source, external: true };
+          }
+
+          return;
         }
 
         let loadPromise = loads.get(resolvedSpecifier);
