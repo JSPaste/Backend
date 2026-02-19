@@ -8,5 +8,5 @@
 !/LICENSE
 !/mise.toml
 !/package.json
-!/rolldown.config.ts
+!/rolldown.config.mts
 !/tsconfig.json

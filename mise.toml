@@ -68,11 +68,11 @@ run = [
 
 [tasks."build:server"]
 description = "Build server"
-sources = ['src/**/*.ts', "deno.lock", 'rolldown.config.ts']
+sources = ['src/**/*.mts', "deno.lock", 'rolldown.config.mts']
 outputs = ['dist/backend.js', 'dist/backend.js.map']
 run = [
     { task = "install" },
-    "mise exec -- deno x -A rolldown -c rolldown.config.ts"
+    "mise exec -- deno x -A rolldown -c rolldown.config.mts"
 ]
 
 [tasks."build:standalone_"]
@@ -180,7 +180,7 @@ alias = "dev"
 description = "Start devel server"
 run = [
     { task = "install" },
-    "JSPB_DEBUG_DATABASE_EPHEMERAL=true JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A ./src/index.ts"
+    "JSPB_DEBUG_DATABASE_EPHEMERAL=true JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A ./src/index.mts"
 ]
 
 [tasks."start:build"]
