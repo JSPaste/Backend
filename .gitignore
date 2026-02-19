@@ -24,5 +24,5 @@
 !/mise.toml
 !/package.json
 !/README.md
-!/rolldown.config.ts
+!/rolldown.config.mts
 !/tsconfig.json
