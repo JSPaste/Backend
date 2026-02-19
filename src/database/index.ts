@@ -135,7 +135,6 @@ export class Database {
   }
 
   public [Symbol.dispose](): void {
-    constantStoreStatements.clear();
     this.database.close();
   }
 }
