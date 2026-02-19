@@ -36,6 +36,8 @@
 *.styl            text
 *.tag             text
 *.ts              text
+*.mts             text
+*.cts             text
 *.tsx             text
 *.xml             text
 *.xhtml           text diff=html
