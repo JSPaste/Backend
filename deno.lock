@@ -22,7 +22,7 @@
     "jsr:@std/ulid@1": "1.0.0",
     "npm:@biomejs/biome@2.4.2": "2.4.2",
     "npm:@types/node@^25.3.0": "25.3.0",
-    "npm:arkenv@~0.9.3": "0.9.3_arktype@2.1.29",
+    "npm:arkenv@0.8.3": "0.8.3_arktype@2.1.29",
     "npm:arktype@^2.1.29": "2.1.29",
     "npm:hash-wasm@^4.12.0": "4.12.0",
     "npm:hono-openapi@^1.2.0": "1.2.0_@standard-community+standard-json@0.3.5__@standard-schema+spec@1.1.0__@types+json-schema@7.0.15__arktype@2.1.29__quansync@0.2.11_@standard-community+standard-openapi@0.2.9__@standard-community+standard-json@0.3.5___@standard-schema+spec@1.1.0___@types+json-schema@7.0.15___arktype@2.1.29___quansync@0.2.11__@standard-schema+spec@1.1.0__arktype@2.1.29__openapi-types@12.1.3__@types+json-schema@7.0.15_@types+json-schema@7.0.15_openapi-types@12.1.3_arktype@2.1.29",
@@ -307,12 +307,9 @@
         "undici-types"
       ]
     },
-    "arkenv@0.9.3_arktype@2.1.29": {
-      "integrity": "sha512-DFZy3a1F0ZcaL+A0ugJB8m7IN/uCSDmvCY/kUJK53Oau3EJqf0DizUgSjEYZzv1CR3b3FWXml/sk3mDqWg5+2Q==",
+    "arkenv@0.8.3_arktype@2.1.29": {
+      "integrity": "sha512-fndPYpIZ/EvARTXabWG5H+gKxlJEbPgTRvXH8htimmCbdBfEXZsSOgObwdiCCCcBz33tJAYk88goDtj0Ao99NA==",
       "dependencies": [
-        "arktype"
-      ],
-      "optionalPeers": [
         "arktype"
       ]
     },
@@ -397,7 +394,7 @@
       "jsr:@std/ulid@1",
       "npm:@biomejs/biome@2.4.2",
       "npm:@types/node@^25.3.0",
-      "npm:arkenv@~0.9.3",
+      "npm:arkenv@0.8.3",
       "npm:arktype@^2.1.29",
       "npm:hash-wasm@^4.12.0",
       "npm:hono-openapi@^1.2.0",
