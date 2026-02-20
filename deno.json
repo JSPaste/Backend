@@ -28,7 +28,7 @@
     "@std/streams": "jsr:@std/streams@^1.0.17",
     "@std/ulid": "jsr:@std/ulid@^1.0.0",
     "@types/node": "npm:@types/node@^25.3.0",
-    "arkenv": "npm:arkenv@~0.9.3",
+    "arkenv": "npm:arkenv@0.8.3",
     "arktype": "npm:arktype@^2.1.29",
     "biome": "npm:@biomejs/biome@2.4.2",
     "hash-wasm": "npm:hash-wasm@^4.12.0",
