@@ -71,6 +71,7 @@ The API is documented under OpenAPI specification and can be found at the follow
 ```
 
 You can get a quick overview with:
+
 - [Swagger Editor](https://editor.swagger.io/?url=https://jspaste.eu/api/oas.json)
 - [Scalar Client](https://client.scalar.com/?url=https://jspaste.eu/api/oas.json)
 

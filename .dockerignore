@@ -1,12 +1,11 @@
 *
 
-!/lib/**
 !/src/**
-!/.npmrc
 !/deno.json
 !/deno.lock
 !/LICENSE
 !/mise.toml
 !/package.json
-!/rolldown.config.mts
+!/rolldown.config.ts
+!/rolldown.deno.ts
 !/tsconfig.json

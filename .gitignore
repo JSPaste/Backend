@@ -5,8 +5,6 @@
 !/.github/workflows/*.yml
 !/.zed/
 !/.zed/settings.json
-!/lib/
-!/lib/**
 !/src/
 !/src/**
 !/.dockerignore
@@ -14,8 +12,8 @@
 !/.env.example
 !/.gitattributes
 !/.gitignore
-!/.npmrc
-!/biome.json
+!/.oxfmtrc.json
+!/.oxlintrc.json
 !/CONTRIBUTING.md
 !/deno.json
 !/deno.lock
@@ -24,5 +22,6 @@
 !/mise.toml
 !/package.json
 !/README.md
-!/rolldown.config.mts
+!/rolldown.config.ts
+!/rolldown.deno.ts
 !/tsconfig.json

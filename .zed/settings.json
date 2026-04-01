@@ -1,5 +1,4 @@
 // -*- mode: jsonc -*-
-
 {
   // lsp
   "lsp": {
@@ -10,10 +9,22 @@
         }
       }
     },
-    "biome": {
-      "settings": {
-        "require_config_file": true,
-        "config_path": "./biome.json"
+    "oxfmt": {
+      "initialization_options": {
+        "settings": {
+          "fmt.configPath": ".oxfmtrc.json",
+          "run": "onSave"
+        }
+      }
+    },
+    "oxlint": {
+      "initialization_options": {
+        "settings": {
+          "configPath": ".oxlintrc.json",
+          "run": "onSave",
+          "fixKind": "safe_fix",
+          "unusedDisableDirectives": "deny"
+        }
       }
     },
     "yaml-language-server": {
@@ -27,27 +38,31 @@
       }
     }
   },
-
   // language specific (overrides global)
   "languages": {
+    "JSON": {
+      "formatter": "language_server",
+      "language_servers": ["oxfmt", "json-language-server"]
+    },
+    "JSONC": {
+      "formatter": "language_server",
+      "language_servers": ["oxfmt", "json-language-server"]
+    },
     "JavaScript": {
       "formatter": "language_server",
-      "language_servers": ["biome", "deno"]
+      "language_servers": ["oxfmt", "deno"]
+    },
+    "Markdown": {
+      "formatter": "language_server",
+      "language_servers": ["oxfmt"]
     },
     "TypeScript": {
       "formatter": "language_server",
-      "language_servers": ["biome", "deno"]
-    },
-    "JSON": {
-      "language_servers": ["biome", "json-language-server"],
-      "formatter": "language_server"
-    },
-    "JSONC": {
-      "language_servers": ["biome", "json-language-server"],
-      "formatter": "language_server"
+      "language_servers": ["oxfmt", "deno"]
     },
     "YAML": {
-      "format_on_save": "off"
+      "formatter": "language_server",
+      "language_servers": ["oxfmt"]
     }
   }
 }
