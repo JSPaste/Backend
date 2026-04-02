@@ -53,12 +53,8 @@ Note: To remove (nullify) a value, send the header with an empty value`,
     security: [{}, { bearer: [] }],
     requestBody: {
       content: {
-        "text/plain": {
-          schema: schemaBody.schema
-        },
-        "application/octet-stream": {
-          schema: schemaBody.schema
-        }
+        "text/plain": schemaBody,
+        "application/octet-stream": schemaBody
       }
     },
     responses: {
