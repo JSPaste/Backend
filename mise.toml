@@ -1,5 +1,5 @@
 [tools]
-deno = "latest"
+deno = "2.7.5"
 
 [tasks."install"]
 description = "Install all dependencies"
