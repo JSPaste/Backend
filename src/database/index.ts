@@ -1,13 +1,14 @@
 import { DatabaseSync, type StatementSync } from "node:sqlite";
 
+import { LruCache } from "@std/cache";
 import { monotonicUlid, ulid } from "@std/ulid";
 
+import { constantPathDatabaseFile } from "#/global.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
 import { env } from "#util/env.ts";
 import { generateToken } from "#util/user.ts";
 
-import { constantPathDatabaseFile, constantStoreStatements } from "../global.ts";
 import { migrations } from "./migration.ts";
 import { DocumentQuery, UserQuery } from "./query.ts";
 
@@ -22,6 +23,7 @@ export class Database {
   public readonly user = new UserQuery(this);
 
   private readonly database: DatabaseSync;
+  private readonly store = new LruCache<string, StatementSync>(200);
 
   public constructor(options: Options = {}) {
     options.ephemeral ??= env.JSPB_DEBUG_DATABASE_EPHEMERAL;
@@ -97,10 +99,10 @@ export class Database {
       return this.database.prepare(sql);
     }
 
-    let statement = constantStoreStatements.get(sql);
+    let statement = this.store.get(sql);
     if (!statement) {
       statement = this.database.prepare(sql);
-      constantStoreStatements.set(sql, statement);
+      this.store.set(sql, statement);
     }
 
     return statement;
