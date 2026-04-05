@@ -35,7 +35,7 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
   }
 
   try {
-    await stream.pipeTo(handle.writable, { preventClose: true });
+    await stream.pipeTo(handle.writable);
   } catch (why) {
     void fsDelete({ id: id });
 
