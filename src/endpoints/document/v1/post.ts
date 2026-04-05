@@ -33,11 +33,11 @@ const schemaHeader = type({
 });
 
 // Object includes not allowed fields
-const schemaBodyResponse = await resolver(
+const schemaBodyResponse = resolver(
   type({
     name: validatorDocumentName
   })
-).toOpenAPISchema();
+);
 
 export default new Hono<Env>().post(
   "/",
@@ -48,19 +48,15 @@ export default new Hono<Env>().post(
     security: [{}, { bearer: [] }],
     requestBody: {
       content: {
-        "text/plain": {
-          schema: schemaBody.schema
-        },
-        "application/octet-stream": {
-          schema: schemaBody.schema
-        }
+        "text/plain": schemaBody,
+        "application/octet-stream": schemaBody
       }
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: schemaBodyResponse.schema
+            schema: schemaBodyResponse
           }
         },
         description: constantHttpStatusCodes[200]

@@ -8,7 +8,7 @@ import { authMiddleware } from "#http/middleware/authorization.ts";
 import { errorCodeUserInvalidToken, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentListObject } from "#util/validator/document.ts";
 
-const schemaBodyResponse = await resolver(validatorDocumentListObject.array()).toOpenAPISchema();
+const schemaBodyResponse = resolver(validatorDocumentListObject.array());
 
 export default new Hono<Env>().get(
   "/",
@@ -21,7 +21,7 @@ export default new Hono<Env>().get(
       200: {
         content: {
           "application/json": {
-            schema: schemaBodyResponse.schema
+            schema: schemaBodyResponse
           }
         },
         description: constantHttpStatusCodes[200]

@@ -1,4 +1,5 @@
-import { configure } from "arktype/config";
+import { init } from "./init.ts";
+
 import "@std/dotenv/load";
 
 declare global {
@@ -10,12 +11,4 @@ declare global {
   }
 }
 
-configure({
-  toJsonSchema: {
-    fallback: {
-      morph: (ctx) => ctx.out ?? ctx.base
-    }
-  }
-});
-
-void import("./init.ts").then(({ init }) => init());
+void init();
