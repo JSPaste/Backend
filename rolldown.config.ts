@@ -13,7 +13,7 @@ export default {
     codeSplitting: false,
     topLevelVar: true
   },
-  platform: "node",
+  platform: "neutral",
   moduleTypes: {
     ".sql": "text"
   },
