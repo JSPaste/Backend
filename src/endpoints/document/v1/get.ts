@@ -35,7 +35,7 @@ const schemaHeader = type({
   "x-jspaste-password?": validatorDocumentPassword
 });
 
-const schemaBodyResponse = await resolver(type.unknown).toOpenAPISchema();
+const schemaBodyResponse = resolver(type.unknown);
 
 const schemaHeaderResponse = await resolver(
   type({
@@ -55,7 +55,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
       200: {
         content: {
           "application/octet-stream": {
-            schema: schemaBodyResponse.schema
+            schema: schemaBodyResponse
           }
         },
         headers: schemaHeaderResponse.components,

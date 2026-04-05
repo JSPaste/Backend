@@ -1,7 +1,5 @@
 import { STATUS_CODES } from "node:http";
-import type { StatementSync } from "node:sqlite";
 
-import { LruCache } from "@std/cache";
 import type { StatusCode } from "hono/utils/http-status";
 import { customAlphabet } from "nanoid";
 
@@ -23,7 +21,6 @@ export const constantNanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWX
 export const constantPathStructStorage = "./storage/";
 export const constantPathStructStorageData = "./storage/data/";
 export const constantPathDatabaseFile = "./storage/database.db";
-export const constantStoreStatements = new LruCache<string, StatementSync>(200);
 export const constantStoreDispose = new Map<string, [number, () => Promise<void>]>();
 export const constantTemporalUTC = (): Temporal.ZonedDateTime => Temporal.Now.zonedDateTimeISO("Etc/UTC");
 export const constantTemporalToUTC = (temporal: Temporal.Instant): Temporal.ZonedDateTime =>
