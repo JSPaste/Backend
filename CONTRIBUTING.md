@@ -78,7 +78,7 @@ You can get a quick overview with:
 If using Scalar Client, disable the CORS proxy and follow these steps to import the
 instance `oas.json`..:
 
-![](https://static.x.inetol.net/jspaste/backend/scalar-t1.webp)
+![](https://static.inetol.net/jspaste/backend/scalar-t1.webp)
 
 ## Maintenance
 
