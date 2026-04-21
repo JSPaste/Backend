@@ -1,13 +1,13 @@
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
-import { errorCodeUnknown, errorGet } from "#util/error.ts";
+import { ErrorCode, errorGet } from "#util/error.ts";
 
 const log: Logger = new Logger("http");
 
 const dummyHandler = (): Response => {
   return Response.json(
     {
-      ...errorGet(errorCodeUnknown)
+      ...errorGet(ErrorCode.Unknown)
     },
     {
       status: 503,

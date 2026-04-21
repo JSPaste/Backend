@@ -6,13 +6,7 @@ import { Hono } from "hono/tiny";
 import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
-import {
-  errorCodeDocumentInvalidPassword,
-  errorCodeDocumentNotFound,
-  errorCodeDocumentPasswordNeeded,
-  errorThrow,
-  genericErrorResponse
-} from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsRead } from "#util/fs.ts";
 import { validatorDocumentName, validatorDocumentPassword } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -74,15 +68,15 @@ export default new Hono<Env>().get(
 
     const document = mutable.database.document.get("name", param.name);
     if (!document?.id) {
-      return errorThrow(errorCodeDocumentNotFound);
+      return errorThrow(ErrorCode.DocumentNotFound);
     }
     if (document.password) {
       if (!options.password) {
-        return errorThrow(errorCodeDocumentPasswordNeeded);
+        return errorThrow(ErrorCode.DocumentPasswordNeeded);
       }
 
       if (!verifyHash(options.password, document.password)) {
-        return errorThrow(errorCodeDocumentInvalidPassword);
+        return errorThrow(ErrorCode.DocumentInvalidPassword);
       }
     }
 

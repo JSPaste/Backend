@@ -14,7 +14,7 @@ import { bodyStream } from "#http/middleware/bodyStream.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateName } from "#util/document.ts";
 import { env } from "#util/env.ts";
-import { errorCodeDocumentNameAlreadyExists, errorThrow, genericErrorResponse } from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsWrite } from "#util/fs.ts";
 import { validatorDocumentName, validatorDocumentPassword } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -82,7 +82,7 @@ export default new Hono<Env>().post(
     let setName: string;
     if (name) {
       if (mutable.database.document.get("name", name)?.name) {
-        return errorThrow(errorCodeDocumentNameAlreadyExists);
+        return errorThrow(ErrorCode.DocumentNameAlreadyExists);
       }
 
       setName = name;

@@ -6,7 +6,7 @@ import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
 import { env } from "#util/env.ts";
-import { errorCodeDocumentNotFound, errorThrow, genericErrorResponse } from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsWrite } from "#util/fs.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -65,7 +65,7 @@ export default new Hono<Env>().patch(
 
     const document = mutable.database.document.get("name", param.name);
     if (!document?.id || document.user_id) {
-      return errorThrow(errorCodeDocumentNotFound);
+      return errorThrow(ErrorCode.DocumentNotFound);
     }
 
     mutable.database.document.update("name", param.name, "version", env.JSPB_DOCUMENT_COMPRESSION);
