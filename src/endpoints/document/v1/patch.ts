@@ -9,13 +9,7 @@ import { bodyStream } from "#http/middleware/bodyStream.ts";
 import { generateHash } from "#util/crypto.ts";
 import { isOwner } from "#util/document.ts";
 import { env } from "#util/env.ts";
-import {
-  errorCodeDocumentNameAlreadyExists,
-  errorCodeDocumentNotFound,
-  errorCodeUserInvalidToken,
-  errorThrow,
-  genericErrorResponse
-} from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsWrite } from "#util/fs.ts";
 import {
   validatorDocumentName,
@@ -91,13 +85,13 @@ Note: To remove (nullify) a value, send the header with an empty value`,
 
     const document = mutable.database.document.get("name", actualName);
     if (!document?.id) {
-      return errorThrow(errorCodeDocumentNotFound);
+      return errorThrow(ErrorCode.DocumentNotFound);
     }
 
     const userId = ctx.get("userId");
     const owner = isOwner(userId, document.user_id);
     if (!owner) {
-      return errorThrow(errorCodeUserInvalidToken);
+      return errorThrow(ErrorCode.UserInvalidToken);
     }
 
     if (newPassword !== undefined) {
@@ -113,7 +107,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
     // keep newName last thing to alter in case of race conditions
     if (newName) {
       if (mutable.database.document.get("name", newName)?.name) {
-        return errorThrow(errorCodeDocumentNameAlreadyExists);
+        return errorThrow(ErrorCode.DocumentNameAlreadyExists);
       }
 
       mutable.database.document.update("name", actualName, "name", newName);

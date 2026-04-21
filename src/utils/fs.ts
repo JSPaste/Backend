@@ -6,7 +6,7 @@ import type { Env } from "#http/handler.ts";
 import { constantPathStructStorageData, constantTemporalToUTC, constantTemporalUTC } from "../global.ts";
 import { documentVersionV1, documentVersionV2 } from "./document.ts";
 import { env } from "./env.ts";
-import { errorCodeDocumentCorrupted, errorCodeDocumentInvalidSize, errorThrow } from "./error.ts";
+import { ErrorCode, errorThrow } from "./error.ts";
 
 export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): Promise<void> => {
   await using handle = await Deno.open(constantPathStructStorageData + id, {
@@ -30,7 +30,7 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
       break;
     }
     default: {
-      return errorThrow(errorCodeDocumentCorrupted);
+      return errorThrow(ErrorCode.DocumentCorrupted);
     }
   }
 
@@ -40,7 +40,7 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
     void fsDelete({ id: id });
 
     if (why instanceof Deno.errors.BrokenPipe) {
-      return errorThrow(errorCodeDocumentInvalidSize);
+      return errorThrow(ErrorCode.DocumentInvalidSize);
     }
 
     throw why;
@@ -85,7 +85,7 @@ export const fsRead = async (
       break;
     }
     default: {
-      return errorThrow(errorCodeDocumentCorrupted);
+      return errorThrow(ErrorCode.DocumentCorrupted);
     }
   }
 

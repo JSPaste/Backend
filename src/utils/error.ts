@@ -3,122 +3,99 @@ import { type } from "arktype";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-// allow const enum in the future
-// https://github.com/rolldown/rolldown/issues/7676
+export enum ErrorCode {
+  Crash = 1000,
+  Unknown = 1001,
+  Validation = 1002,
+  // Parse = 1003, // moved to 1002
+  NotFound = 1004,
+  Dummy = 1005,
 
-export const errorCodeCrash = 1000;
-export const errorCodeUnknown = 1001;
-export const errorCodeValidation = 1002;
-// export const errorCodeParse = 1003; // moved to 1002
-export const errorCodeNotFound = 1004;
-export const errorCodeDummy = 1005;
-
-// document
-export const errorCodeDocumentNotFound = 1200;
-export const errorCodeDocumentNameAlreadyExists = 1201;
-export const errorCodeDocumentPasswordNeeded = 1202;
-export const errorCodeDocumentInvalidSize = 1203;
-// export const errorCodeDocumentInvalidNameLength = 1204; // moved to 1002
-export const errorCodeDocumentInvalidPassword = 1205;
-// export const errorCodeDocumentInvalidPasswordLength = 1206; // moved to 1002
-// export const errorCodeDocumentInvalidSecret = 1207; // deprecated
-// export const errorCodeDocumentInvalidSecretLength = 1208; // deprecated
-// export const errorCodeDocumentInvalidName = 1209; // moved to 1002
-export const errorCodeDocumentCorrupted = 1210;
-
-// user
-export const errorCodeUserInvalidToken = 1300;
-
-export type ErrorCodeType =
-  | typeof errorCodeCrash
-  | typeof errorCodeUnknown
-  | typeof errorCodeValidation
-  // | typeof errorCodeParse
-  | typeof errorCodeNotFound
-  | typeof errorCodeDummy
   // document
-  | typeof errorCodeDocumentNotFound
-  | typeof errorCodeDocumentNameAlreadyExists
-  | typeof errorCodeDocumentPasswordNeeded
-  | typeof errorCodeDocumentInvalidSize
-  // | typeof errorCodeDocumentInvalidNameLength
-  | typeof errorCodeDocumentInvalidPassword
-  // | typeof errorCodeDocumentInvalidPasswordLength
-  // | typeof errorCodeDocumentInvalidSecret
-  // | typeof errorCodeDocumentInvalidSecretLength
-  // | typeof errorCodeDocumentInvalidName
-  | typeof errorCodeDocumentCorrupted
+  DocumentNotFound = 1200,
+  DocumentNameAlreadyExists = 1201,
+  DocumentPasswordNeeded = 1202,
+  DocumentInvalidSize = 1203,
+  // DocumentInvalidNameLength = 1204, // moved to 1002
+  DocumentInvalidPassword = 1205,
+  // DocumentInvalidPasswordLength = 1206, // moved to 1002
+  // DocumentInvalidSecret = 1207, // deprecated
+  // DocumentInvalidSecretLength = 1208, // deprecated
+  // DocumentInvalidName = 1209, // moved to 1002
+  DocumentCorrupted = 1210,
+
   // user
-  | typeof errorCodeUserInvalidToken;
+  UserInvalidToken = 1300
+}
 
 export type Schema = {
   httpCode: ContentfulStatusCode;
   message: string;
 };
 
-const errorDefinition: Record<ErrorCodeType, Schema> = {
-  [errorCodeCrash]: {
+const errorDefinition: Record<ErrorCode, Schema> = {
+  [ErrorCode.Crash]: {
     httpCode: 500,
     message:
       "An unexpected server error occurred. If this persists, open an issue at: https://github.com/jspaste/backend/issues"
   },
-  [errorCodeUnknown]: {
+  [ErrorCode.Unknown]: {
     httpCode: 503,
     message: "Server handler has not loaded yet. Wait..."
   },
-  [errorCodeValidation]: {
+  [ErrorCode.Validation]: {
     httpCode: 400,
     message: "The request contains invalid or malformed data."
   },
-  [errorCodeNotFound]: {
+  [ErrorCode.NotFound]: {
     httpCode: 404,
     message: "The requested resource could not be found."
   },
-  [errorCodeDummy]: {
+  [ErrorCode.Dummy]: {
     httpCode: 200,
     message: "Placeholder response for documentation purposes."
   },
 
   // document
-  [errorCodeDocumentNotFound]: {
+  [ErrorCode.DocumentNotFound]: {
     httpCode: 404,
     message: "No document exists with the specified name."
   },
-  [errorCodeDocumentNameAlreadyExists]: {
+  [ErrorCode.DocumentNameAlreadyExists]: {
     httpCode: 409,
     message: "A document with this name already exists. Choose a different name."
   },
-  [errorCodeDocumentPasswordNeeded]: {
+  [ErrorCode.DocumentPasswordNeeded]: {
     httpCode: 401,
     message: "This document is password protected. Include the password in your request."
   },
-  [errorCodeDocumentInvalidSize]: {
+  [ErrorCode.DocumentInvalidSize]: {
     httpCode: 413,
     message: "The document content exceeds the maximum allowed size."
   },
-  [errorCodeDocumentInvalidPassword]: {
+  [ErrorCode.DocumentInvalidPassword]: {
     httpCode: 403,
     message: "The provided password is incorrect."
   },
-  [errorCodeDocumentCorrupted]: {
+  [ErrorCode.DocumentCorrupted]: {
     httpCode: 500,
     message: "The document content is corrupted and cannot be retrieved."
   },
 
   // user
-  [errorCodeUserInvalidToken]: {
+  [ErrorCode.UserInvalidToken]: {
     httpCode: 401,
     message: "The provided authorization token is invalid or missing privileges."
   }
 } as const;
 
-export const errorGet = (code: ErrorCodeType, overrideMessage?: string): { code: ErrorCodeType; message: string } => {
+export const errorGet = (code: ErrorCode, overrideMessage?: string): { code: ErrorCode; message: string } => {
   const { message } = errorDefinition[code];
 
   return { code: code, message: overrideMessage ?? message };
 };
 
-export const errorThrow = (code: ErrorCodeType, overrideMessage?: string): never => {
+export const errorThrow = (code: ErrorCode, overrideMessage?: string): never => {
   const { httpCode, message } = errorDefinition[code];
 
   throw new HTTPException(httpCode, {
@@ -133,7 +110,7 @@ export const genericErrorResponse = {
         type({
           code: type.number.configure({
             description: "The error code",
-            examples: [errorCodeDummy]
+            examples: [ErrorCode.Dummy]
           }),
           message: type.string.configure({
             description: "The error description"

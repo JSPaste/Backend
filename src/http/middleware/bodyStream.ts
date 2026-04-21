@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 
 import { env } from "#util/env.ts";
-import { errorCodeDocumentInvalidSize, errorThrow } from "#util/error.ts";
+import { ErrorCode, errorThrow } from "#util/error.ts";
 
 import type { Env } from "../handler.ts";
 
@@ -16,7 +16,7 @@ export const bodyStream = createMiddleware<Env>(async (ctx, next) => {
   if (contentLengthHeader !== null && !ctx.req.raw.headers.has("transfer-encoding")) {
     const size = Number.parseInt(contentLengthHeader, 10);
     if (size > env.JSPB_DOCUMENT_SIZE) {
-      return errorThrow(errorCodeDocumentInvalidSize);
+      return errorThrow(ErrorCode.DocumentInvalidSize);
     }
 
     ctx.set("hasBody", size > 0);

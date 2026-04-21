@@ -8,7 +8,7 @@ import { v2LegacyDocumentHandler } from "#endpoint/legacy/v2/documents/index.ts"
 import { v1UserHandler } from "#endpoint/user/v1/index.ts";
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
-import { errorCodeCrash, errorCodeDocumentCorrupted, errorGet } from "#util/error.ts";
+import { ErrorCode, errorGet } from "#util/error.ts";
 
 const log: Logger = new Logger("http");
 
@@ -42,12 +42,12 @@ export const handler = (): Hono<Env> => {
     ) {
       log.debug(instance);
 
-      return ctx.json(errorGet(errorCodeDocumentCorrupted));
+      return ctx.json(errorGet(ErrorCode.DocumentCorrupted));
     }
 
     log.error(instance);
 
-    return ctx.json(errorGet(errorCodeCrash));
+    return ctx.json(errorGet(ErrorCode.Crash));
   });
 
   handler.use("*", cors());

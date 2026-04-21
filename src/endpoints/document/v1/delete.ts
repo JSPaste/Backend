@@ -6,7 +6,7 @@ import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { isOwner } from "#util/document.ts";
-import { errorCodeDocumentNotFound, errorCodeUserInvalidToken, errorThrow, genericErrorResponse } from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsDelete } from "#util/fs.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
 import { validatorHandler } from "#util/validator/handler.ts";
@@ -43,13 +43,13 @@ export default new Hono<Env>().delete(
 
     const document = mutable.database.document.get("name", name);
     if (!document?.id) {
-      return errorThrow(errorCodeDocumentNotFound);
+      return errorThrow(ErrorCode.DocumentNotFound);
     }
 
     const userId = ctx.get("userId");
     const owner = isOwner(userId, document.user_id);
     if (!owner) {
-      return errorThrow(errorCodeUserInvalidToken);
+      return errorThrow(ErrorCode.UserInvalidToken);
     }
 
     mutable.database.document.delete("name", name);
