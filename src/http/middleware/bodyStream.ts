@@ -1,9 +1,8 @@
 import { createMiddleware } from "hono/factory";
 
+import type { Env } from "#http/handler.ts";
 import { env } from "#util/env.ts";
 import { ErrorCode, errorThrow } from "#util/error.ts";
-
-import type { Env } from "../handler.ts";
 
 export const bodyStream = createMiddleware<Env>(async (ctx, next) => {
   if (!ctx.req.raw.body) {

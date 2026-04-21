@@ -3,12 +3,11 @@ import type { SQLInputValue } from "node:sqlite";
 import { chunk } from "@std/collections";
 import { monotonicUlid } from "@std/ulid";
 
+import { constantDatabaseMaxElements } from "#/global.ts";
 import type { Database } from "#db/index.ts";
 import { generateHash } from "#util/crypto.ts";
 import type { DocumentVersionType } from "#util/document.ts";
 import { generateToken } from "#util/user.ts";
-
-import { constantDatabaseMaxElements } from "../global.ts";
 
 export type Document = {
   id: string;

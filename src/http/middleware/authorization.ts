@@ -2,11 +2,10 @@ import { type } from "arktype";
 import { createMiddleware } from "hono/factory";
 
 import { mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, errorThrow } from "#util/error.ts";
 import { validatorUserHeader } from "#util/validator/user.ts";
-
-import type { Env } from "../handler.ts";
 
 export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
   const authorization = ctx.req.header("authorization");
