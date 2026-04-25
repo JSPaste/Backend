@@ -1,6 +1,5 @@
+import { constantStoreDispose } from "#/global.ts";
 import { Logger } from "#util/console.ts";
-
-import { constantStoreDispose } from "./global.ts";
 
 const log: Logger = new Logger("task");
 
@@ -29,7 +28,7 @@ export const taskRegister = (
 
   const id = `__task-${options.name}`;
 
-  constantStoreDispose.get(id)?.[1]();
+  constantStoreDispose.get(id)?.run();
 
   try {
     Deno.cron(options.name, expression, { signal: abort.signal }, () => trigger(callback, options));
@@ -37,7 +36,10 @@ export const taskRegister = (
     log.error(`Failed to register "${options.name}"..:`, error);
   }
 
-  constantStoreDispose.set(id, [100, async (): Promise<void> => abort.abort()]);
+  constantStoreDispose.set(id, {
+    priority: 100,
+    run: () => abort.abort()
+  });
 
   log.debug(`Registered "${options.name}".`);
 };

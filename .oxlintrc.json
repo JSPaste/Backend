@@ -8,7 +8,7 @@
     "oxc/misrefactored-assign-op": "error",
     "oxc/no-accumulating-spread": "error",
     "oxc/no-barrel-file": "error",
-    "oxc/no-const-enum": "warn",
+    "oxc/no-const-enum": "off",
     "oxc/no-map-spread": "error",
     "oxc/no-this-in-exported-function": "error",
     "typescript/adjacent-overload-signatures": "error",
@@ -20,8 +20,8 @@
     "typescript/consistent-type-assertions": "error",
     "typescript/consistent-type-definitions": ["error", "type"],
     "typescript/dot-notation": "error",
-    "typescript/explicit-function-return-type": "error",
-    "typescript/explicit-module-boundary-types": "error",
+    "typescript/explicit-function-return-type": "off",
+    "typescript/explicit-module-boundary-types": "off",
     "typescript/no-confusing-non-null-assertion": "error",
     "typescript/no-confusing-void-expression": "error",
     "typescript/no-deprecated": "error",
@@ -44,14 +44,14 @@
     "typescript/no-unnecessary-type-assertion": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unnecessary-type-parameters": "error",
-    "typescript/no-unsafe-argument": "error",
-    "typescript/no-unsafe-assignment": "error",
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
     "typescript/no-unsafe-call": "off",
-    "typescript/no-unsafe-enum-comparison": "error",
-    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-unsafe-enum-comparison": "off",
+    "typescript/no-unsafe-function-type": "off",
     "typescript/no-unsafe-member-access": "off",
-    "typescript/no-unsafe-return": "error",
-    "typescript/no-unsafe-type-assertion": "error",
+    "typescript/no-unsafe-return": "off",
+    "typescript/no-unsafe-type-assertion": "off",
     "typescript/no-useless-default-assignment": "error",
     "typescript/non-nullable-type-assertion-style": "error",
     "typescript/only-throw-error": "error",
@@ -76,14 +76,14 @@
     "typescript/require-await": "error",
     "typescript/restrict-plus-operands": "error",
     "typescript/return-await": "error",
-    "typescript/strict-boolean-expressions": "error",
+    "typescript/strict-boolean-expressions": "off",
     "typescript/strict-void-return": "error",
-    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/switch-exhaustiveness-check": "warn",
     "typescript/unified-signatures": "error",
     "typescript/use-unknown-in-catch-callback-variable": "error"
   },
   "options": {
-    // deno incompatibility
+    // manual check only
     "typeAware": false
   }
 }

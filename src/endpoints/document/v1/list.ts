@@ -34,7 +34,7 @@ export default new Hono<Env>().get(
     }
   }),
   authMiddleware,
-  async (ctx) => {
+  (ctx) => {
     const userId = ctx.get("userId");
     if (!userId) {
       return errorThrow(ErrorCode.UserInvalidToken);

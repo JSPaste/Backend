@@ -18,6 +18,7 @@ export const validatorDocumentName = type(regexBase64URL)
     description: "The document name",
     examples: ["myDocumentNameHere"],
     expected: (ctx) => {
+      // oxlint-disable-next-line typescript-eslint/switch-exhaustiveness-check
       switch (ctx.code) {
         case "pattern": {
           return "a valid Base64URL";
@@ -41,6 +42,7 @@ export const validatorDocumentNameLength = type.keywords.string.integer.parse
     ref: "DocumentNameLength",
     description: "The name length for the document",
     expected: (ctx) => {
+      // oxlint-disable-next-line typescript-eslint/switch-exhaustiveness-check
       switch (ctx.code) {
         case "domain": {
           return "a valid integer";

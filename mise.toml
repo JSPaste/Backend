@@ -89,11 +89,11 @@ run = [{ task = "install" }, { task = "fix:oxfmt" }, { task = "fix:oxlint" }]
 
 [tasks."fix:oxfmt"]
 description = "Run oxfmt formatter"
-run = ["mise exec -- deno x -A oxfmt **"]
+run = ["mise exec -- deno x -A oxfmt"]
 
 [tasks."fix:oxlint"]
 description = "Run oxlint formatter"
-run = ["mise exec -- deno x -A oxlint --fix **"]
+run = ["mise exec -- deno x -A oxlint --fix"]
 
 [tasks."lint"]
 description = "Run all linters"
@@ -105,7 +105,7 @@ run = ["mise exec -- deno check --quiet"]
 
 [tasks."lint:oxlint"]
 description = "Run oxlint linter"
-run = ["mise exec -- deno x -A oxlint **"]
+run = ["mise exec -- deno x -A oxlint"]
 
 [tasks."tidy"]
 description = "Tidy all"

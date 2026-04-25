@@ -10,6 +10,7 @@ export const validatorUserToken = type.string.exactlyLength(constantUserTokenLen
   description: "A user token",
   examples: ["myUserTokenHere"],
   expected: (ctx) => {
+    // oxlint-disable-next-line typescript-eslint/switch-exhaustiveness-check
     switch (ctx.code) {
       case "domain": {
         return "a string";
@@ -31,6 +32,7 @@ export const validatorUserTokenLegacy = type(regexBase64URL)
     description: "An unhashed user token",
     examples: ["myUserTokenHere"],
     expected: (ctx) => {
+      // oxlint-disable-next-line typescript-eslint/switch-exhaustiveness-check
       switch (ctx.code) {
         case "pattern": {
           return "a valid Base64URL";

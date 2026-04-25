@@ -45,5 +45,5 @@ export const humanizeSize = (input: string): number => {
     throw new Error(`Invalid size "${input}"`);
   }
 
-  return Number.parseFloat(value) * (sizeUnits[unit.toLowerCase()] as number);
+  return Number.parseFloat(value) * (sizeUnits[unit.toLowerCase()] ?? 0);
 };

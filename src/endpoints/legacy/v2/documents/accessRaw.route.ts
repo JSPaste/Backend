@@ -50,7 +50,7 @@ export default new Hono<Env>().get(
   validator("param", schemaParam, validatorHandler),
   validator("header", schemaHeader, validatorHandler),
   validator("query", schemaQuery, validatorHandler),
-  async (ctx) => {
+  (ctx) => {
     // https://github.com/honojs/hono/issues/1130
     if (ctx.req.method === "HEAD") {
       return ctx.body(null);

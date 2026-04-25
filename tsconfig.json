@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig.json",
   "compilerOptions": {
-    "lib": ["ESNext", "deno.window", "deno.unstable"],
+    "lib": ["esnext"],
     "types": ["node"],
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -27,7 +27,6 @@
     "useUnknownInCatchVariables": true,
     "verbatimModuleSyntax": true,
 
-    "baseUrl": ".",
     "paths": {
       "#/*": ["./src/*"],
       "#db/*": ["./src/database/*"],

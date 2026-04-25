@@ -62,7 +62,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
   validator("param", schemaParam, validatorHandler),
   validator("header", schemaHeader, validatorHandler),
   validator("query", schemaQuery, validatorHandler),
-  async (ctx) => {
+  (ctx) => {
     const {
       name
       // @ts-expect-error upstream
