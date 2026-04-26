@@ -112,7 +112,14 @@ export default new Hono<Env>().post(
       name: setName,
       password: hashCombo
     });
-    await fsWrite(ctx, { id: setId });
+
+    try {
+      await fsWrite(ctx, { id: setId });
+    } catch (why) {
+      mutable.database.document.delete("id", setId);
+
+      throw why;
+    }
 
     return ctx.json({
       name: setName
