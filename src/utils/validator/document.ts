@@ -84,8 +84,6 @@ export const validatorDocumentListObject = type({
   name: validatorDocumentName,
   created: validatorCreationTimestamp
 }).configure({
-  // FIXME: schema references not being generated when using toOpenAPISchema()
-  // Invalid object key "DocumentListMetadata" at position 2 in "/components/schemas/DocumentListMetadata": key not found in object
-  //ref: "DocumentListMetadata",
+  ref: "DocumentListObject",
   description: "An object with document metadata"
 });
