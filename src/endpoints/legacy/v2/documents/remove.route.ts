@@ -2,7 +2,7 @@ import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsDelete } from "#util/fs.ts";
@@ -46,12 +46,12 @@ export default new Hono<Env>().delete(
     // @ts-expect-error upstream
     const param = ctx.req.valid("param") as typeof schemaParam.infer;
 
-    const document = mutable.database.document.get("name", param.name);
+    const document = mutableDatabase.document.get("name", param.name);
     if (!document?.id || document.user_id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }
 
-    mutable.database.document.delete("name", param.name);
+    mutableDatabase.document.delete("name", param.name);
     void fsDelete(document);
 
     return ctx.json({ removed: true });

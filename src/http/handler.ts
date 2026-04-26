@@ -56,7 +56,7 @@ export const handler = (): Hono<Env> => {
 
     // disable compression
     // https://docs.deno.com/runtime/fundamentals/http_server/#automatic-body-compression
-    ctx.res.headers.append("Cache-Control", "no-transform");
+    ctx.res.headers.set("Cache-Control", "no-transform");
   });
 
   handler.get(

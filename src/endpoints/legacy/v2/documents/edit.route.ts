@@ -2,7 +2,7 @@ import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
 import { env } from "#util/env.ts";
@@ -63,12 +63,12 @@ export default new Hono<Env>().patch(
     // @ts-expect-error upstream
     const param = ctx.req.valid("param") as typeof schemaParam.infer;
 
-    const document = mutable.database.document.get("name", param.name);
+    const document = mutableDatabase.document.get("name", param.name);
     if (!document?.id || document.user_id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }
 
-    mutable.database.document.update("name", param.name, "version", env.JSPB_DOCUMENT_COMPRESSION);
+    mutableDatabase.document.update("name", param.name, "version", env.JSPB_DOCUMENT_COMPRESSION);
     await fsWrite(ctx, document);
 
     return ctx.json({

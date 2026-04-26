@@ -2,7 +2,7 @@ import { describeRoute, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { isOwner } from "#util/document.ts";
@@ -41,7 +41,7 @@ export default new Hono<Env>().delete(
       // @ts-expect-error upstream
     } = ctx.req.valid("param") as typeof schemaParam.infer;
 
-    const document = mutable.database.document.get("name", name);
+    const document = mutableDatabase.document.get("name", name);
     if (!document?.id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }
@@ -52,7 +52,7 @@ export default new Hono<Env>().delete(
       return errorThrow(ErrorCode.UserInvalidToken);
     }
 
-    mutable.database.document.delete("name", name);
+    mutableDatabase.document.delete("name", name);
     void fsDelete(document);
 
     return ctx.body(null);

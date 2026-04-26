@@ -7,7 +7,7 @@ import {
   constantDocumentNameLengthMax,
   constantDocumentNameLengthMin,
   constantHttpStatusCodes,
-  mutable
+  mutableDatabase
 } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
@@ -81,7 +81,7 @@ export default new Hono<Env>().post(
 
     let setName: string;
     if (name) {
-      if (mutable.database.document.get("name", name)?.name) {
+      if (mutableDatabase.document.get("name", name)?.name) {
         return errorThrow(ErrorCode.DocumentNameAlreadyExists);
       }
 
@@ -99,7 +99,7 @@ export default new Hono<Env>().post(
       hashCombo = null;
     }
 
-    mutable.database.document.create({
+    mutableDatabase.document.create({
       id: id,
       user_id: null,
       version: env.JSPB_DOCUMENT_COMPRESSION,

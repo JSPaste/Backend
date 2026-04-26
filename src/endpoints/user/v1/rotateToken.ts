@@ -2,7 +2,7 @@ import { describeRoute, resolver } from "@hono/openapi";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { generateHash } from "#util/crypto.ts";
@@ -49,7 +49,7 @@ export default new Hono<Env>().post(
     const token = generateToken(userId);
     const hash = generateHash(token);
 
-    mutable.database.user.update("id", userId, "token", hash.combo);
+    mutableDatabase.user.update("id", userId, "token", hash.combo);
 
     return ctx.json({
       token: token

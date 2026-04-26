@@ -1,4 +1,4 @@
-import { constantDocumentNameLengthDefault, constantNanoid, mutable } from "#/global.ts";
+import { constantDocumentNameLengthDefault, constantNanoid, mutableDatabase, mutableRootId } from "#/global.ts";
 
 // deflate
 export const documentVersionV1 = 1;
@@ -11,7 +11,7 @@ export const generateName = (length = constantDocumentNameLengthDefault): string
   let name: string;
   do {
     name = constantNanoid(length);
-  } while (mutable.database.document.get("name", name)?.name);
+  } while (mutableDatabase.document.get("name", name)?.name);
 
   return name;
 };
@@ -29,7 +29,7 @@ export const isOwner = (userId?: string | null, documentUserId?: string | null):
     }
 
     // the root user can alter everything
-    if (userId === mutable.database.user.getRoot()?.id) {
+    if (userId === mutableRootId) {
       return true;
     }
   }

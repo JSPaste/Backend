@@ -3,7 +3,7 @@ import { toText } from "@std/streams";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
@@ -74,7 +74,7 @@ export default new Hono<Env>().get(
     // @ts-expect-error upstream
     const header = ctx.req.valid("header") as typeof schemaHeader.infer;
 
-    const document = mutable.database.document.get("name", param.name);
+    const document = mutableDatabase.document.get("name", param.name);
     if (!document?.id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }

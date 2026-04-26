@@ -5,9 +5,19 @@ import { customAlphabet } from "nanoid";
 
 import type { Database } from "#db/index.ts";
 
-export const mutable = {
-  database: undefined as unknown as Database,
-  http: undefined as unknown as Deno.HttpServer<Deno.NetAddr>
+export let mutableDatabase: Database;
+export const setMutableDatabase = (database: Database) => {
+  mutableDatabase = database;
+};
+
+export let mutableHttpServer: Deno.HttpServer<Deno.NetAddr>;
+export const setMutableHttpServer = (httpServer: Deno.HttpServer<Deno.NetAddr>) => {
+  mutableHttpServer = httpServer;
+};
+
+export let mutableRootId: string;
+export const setMutableRootId = (rootId: string) => {
+  mutableRootId = rootId;
 };
 
 export const constantDatabaseMaxElements = 10_000;
