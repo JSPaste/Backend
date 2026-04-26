@@ -89,10 +89,6 @@ export const initUnhashedTokenCheck = (): void => {
   }
 
   if (userUnhashedToken) {
-    log.warn(
-      "Users with unhashed tokens found!",
-      "Those users may lose access in future versions of JSPaste!",
-      "See: https://github.com/jspaste/backend/issues/318"
-    );
+    log.error("Users with unhashed tokens found!", "See: https://github.com/jspaste/backend/issues/318");
   }
 };

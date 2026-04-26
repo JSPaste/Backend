@@ -18,25 +18,7 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
     return errorThrow(ErrorCode.Validation, token.summary);
   }
 
-  const dotIndex = token.indexOf(".");
-  if (dotIndex === -1) {
-    // unhashed token
-    if (token.length === 32) {
-      // @ts-expect-error unindexed select
-      const id = mutableDatabase.user.get("token", token)?.id;
-      if (!id) {
-        return errorThrow(ErrorCode.UserInvalidToken);
-      }
-
-      ctx.set("userId", id);
-
-      return next();
-    }
-
-    return errorThrow(ErrorCode.UserInvalidToken);
-  }
-
-  const id = token.slice(0, dotIndex);
+  const id = token.slice(0, token.indexOf("."));
   if (!id) {
     return errorThrow(ErrorCode.UserInvalidToken);
   }
