@@ -2,7 +2,7 @@ import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentName } from "#util/validator/document.ts";
@@ -43,6 +43,6 @@ export default new Hono<Env>().get(
     // @ts-expect-error upstream
     const param = ctx.req.valid("param") as typeof schemaParam.infer;
 
-    return ctx.text(mutable.database.document.get("name", param.name)?.name ? "true" : "false");
+    return ctx.text(mutableDatabase.document.get("name", param.name)?.name ? "true" : "false");
   }
 );

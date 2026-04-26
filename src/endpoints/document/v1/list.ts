@@ -2,7 +2,7 @@ import { describeRoute, resolver } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
@@ -45,7 +45,7 @@ export default new Hono<Env>().get(
       return ctx.body(null);
     }
 
-    const documents = mutable.database.user.getDocuments(userId).map((document) => {
+    const documents = mutableDatabase.user.getDocuments(userId).map((document) => {
       return {
         name: document.name,
         created: Temporal.Instant.fromEpochMilliseconds(decodeTime(document.id)).toString()

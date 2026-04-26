@@ -3,7 +3,7 @@ import { monotonicUlid } from "@std/ulid";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
@@ -87,7 +87,7 @@ export default new Hono<Env>().post(
 
     let setName: string;
     if (name) {
-      if (mutable.database.document.get("name", name)?.name) {
+      if (mutableDatabase.document.get("name", name)?.name) {
         return errorThrow(ErrorCode.DocumentNameAlreadyExists);
       }
 
@@ -105,7 +105,7 @@ export default new Hono<Env>().post(
       hashCombo = null;
     }
 
-    mutable.database.document.create({
+    mutableDatabase.document.create({
       id: setId,
       user_id: ctx.get("userId") ?? null,
       version: env.JSPB_DOCUMENT_COMPRESSION,
@@ -116,7 +116,7 @@ export default new Hono<Env>().post(
     try {
       await fsWrite(ctx, { id: setId });
     } catch (why) {
-      mutable.database.document.delete("id", setId);
+      mutableDatabase.document.delete("id", setId);
 
       throw why;
     }

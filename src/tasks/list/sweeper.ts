@@ -1,7 +1,7 @@
 import { mapNotNullish } from "@std/collections";
 import { decodeTime } from "@std/ulid";
 
-import { constantTemporalUTC, mutable } from "#/global.ts";
+import { constantTemporalUTC, mutableRootId } from "#/global.ts";
 import { Database } from "#db/index.ts";
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
@@ -26,7 +26,7 @@ const sweeperDatabaseUser = (): void => {
 
   const users = mapNotNullish(database.user.getAllWithoutDocuments(), ({ id }) => {
     if (!id) return;
-    if (id === mutable.database.user.getRoot()?.id) return;
+    if (id === mutableRootId) return;
 
     if (temporalFuture.epochMilliseconds > decodeTime(id)) {
       return id;
@@ -45,13 +45,13 @@ const sweeperDatabaseDocument = (): void => {
   using database = new Database();
 
   const temporalNow = constantTemporalUTC();
+  const documentAgeAnonymous = env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("milliseconds");
+  const documentAge = env.JSPB_DOCUMENT_AGE.total("milliseconds");
 
   const documents = mapNotNullish(database.document.getAll(["id", "user_id"]), ({ id, user_id }) => {
     if (!id) return;
 
-    const ageType = user_id
-      ? env.JSPB_DOCUMENT_AGE.total("milliseconds")
-      : env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("milliseconds");
+    const ageType = user_id ? documentAge : documentAgeAnonymous;
 
     if (ageType > 0 && temporalNow.epochMilliseconds - decodeTime(id) > ageType) {
       return id;

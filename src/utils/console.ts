@@ -42,7 +42,12 @@ export class Logger {
 
     if (env.JSPB_LOG_TIME) {
       prefix +=
-        gray(Temporal.Now.zonedDateTimeISO().toString({ timeZoneName: "never", fractionalSecondDigits: 3 })) + " ";
+        gray(
+          Temporal.Now.zonedDateTimeISO().toString({
+            timeZoneName: "never",
+            fractionalSecondDigits: 3
+          })
+        ) + " ";
     }
 
     prefix += name;
