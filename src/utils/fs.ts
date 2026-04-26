@@ -60,17 +60,14 @@ export const fsDelete = async ({ id }: Pick<Document, "id">): Promise<void> => {
 
 export const fsRead = async (
   ctx: Context<Env>,
-  { id, version }: Pick<Document, "id" | "version">,
-  clientIgnoreCapabilities = false
+  { id, version }: Pick<Document, "id" | "version">
 ): Promise<ReadableStream<Uint8Array>> => {
   const handle = await Deno.open(constantPathStructStorageData + id);
-
-  const hasClientDeflate = clientIgnoreCapabilities ? false : ctx.req.header("accept-encoding")?.includes("deflate");
 
   let stream: ReadableStream<Uint8Array>;
   switch (version) {
     case documentVersionV1: {
-      if (hasClientDeflate) {
+      if (ctx.req.header("accept-encoding")?.includes("deflate")) {
         ctx.res.headers.set("content-encoding", "deflate");
         stream = handle.readable;
       } else {
