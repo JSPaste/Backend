@@ -39,7 +39,7 @@ export default new Hono<Env>().patch(
   describeRoute({
     tags: ["DOCUMENT (v1)"],
     summary: "Alter document",
-    description: `Edit the content/metadata of a published document in the instance
+    description: `Edit the content/metadata of a document in the instance
 
 Note: You can't move the ownership of a document, duplicate the document instead
 

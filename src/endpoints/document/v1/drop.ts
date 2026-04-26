@@ -19,8 +19,8 @@ export default new Hono<Env>().delete(
   "/:name",
   describeRoute({
     tags: ["DOCUMENT (v1)"],
-    summary: "Delete document",
-    description: "Deletes a published document in the instance",
+    summary: "Drop document",
+    description: "Deletes a document in the instance",
     security: [{}, { bearer: [] }],
     responses: {
       200: {

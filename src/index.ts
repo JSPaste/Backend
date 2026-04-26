@@ -1,7 +1,7 @@
 import { abortable } from "@std/async";
 
 import { constantStoreDispose } from "#/global.ts";
-import { initDatabase, initDirStruct, initHTTPServer, initTask } from "#/init.ts";
+import { initDatabase, initDirStruct, initHTTPServer, initUnhashedTokenCheck, initTask } from "#/init.ts";
 import { handler } from "#http/handler.ts";
 import { Logger } from "#util/console.ts";
 
@@ -59,6 +59,7 @@ for (const signal of ["SIGINT", "SIGTERM", "SIGHUP", "SIGUSR1", "SIGUSR2"] satis
 try {
   await Promise.all([initDirStruct(), initHTTPServer()]);
   await initDatabase();
+  initUnhashedTokenCheck();
   initTask();
   await initHTTPServer(handler().fetch);
 } catch (error) {
