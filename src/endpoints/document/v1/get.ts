@@ -42,7 +42,7 @@ export default new Hono<Env>().get(
   describeRoute({
     tags: ["DOCUMENT (v1)"],
     summary: "Get document",
-    description: `Get the content/metadata of a published document in the instance
+    description: `Fetch the content/metadata of a document in the instance
 
 Note: If you only need to query the document metadata, you should use HEAD method instead`,
     responses: {
