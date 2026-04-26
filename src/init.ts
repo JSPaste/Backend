@@ -4,9 +4,12 @@ import { Database } from "#db/index.ts";
 import { http } from "#http/index.ts";
 import { taskRegister } from "#task/index.ts";
 import { sweeper } from "#task/list/sweeper.ts";
+import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
 
 import { constantPathStructStorage, constantPathStructStorageData, constantStoreDispose, mutable } from "./global.ts";
+
+const log: Logger = new Logger();
 
 export const initDirStruct = async (): Promise<void> => {
   await Promise.all([ensureDir(constantPathStructStorage), ensureDir(constantPathStructStorageData)]);
@@ -53,4 +56,25 @@ export const initTask = (): void => {
   taskRegister(env.JSPB_TASK_SWEEPER, sweeper, {
     name: "sweeper"
   });
+};
+
+export const initUnhashedTokenCheck = (): void => {
+  const userTokens = mutable.database.user.getAll(["token"]);
+
+  let userUnhashedToken = false;
+  for (const entry of userTokens) {
+    // combo separator
+    if (!entry.token.includes(" ")) {
+      userUnhashedToken = true;
+      break;
+    }
+  }
+
+  if (userUnhashedToken) {
+    log.warn(
+      "Users with unhashed tokens found!",
+      "Those users may lose access in future versions of JSPaste!",
+      "See: https://github.com/jspaste/backend/issues/318"
+    );
+  }
 };
