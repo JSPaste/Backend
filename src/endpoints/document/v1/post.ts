@@ -10,7 +10,7 @@ import { bodyStream } from "#http/middleware/bodyStream.ts";
 import { generateHash } from "#util/crypto.ts";
 import { generateName } from "#util/document.ts";
 import { env } from "#util/env.ts";
-import { errorCodeDocumentNameAlreadyExists, errorThrow, genericErrorResponse } from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsWrite } from "#util/fs.ts";
 import {
   validatorDocumentName,
@@ -88,7 +88,7 @@ export default new Hono<Env>().post(
     let setName: string;
     if (name) {
       if (mutable.database.document.get("name", name)?.name) {
-        return errorThrow(errorCodeDocumentNameAlreadyExists);
+        return errorThrow(ErrorCode.DocumentNameAlreadyExists);
       }
 
       setName = name;
@@ -112,7 +112,14 @@ export default new Hono<Env>().post(
       name: setName,
       password: hashCombo
     });
-    await fsWrite(ctx, { id: setId });
+
+    try {
+      await fsWrite(ctx, { id: setId });
+    } catch (why) {
+      mutable.database.document.delete("id", setId);
+
+      throw why;
+    }
 
     return ctx.json({
       name: setName

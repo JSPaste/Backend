@@ -7,7 +7,7 @@ import type { Database } from "#db/index.ts";
 
 export const mutable = {
   database: undefined as unknown as Database,
-  http: undefined as Deno.HttpServer<Deno.NetAddr> | undefined
+  http: undefined as unknown as Deno.HttpServer<Deno.NetAddr>
 };
 
 export const constantDatabaseMaxElements = 10_000;
@@ -21,7 +21,7 @@ export const constantNanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWX
 export const constantPathStructStorage = "./storage/";
 export const constantPathStructStorageData = "./storage/data/";
 export const constantPathDatabaseFile = "./storage/database.db";
-export const constantStoreDispose = new Map<string, [number, () => Promise<void>]>();
+export const constantStoreDispose = new Map<string, { priority: number; run: () => Promise<void> | void }>();
 export const constantTemporalUTC = (): Temporal.ZonedDateTime => Temporal.Now.zonedDateTimeISO("Etc/UTC");
 export const constantTemporalToUTC = (temporal: Temporal.Instant): Temporal.ZonedDateTime =>
   temporal.toZonedDateTimeISO("Etc/UTC");

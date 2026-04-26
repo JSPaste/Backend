@@ -1,77 +1,64 @@
 import { mapNotNullish } from "@std/collections";
 import { blue, gray, red, yellow } from "@std/fmt/colors";
 
+import { constantTextEncoder } from "#/global.ts";
+
 import { env } from "./env.ts";
 
 export class Logger {
   public static readonly level = {
-    none: [0, null],
-    error: [1, red],
-    warn: [2, yellow],
-    info: [3, blue],
-    debug: [4, gray]
+    error: [1, red("ERROR")],
+    warn: [2, yellow("WARN") + " "],
+    info: [3, blue("INFO") + " "],
+    debug: [4, gray("DEBUG")]
   } as const;
 
   public readonly source: string;
 
-  public constructor(source = "common") {
-    this.source = source;
+  public constructor(source?: string) {
+    this.source = source ? gray(`[${source}]`) : "";
   }
 
   public error(...message: unknown[]): void {
-    this.flush("error", message);
+    this.flush(Logger.level.error, message);
   }
 
   public warn(...message: unknown[]): void {
-    this.flush("warn", message);
+    this.flush(Logger.level.warn, message);
   }
 
   public info(...message: unknown[]): void {
-    this.flush("info", message);
+    this.flush(Logger.level.info, message);
   }
 
   public debug(...message: unknown[]): void {
-    this.flush("debug", message);
+    this.flush(Logger.level.debug, message);
   }
 
-  private flush(level: Exclude<keyof typeof Logger.level, "none">, message: unknown[]): void {
-    const [levelNumber, color] = Logger.level[level];
+  private flush([level, name]: (typeof Logger.level)[keyof typeof Logger.level], message: unknown[]): void {
+    if (level > env.JSPB_LOG_VERBOSITY) return;
 
-    if (levelNumber > env.JSPB_LOG_VERBOSITY) return;
-
-    const prefix: string[] = [];
+    let prefix = "";
 
     if (env.JSPB_LOG_TIME) {
-      const temporalLocal = Temporal.Now.zonedDateTimeISO();
-      const temporalYear = temporalLocal.year;
-      const temporalMonth = temporalLocal.month.toString().padStart(2, "0");
-      const temporalDay = temporalLocal.day.toString().padStart(2, "0");
-      const temporalHour = temporalLocal.hour.toString().padStart(2, "0");
-      const temporalMinute = temporalLocal.minute.toString().padStart(2, "0");
-      const temporalSecond = temporalLocal.second.toString().padStart(2, "0");
-      const temporalMillisecond = temporalLocal.millisecond.toString().padStart(3, "0");
-      const temporalOffset = temporalLocal.offset;
-
-      prefix.push(
-        gray(
-          `${temporalYear}-${temporalMonth}-${temporalDay}T${temporalHour}:${temporalMinute}:${temporalSecond}.${temporalMillisecond + temporalOffset}`
-        )
-      );
+      prefix +=
+        gray(Temporal.Now.zonedDateTimeISO().toString({ timeZoneName: "never", fractionalSecondDigits: 3 })) + " ";
     }
 
-    prefix.push(color(level.toUpperCase().padEnd(5)));
-    prefix.push(gray(`[${this.source}]`));
+    prefix += name;
 
-    const prefixString = prefix.join(" ");
+    if (this.source) {
+      prefix += " " + this.source;
+    }
 
     const render = mapNotNullish(message, (item) => {
       if (item == null) return;
 
       if (typeof item === "string") {
-        return `${prefixString} ${item}`;
+        return `${prefix} ${item}`;
       }
 
-      return `${prefixString} ${Deno.inspect(item, {
+      return `${prefix} ${Deno.inspect(item, {
         colors: true,
         strAbbreviateSize: 60,
         iterableLimit: 10
@@ -79,7 +66,13 @@ export class Logger {
     });
 
     for (const line of render) {
-      console[level](line);
+      const data = constantTextEncoder.encode(line + "\n");
+
+      if (level > 2) {
+        Deno.stdout.writeSync(data);
+      } else {
+        Deno.stderr.writeSync(data);
+      }
     }
   }
 }

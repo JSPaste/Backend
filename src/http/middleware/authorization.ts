@@ -2,11 +2,10 @@ import { type } from "arktype";
 import { createMiddleware } from "hono/factory";
 
 import { mutable } from "#/global.ts";
+import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
-import { errorCodeUserInvalidToken, errorCodeValidation, errorThrow } from "#util/error.ts";
+import { ErrorCode, errorThrow } from "#util/error.ts";
 import { validatorUserHeader } from "#util/validator/user.ts";
-
-import type { Env } from "../handler.ts";
 
 export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
   const authorization = ctx.req.header("authorization");
@@ -16,7 +15,7 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
 
   const token = validatorUserHeader(authorization);
   if (token instanceof type.errors) {
-    return errorThrow(errorCodeValidation, token.summary);
+    return errorThrow(ErrorCode.Validation, token.summary);
   }
 
   if (!token.includes(".")) {
@@ -25,7 +24,7 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
       // @ts-expect-error unindexed select
       const id = mutable.database.user.get("token", token)?.id;
       if (!id) {
-        return errorThrow(errorCodeUserInvalidToken);
+        return errorThrow(ErrorCode.UserInvalidToken);
       }
 
       ctx.set("userId", id);
@@ -33,18 +32,18 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
       return next();
     }
 
-    return errorThrow(errorCodeUserInvalidToken);
+    return errorThrow(ErrorCode.UserInvalidToken);
   }
 
   const [id] = token.split(".");
   if (!id) {
-    return errorThrow(errorCodeUserInvalidToken);
+    return errorThrow(ErrorCode.UserInvalidToken);
   }
 
   // trying to minimize timing attacks by always calling verifyHash
   const combo = mutable.database.user.get("id", id)?.token ?? "0 0";
   if (!verifyHash(token, combo)) {
-    return errorThrow(errorCodeUserInvalidToken);
+    return errorThrow(ErrorCode.UserInvalidToken);
   }
 
   ctx.set("userId", id);

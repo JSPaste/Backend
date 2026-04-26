@@ -7,13 +7,7 @@ import { Hono } from "hono/tiny";
 import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
-import {
-  errorCodeDocumentInvalidPassword,
-  errorCodeDocumentNotFound,
-  errorCodeDocumentPasswordNeeded,
-  errorThrow,
-  genericErrorResponse
-} from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { fsRead } from "#util/fs.ts";
 import {
   validatorDocumentName,
@@ -48,7 +42,7 @@ export default new Hono<Env>().get(
   describeRoute({
     tags: ["DOCUMENT (v1)"],
     summary: "Get document",
-    description: `Get the content/metadata of a published document in the instance
+    description: `Fetch the content/metadata of a document in the instance
 
 Note: If you only need to query the document metadata, you should use HEAD method instead`,
     responses: {
@@ -68,7 +62,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
   validator("param", schemaParam, validatorHandler),
   validator("header", schemaHeader, validatorHandler),
   validator("query", schemaQuery, validatorHandler),
-  async (ctx) => {
+  (ctx) => {
     const {
       name
       // @ts-expect-error upstream
@@ -84,15 +78,15 @@ Note: If you only need to query the document metadata, you should use HEAD metho
 
     const document = mutable.database.document.get("name", name);
     if (!document?.id) {
-      return errorThrow(errorCodeDocumentNotFound);
+      return errorThrow(ErrorCode.DocumentNotFound);
     }
     if (document.password) {
       if (!password) {
-        return errorThrow(errorCodeDocumentPasswordNeeded);
+        return errorThrow(ErrorCode.DocumentPasswordNeeded);
       }
 
       if (!verifyHash(password, document.password)) {
-        return errorThrow(errorCodeDocumentInvalidPassword);
+        return errorThrow(ErrorCode.DocumentInvalidPassword);
       }
     }
 

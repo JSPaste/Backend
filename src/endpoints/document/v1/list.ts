@@ -5,7 +5,7 @@ import { Hono } from "hono/tiny";
 import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
-import { errorCodeUserInvalidToken, errorThrow, genericErrorResponse } from "#util/error.ts";
+import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
 import { validatorDocumentListObject } from "#util/validator/document.ts";
 
 const schemaBodyResponse = resolver(validatorDocumentListObject.array());
@@ -34,10 +34,10 @@ export default new Hono<Env>().get(
     }
   }),
   authMiddleware,
-  async (ctx) => {
+  (ctx) => {
     const userId = ctx.get("userId");
     if (!userId) {
-      return errorThrow(errorCodeUserInvalidToken);
+      return errorThrow(ErrorCode.UserInvalidToken);
     }
 
     // https://github.com/honojs/hono/issues/1130

@@ -1,34 +1,22 @@
-import { describeRoute, resolver } from "@hono/openapi";
-import { type } from "arktype";
+import { describeRoute } from "@hono/openapi";
 import { Hono } from "hono/tiny";
 
 import { constantHttpStatusCodes, mutable } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
-import { env } from "#util/env.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
-import { validatorUserToken } from "#util/validator/user.ts";
 
-const schemaBodyResponse = resolver(
-  type({
-    token: validatorUserToken
-  })
-);
-
-export default new Hono<Env>().post(
+export default new Hono<Env>().delete(
   "/",
   describeRoute({
     tags: ["USER (v1)"],
-    summary: "Create user",
-    description: "Create a user to the instance",
-    security: [{}, { bearer: [] }],
+    summary: "Drop user",
+    description: `Deletes a user in the instance
+
+Note: All documents owned by the user will also be deleted`,
+    security: [{ bearer: [] }],
     responses: {
       200: {
-        content: {
-          "application/json": {
-            schema: schemaBodyResponse
-          }
-        },
         description: constantHttpStatusCodes[200]
       },
       400: { ...genericErrorResponse, description: constantHttpStatusCodes[400] },
@@ -40,12 +28,13 @@ export default new Hono<Env>().post(
   }),
   authMiddleware,
   (ctx) => {
-    if (!env.JSPB_USER_REGISTER && ctx.get("userId") !== mutable.database.user.getRoot()?.id) {
+    const userId = ctx.get("userId");
+    if (!userId) {
       return errorThrow(ErrorCode.UserInvalidToken);
     }
 
-    return ctx.json({
-      token: mutable.database.user.create()
-    });
+    mutable.database.user.delete("id", userId);
+
+    return ctx.body(null);
   }
 );

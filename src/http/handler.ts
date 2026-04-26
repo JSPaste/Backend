@@ -8,14 +8,14 @@ import { v2LegacyDocumentHandler } from "#endpoint/legacy/v2/documents/index.ts"
 import { v1UserHandler } from "#endpoint/user/v1/index.ts";
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
-import { errorCodeCrash, errorCodeDocumentCorrupted, errorGet } from "#util/error.ts";
+import { ErrorCode, errorGet } from "#util/error.ts";
 
 const log: Logger = new Logger("http");
 
 export type Env = {
   Variables: {
-    userId: string | undefined;
-    hasBody: boolean | undefined;
+    userId?: string;
+    hasBody?: boolean;
   };
 };
 
@@ -42,12 +42,12 @@ export const handler = (): Hono<Env> => {
     ) {
       log.debug(instance);
 
-      return ctx.json(errorGet(errorCodeDocumentCorrupted));
+      return ctx.json(errorGet(ErrorCode.DocumentCorrupted));
     }
 
     log.error(instance);
 
-    return ctx.json(errorGet(errorCodeCrash));
+    return ctx.json(errorGet(ErrorCode.Crash));
   });
 
   handler.use("*", cors());
@@ -80,9 +80,9 @@ Each instance can impose restrictions to the API usage. These restrictions may i
 
 (the following values might change without notice)
 - Instance registration policy: ${env.JSPB_USER_REGISTER ? "OPEN" : "CLOSED"}
-- Document size limit: ${env.JSPB_DOCUMENT_SIZE === 0 ? "unlimited" : (env.JSPB_DOCUMENT_SIZE ?? "unknown")}
-- Document lifetime: ${env.JSPB_DOCUMENT_AGE.total("minutes") === 0 ? "unlimited" : (env.JSPB_DOCUMENT_AGE.total("minutes") ?? "unknown")}
-- Document anonymous lifetime: ${env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") === 0 ? "unlimited" : (env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") ?? "unknown")}
+- Document size limit: ${env.JSPB_DOCUMENT_SIZE === 0 ? "unlimited" : env.JSPB_DOCUMENT_SIZE}
+- Document lifetime: ${env.JSPB_DOCUMENT_AGE.total("minutes") === 0 ? "unlimited" : env.JSPB_DOCUMENT_AGE.total("minutes")}
+- Document anonymous lifetime: ${env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") === 0 ? "unlimited" : env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes")}
 `,
           license: {
             name: "EUPL-1.2",

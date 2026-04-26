@@ -1,11 +1,10 @@
 import { mapNotNullish } from "@std/collections";
 import { ulid } from "@std/ulid";
 
+import { mutable } from "#/global.ts";
 import type { Database } from "#db/index.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
-
-import { mutable } from "../global.ts";
 
 const log: Logger = new Logger("database::migration");
 
@@ -67,25 +66,6 @@ export const migrations: Migration[] = [
         if (userRootId) {
           database.user.update("id", userRootId, "token", userRootToken);
         }
-      }
-
-      const userTokens = database.user.getAll(["token"]);
-
-      let userTokenUnhashed = false;
-      for (const entry of userTokens) {
-        // combo separator
-        if (!entry.token.includes(" ")) {
-          userTokenUnhashed = true;
-          break;
-        }
-      }
-
-      if (userTokenUnhashed) {
-        log.warn(
-          "Users with plain tokens found!",
-          "New users in the instance will have their token hashed,",
-          "In the future we will enforce that every user token is hashed."
-        );
       }
     },
     sql: (await import("./migrations/0002.sql", { with: { type: "text" } })).default

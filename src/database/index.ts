@@ -4,13 +4,12 @@ import { LruCache } from "@std/cache";
 import { monotonicUlid, ulid } from "@std/ulid";
 
 import { constantPathDatabaseFile } from "#/global.ts";
+import { migrations } from "#db/migration.ts";
+import { DocumentQuery, UserQuery } from "#db/query.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
 import { env } from "#util/env.ts";
 import { generateToken } from "#util/user.ts";
-
-import { migrations } from "./migration.ts";
-import { DocumentQuery, UserQuery } from "./query.ts";
 
 const log: Logger = new Logger("database");
 

@@ -1,12 +1,12 @@
 import type { Context } from "hono";
 
+import { constantPathStructStorageData, constantTemporalToUTC, constantTemporalUTC } from "#/global.ts";
 import type { Document } from "#db/query.ts";
 import type { Env } from "#http/handler.ts";
 
-import { constantPathStructStorageData, constantTemporalToUTC, constantTemporalUTC } from "../global.ts";
 import { documentVersionV1, documentVersionV2 } from "./document.ts";
 import { env } from "./env.ts";
-import { errorCodeDocumentCorrupted, errorCodeDocumentInvalidSize, errorThrow } from "./error.ts";
+import { ErrorCode, errorThrow } from "./error.ts";
 
 export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): Promise<void> => {
   await using handle = await Deno.open(constantPathStructStorageData + id, {
@@ -18,19 +18,19 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
   let stream: ReadableStream<Uint8Array>;
   switch (env.JSPB_DOCUMENT_COMPRESSION) {
     case documentVersionV1: {
-      // ctx.req.raw.body is only null on GET/HEAD
-      stream = (ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>).pipeThrough(new CompressionStream("deflate"));
+      // oxlint-disable-next-line typescript-eslint/no-non-null-assertion: ctx.req.raw.body is only null on GET/HEAD
+      stream = ctx.req.raw.body!.pipeThrough(new CompressionStream("deflate"));
 
       break;
     }
     case documentVersionV2: {
-      // ctx.req.raw.body is only null on GET/HEAD
-      stream = ctx.req.raw.body as NonNullable<typeof ctx.req.raw.body>;
+      // oxlint-disable-next-line typescript-eslint/no-non-null-assertion: ctx.req.raw.body is only null on GET/HEAD
+      stream = ctx.req.raw.body!;
 
       break;
     }
     default: {
-      return errorThrow(errorCodeDocumentCorrupted);
+      return errorThrow(ErrorCode.DocumentCorrupted);
     }
   }
 
@@ -40,7 +40,7 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
     void fsDelete({ id: id });
 
     if (why instanceof Deno.errors.BrokenPipe) {
-      return errorThrow(errorCodeDocumentInvalidSize);
+      return errorThrow(ErrorCode.DocumentInvalidSize);
     }
 
     throw why;
@@ -62,7 +62,7 @@ export const fsRead = async (
   ctx: Context<Env>,
   { id, version }: Pick<Document, "id" | "version">,
   clientIgnoreCapabilities = false
-): Promise<ReadableStream<Uint8Array<ArrayBufferLike>>> => {
+): Promise<ReadableStream<Uint8Array>> => {
   const handle = await Deno.open(constantPathStructStorageData + id);
 
   const hasClientDeflate = clientIgnoreCapabilities ? false : ctx.req.header("accept-encoding")?.includes("deflate");
@@ -85,7 +85,7 @@ export const fsRead = async (
       break;
     }
     default: {
-      return errorThrow(errorCodeDocumentCorrupted);
+      return errorThrow(ErrorCode.DocumentCorrupted);
     }
   }
 
