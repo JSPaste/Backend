@@ -1,10 +1,10 @@
 import { decodeAscii85, encodeAscii85 } from "@std/encoding";
 import type { EncodeAscii85Options } from "@std/encoding/ascii85";
-import { createBLAKE3 } from "hash-wasm";
+import { createHasher } from "blake3-jit";
 
 import { constantTextEncoder } from "#/global.ts";
 
-const hasher = await createBLAKE3();
+const hasher = createHasher();
 
 const encoderOptions: EncodeAscii85Options = { standard: "Z85" };
 
@@ -15,11 +15,11 @@ export const generateSalt = (length: number): Uint8Array<ArrayBuffer> => {
 export const generateHash = (input: string, salt?: Uint8Array): { combo: string; hash: string } => {
   const defaultSalt = salt ?? generateSalt(4);
 
-  hasher.init();
+  hasher.reset();
   hasher.update(defaultSalt);
   hasher.update(constantTextEncoder.encode(input));
 
-  const encodedHash = encodeAscii85(hasher.digest("binary"), encoderOptions);
+  const encodedHash = encodeAscii85(hasher.finalize(), encoderOptions);
 
   return {
     combo: `${encodedHash} ${encodeAscii85(defaultSalt, encoderOptions)}`,
