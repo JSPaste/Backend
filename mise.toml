@@ -119,14 +119,6 @@ run = [{ task = "clean:deno" }, { task = "install:deno" }]
 description = "Start backend"
 run = [{ task = "start:server" }]
 
-[tasks."start:dev"]
-alias = "dev"
-description = "Start devel server"
-run = [
-  { task = "install" },
-  "JSPB_DEBUG_DATABASE_EPHEMERAL=true JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A ./src/index.ts"
-]
-
 [tasks."start:build"]
 description = "Start dedicated server"
 run = [{ task = "build:server" }, { task = "start:server" }]
