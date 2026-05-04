@@ -2,10 +2,10 @@
   "version": "5",
   "specifiers": {
     "jsr:@deno/loader@0.5": "0.5.0",
-    "jsr:@hono/hono@^4.12.15": "4.12.15",
-    "jsr:@hono/hono@^4.8.3": "4.12.15",
+    "jsr:@hono/hono@^4.12.15": "4.12.16",
+    "jsr:@hono/hono@^4.8.3": "4.12.16",
     "jsr:@hono/standard-validator@~0.2.2": "0.2.2",
-    "jsr:@sitnik/nanoid@^5.1.9": "5.1.9",
+    "jsr:@sitnik/nanoid@^5.1.9": "5.1.11",
     "jsr:@standard-schema/spec@1": "1.1.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/async@^1.3.0": "1.3.0",
@@ -35,8 +35,8 @@
     "@deno/loader@0.5.0": {
       "integrity": "a6d94408de5e6bacac404f8f6963c8b8cc278cfd1a878aa2f06b34a083d6bfee"
     },
-    "@hono/hono@4.12.15": {
-      "integrity": "06a0aef73d9072e73b8db570b81a5b56a94095d697578202a87fccdf04ce352d"
+    "@hono/hono@4.12.16": {
+      "integrity": "d3a3ca0d713852c91881541e74d5ffac0b4af38b8c1285e8ed5ee47b68c58f94"
     },
     "@hono/standard-validator@0.2.2": {
       "integrity": "bc94e1ab41d677a571cb6dd5012823f1162b9856ca24dfd60233734824bb0b0c",
@@ -45,8 +45,8 @@
         "jsr:@standard-schema/spec"
       ]
     },
-    "@sitnik/nanoid@5.1.9": {
-      "integrity": "dd15205aa2c8b2f75804a6b91d6b94ad5657dd28306da8eecf28f64e0d7f8583"
+    "@sitnik/nanoid@5.1.11": {
+      "integrity": "5be5e0fa5daff0c1666bd1885943ff9859f28f409aaa550c9d15392c961e9f2c"
     },
     "@standard-schema/spec@1.1.0": {
       "integrity": "2ccd54513cd9c960bd155ab569b1a901bc99c6f9ad29559d3f38a28c91c1822d"
