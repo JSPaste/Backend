@@ -1,7 +1,7 @@
 import { describeRoute } from "@hono/openapi";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
@@ -33,7 +33,7 @@ Note: All documents owned by the user will also be deleted`,
       return errorThrow(ErrorCode.UserInvalidToken);
     }
 
-    mutable.database.user.delete("id", userId);
+    mutableDatabase.user.delete("id", userId);
 
     return ctx.body(null);
   }

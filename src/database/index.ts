@@ -1,7 +1,7 @@
 import { DatabaseSync, type StatementSync } from "node:sqlite";
 
 import { LruCache } from "@std/cache";
-import { monotonicUlid, ulid } from "@std/ulid";
+import { ulid } from "@std/ulid";
 
 import { constantPathDatabaseFile } from "#/global.ts";
 import { migrations } from "#db/migration.ts";
@@ -23,6 +23,8 @@ export class Database {
 
   private readonly database: DatabaseSync;
   private readonly store = new LruCache<string, StatementSync>(200);
+
+  private savepointId = 0;
 
   public constructor(options: Options = {}) {
     options.ephemeral ??= env.JSPB_DEBUG_DATABASE_EPHEMERAL;
@@ -53,7 +55,7 @@ export class Database {
 
       for (const [delta, migration] of migrations.slice(query.user_version).entries()) {
         try {
-          await this.transaction(async () => {
+          await this.transactionAsync(async () => {
             await migration.preMigration?.(this);
             this.exec(migration.sql);
             await migration.postMigration?.(this);
@@ -109,7 +111,7 @@ export class Database {
 
   public transaction<T>(callback: () => T): T {
     if (this.database.isTransaction) {
-      const name = `_${monotonicUlid()}`;
+      const name = `_${++this.savepointId}`;
 
       this.exec(`SAVEPOINT ${name};`);
       try {
@@ -126,6 +128,36 @@ export class Database {
     this.exec("BEGIN IMMEDIATE;");
     try {
       const result = callback();
+
+      this.exec("COMMIT;");
+
+      return result;
+    } catch (error) {
+      this.exec("ROLLBACK;");
+
+      throw error;
+    }
+  }
+
+  public async transactionAsync<T>(callback: () => Promise<T>): Promise<T> {
+    if (this.database.isTransaction) {
+      const name = `_${++this.savepointId}`;
+
+      this.exec(`SAVEPOINT ${name};`);
+      try {
+        return await callback();
+      } catch (error) {
+        this.exec(`ROLLBACK TO ${name};`);
+
+        throw error;
+      } finally {
+        this.exec(`RELEASE ${name};`);
+      }
+    }
+
+    this.exec("BEGIN IMMEDIATE;");
+    try {
+      const result = await callback();
 
       this.exec("COMMIT;");
 

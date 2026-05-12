@@ -1,9 +1,8 @@
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
-import { stream } from "hono/streaming";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
@@ -50,7 +49,7 @@ export default new Hono<Env>().get(
   validator("param", schemaParam, validatorHandler),
   validator("header", schemaHeader, validatorHandler),
   validator("query", schemaQuery, validatorHandler),
-  (ctx) => {
+  async (ctx) => {
     // https://github.com/honojs/hono/issues/1130
     if (ctx.req.method === "HEAD") {
       return ctx.body(null);
@@ -66,7 +65,7 @@ export default new Hono<Env>().get(
       password: header.password || query.p
     };
 
-    const document = mutable.database.document.get("name", param.name);
+    const document = mutableDatabase.document.get("name", param.name);
     if (!document?.id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }
@@ -83,6 +82,6 @@ export default new Hono<Env>().get(
     ctx.res.headers.set("content-type", "text/plain");
     ctx.res.headers.set("transfer-encoding", "chunked");
 
-    return stream(ctx, async (stream) => await stream.pipe(await fsRead(ctx, document, true)));
+    return ctx.body(await fsRead(ctx, document, true));
   }
 );

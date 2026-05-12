@@ -1,7 +1,7 @@
 import { type } from "arktype";
 import { createMiddleware } from "hono/factory";
 
-import { mutable } from "#/global.ts";
+import { mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, errorThrow } from "#util/error.ts";
@@ -18,30 +18,13 @@ export const authMiddleware = createMiddleware<Env>(async (ctx, next) => {
     return errorThrow(ErrorCode.Validation, token.summary);
   }
 
-  if (!token.includes(".")) {
-    // unhashed token
-    if (token.length === 32) {
-      // @ts-expect-error unindexed select
-      const id = mutable.database.user.get("token", token)?.id;
-      if (!id) {
-        return errorThrow(ErrorCode.UserInvalidToken);
-      }
-
-      ctx.set("userId", id);
-
-      return next();
-    }
-
-    return errorThrow(ErrorCode.UserInvalidToken);
-  }
-
-  const [id] = token.split(".");
+  const id = token.slice(0, token.indexOf("."));
   if (!id) {
     return errorThrow(ErrorCode.UserInvalidToken);
   }
 
   // trying to minimize timing attacks by always calling verifyHash
-  const combo = mutable.database.user.get("id", id)?.token ?? "0 0";
+  const combo = mutableDatabase.user.get("id", id)?.token ?? "0 0";
   if (!verifyHash(token, combo)) {
     return errorThrow(ErrorCode.UserInvalidToken);
   }

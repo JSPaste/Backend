@@ -1,7 +1,7 @@
 import { mapNotNullish } from "@std/collections";
 import { ulid } from "@std/ulid";
 
-import { mutable } from "#/global.ts";
+import { mutableDatabase } from "#/global.ts";
 import type { Database } from "#db/index.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
@@ -62,7 +62,7 @@ export const migrations: Migration[] = [
 
         database.user.delete("id", userRootIdOld);
 
-        const userRootId = mutable.database.user.getRoot()?.id;
+        const userRootId = mutableDatabase.user.getRoot()?.id;
         if (userRootId) {
           database.user.update("id", userRootId, "token", userRootToken);
         }

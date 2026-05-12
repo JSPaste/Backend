@@ -1,10 +1,9 @@
 import { describeRoute, resolver, validator } from "@hono/openapi";
 import { decodeTime } from "@std/ulid";
 import { type } from "arktype";
-import { stream } from "hono/streaming";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { verifyHash } from "#util/crypto.ts";
 import { ErrorCode, errorThrow, genericErrorResponse } from "#util/error.ts";
@@ -62,7 +61,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
   validator("param", schemaParam, validatorHandler),
   validator("header", schemaHeader, validatorHandler),
   validator("query", schemaQuery, validatorHandler),
-  (ctx) => {
+  async (ctx) => {
     const {
       name
       // @ts-expect-error upstream
@@ -76,7 +75,7 @@ Note: If you only need to query the document metadata, you should use HEAD metho
       // @ts-expect-error upstream
     } = ctx.req.valid("query") as typeof schemaQuery.infer;
 
-    const document = mutable.database.document.get("name", name);
+    const document = mutableDatabase.document.get("name", name);
     if (!document?.id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }
@@ -108,6 +107,6 @@ Note: If you only need to query the document metadata, you should use HEAD metho
 
     ctx.res.headers.set("transfer-encoding", "chunked");
 
-    return stream(ctx, async (stream) => await stream.pipe(await fsRead(ctx, document)));
+    return ctx.body(await fsRead(ctx, document));
   }
 );

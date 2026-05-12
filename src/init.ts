@@ -7,7 +7,16 @@ import { sweeper } from "#task/list/sweeper.ts";
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
 
-import { constantPathStructStorage, constantPathStructStorageData, constantStoreDispose, mutable } from "./global.ts";
+import {
+  constantPathStructStorage,
+  constantPathStructStorageData,
+  constantStoreDispose,
+  mutableDatabase,
+  mutableHttpServer,
+  setMutableDatabase,
+  setMutableHttpServer,
+  setMutableRootId
+} from "./global.ts";
 
 const log: Logger = new Logger();
 
@@ -20,17 +29,19 @@ export const initHTTPServer = async (handler?: Deno.ServeHandler<Deno.Addr>): Pr
 
   await constantStoreDispose.get(id)?.run();
 
-  mutable.http = http({
-    handler: handler
-  });
+  setMutableHttpServer(
+    http({
+      handler: handler
+    })
+  );
 
   constantStoreDispose.set(id, {
     priority: 10,
     run: async (): Promise<void> => {
-      mutable.http.unref();
+      mutableHttpServer.unref();
 
       // Deno.serve will deadlock on shutdown under pressure
-      await mutable.http.shutdown();
+      await mutableHttpServer.shutdown();
     }
   });
 };
@@ -40,16 +51,23 @@ export const initDatabase = async (): Promise<void> => {
 
   await constantStoreDispose.get(id)?.run();
 
-  mutable.database = new Database();
+  setMutableDatabase(new Database());
 
   constantStoreDispose.set(id, {
     priority: 0,
     run: (): void => {
-      mutable.database[Symbol.dispose]();
+      mutableDatabase[Symbol.dispose]();
     }
   });
 
-  await mutable.database.migration();
+  await mutableDatabase.migration();
+
+  const rootId = mutableDatabase.user.getRoot()?.id;
+  if (!rootId) {
+    throw new Error('"root" user not found. Database may be corrupted.');
+  }
+
+  setMutableRootId(rootId);
 };
 
 export const initTask = (): void => {
@@ -59,7 +77,7 @@ export const initTask = (): void => {
 };
 
 export const initUnhashedTokenCheck = (): void => {
-  const userTokens = mutable.database.user.getAll(["token"]);
+  const userTokens = mutableDatabase.user.getAll(["token"]);
 
   let userUnhashedToken = false;
   for (const entry of userTokens) {
@@ -71,10 +89,6 @@ export const initUnhashedTokenCheck = (): void => {
   }
 
   if (userUnhashedToken) {
-    log.warn(
-      "Users with unhashed tokens found!",
-      "Those users may lose access in future versions of JSPaste!",
-      "See: https://github.com/jspaste/backend/issues/318"
-    );
+    log.error("Users with unhashed tokens found!", "See: https://github.com/jspaste/backend/issues/318");
   }
 };

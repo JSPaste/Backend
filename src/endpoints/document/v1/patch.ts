@@ -2,7 +2,7 @@ import { describeRoute, resolver, validator } from "@hono/openapi";
 import { type } from "arktype";
 import { Hono } from "hono/tiny";
 
-import { constantHttpStatusCodes, mutable } from "#/global.ts";
+import { constantHttpStatusCodes, mutableDatabase } from "#/global.ts";
 import type { Env } from "#http/handler.ts";
 import { authMiddleware } from "#http/middleware/authorization.ts";
 import { bodyStream } from "#http/middleware/bodyStream.ts";
@@ -83,7 +83,7 @@ Note: To remove (nullify) a value, send the header with an empty value`,
       // @ts-expect-error upstream
     } = ctx.req.valid("header") as typeof schemaHeader.infer;
 
-    const document = mutable.database.document.get("name", actualName);
+    const document = mutableDatabase.document.get("name", actualName);
     if (!document?.id) {
       return errorThrow(ErrorCode.DocumentNotFound);
     }
@@ -96,27 +96,27 @@ Note: To remove (nullify) a value, send the header with an empty value`,
 
     if (newPassword !== undefined) {
       if (newPassword === "") {
-        mutable.database.document.update("name", actualName, "password", null);
+        mutableDatabase.document.update("name", actualName, "password", null);
       } else {
         const hash = generateHash(newPassword);
 
-        mutable.database.document.update("name", actualName, "password", hash.combo);
+        mutableDatabase.document.update("name", actualName, "password", hash.combo);
       }
     }
 
     // keep newName last thing to alter in case of race conditions
     if (newName) {
-      if (mutable.database.document.get("name", newName)?.name) {
+      if (mutableDatabase.document.get("name", newName)?.name) {
         return errorThrow(ErrorCode.DocumentNameAlreadyExists);
       }
 
-      mutable.database.document.update("name", actualName, "name", newName);
+      mutableDatabase.document.update("name", actualName, "name", newName);
 
       actualName = newName;
     }
 
     if (ctx.get("hasBody")) {
-      mutable.database.document.update("name", actualName, "version", env.JSPB_DOCUMENT_COMPRESSION);
+      mutableDatabase.document.update("name", actualName, "version", env.JSPB_DOCUMENT_COMPRESSION);
       await fsWrite(ctx, document);
     }
 

@@ -1,7 +1,8 @@
 import { abortable } from "@std/async";
+import { warmupSimd as initCrypto } from "blake3-jit";
 
 import { constantStoreDispose } from "#/global.ts";
-import { initDatabase, initDirStruct, initHTTPServer, initUnhashedTokenCheck, initTask } from "#/init.ts";
+import { initDatabase, initDirStruct, initHTTPServer, initTask, initUnhashedTokenCheck } from "#/init.ts";
 import { handler } from "#http/handler.ts";
 import { Logger } from "#util/console.ts";
 
@@ -62,6 +63,7 @@ try {
   initUnhashedTokenCheck();
   initTask();
   await initHTTPServer(handler().fetch);
+  initCrypto();
 } catch (error) {
   log.error(error);
 
