@@ -4,7 +4,6 @@ import { HTTPException } from "hono/http-exception";
 import { Hono } from "hono/tiny";
 
 import { v1DocumentHandler } from "#endpoint/document/v1/index.ts";
-import { v2LegacyDocumentHandler } from "#endpoint/legacy/v2/documents/index.ts";
 import { v1UserHandler } from "#endpoint/user/v1/index.ts";
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
@@ -117,16 +116,8 @@ Each instance can impose restrictions to the API usage. These restrictions may i
     })
   );
 
-  // deprecated
-  handler.get("/documents/*", (ctx) => {
-    return ctx.redirect(ctx.req.path.replace(/\/documents\//g, "/v2/documents/"), 307);
-  });
-
   handler.route("/document/v1", v1DocumentHandler);
   handler.route("/user/v1", v1UserHandler);
-
-  // deprecated
-  handler.route("/v2/documents", v2LegacyDocumentHandler);
 
   return handler;
 };

@@ -9,7 +9,6 @@
     "jsr:@standard-schema/spec@1": "1.1.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/async@^1.3.0": "1.3.0",
-    "jsr:@std/bytes@^1.0.6": "1.0.6",
     "jsr:@std/cache@~0.2.3": "0.2.3",
     "jsr:@std/collections@^1.1.7": "1.1.7",
     "jsr:@std/data-structures@^1.0.11": "1.0.11",
@@ -19,7 +18,6 @@
     "jsr:@std/fs@^1.0.23": "1.0.23",
     "jsr:@std/internal@^1.0.12": "1.0.13",
     "jsr:@std/path@^1.1.4": "1.1.4",
-    "jsr:@std/streams@^1.1.0": "1.1.0",
     "jsr:@std/ulid@1": "1.0.0",
     "npm:@types/node@^25.6.0": "25.6.0",
     "npm:arkenv@0.11": "0.11.0_arktype@2.2.0",
@@ -63,9 +61,6 @@
         "jsr:@std/data-structures"
       ]
     },
-    "@std/bytes@1.0.6": {
-      "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
-    },
     "@std/cache@0.2.3": {
       "integrity": "4e0bcab2e61f7c5637937bfe2bb13ccdd15e4dc3092beb14b78726bea8c49916"
     },
@@ -98,12 +93,6 @@
       "integrity": "1d2d43f39efb1b42f0b1882a25486647cb851481862dc7313390b2bb044314b5",
       "dependencies": [
         "jsr:@std/internal"
-      ]
-    },
-    "@std/streams@1.1.0": {
-      "integrity": "2f7024d841f343fd478afe0c958a3f0f068ef2a0d2bcc954f550f97ac1fa22e3",
-      "dependencies": [
-        "jsr:@std/bytes"
       ]
     },
     "@std/ulid@1.0.0": {
@@ -655,8 +644,6 @@
       "jsr:@std/encoding@^1.0.10",
       "jsr:@std/fmt@^1.0.10",
       "jsr:@std/fs@^1.0.23",
-      "jsr:@std/path@^1.1.4",
-      "jsr:@std/streams@^1.1.0",
       "jsr:@std/ulid@1",
       "npm:@types/node@^25.6.0",
       "npm:arkenv@0.11",

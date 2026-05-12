@@ -27,8 +27,6 @@
     "@std/encoding": "jsr:@std/encoding@^1.0.10",
     "@std/fmt": "jsr:@std/fmt@^1.0.10",
     "@std/fs": "jsr:@std/fs@^1.0.23",
-    "@std/path": "jsr:@std/path@^1.1.4",
-    "@std/streams": "jsr:@std/streams@^1.1.0",
     "@std/ulid": "jsr:@std/ulid@^1.0.0",
     "@types/node": "npm:@types/node@^25.6.0",
     "arkenv": "npm:arkenv@~0.11.0",
