@@ -9,7 +9,8 @@ import { Logger } from "#util/console.ts";
 import "@std/dotenv/load";
 
 declare global {
-  // oxlint-disable-next-line typescript-eslint/consistent-type-definitions: expected
+  // expected
+  // oxlint-disable-next-line typescript-eslint/consistent-type-definitions
   interface ArkEnv {
     meta(): {
       ref?: string;
