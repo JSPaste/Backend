@@ -40,7 +40,7 @@ export const initHTTPServer = async (handler?: Deno.ServeHandler<Deno.Addr>): Pr
     run: async (): Promise<void> => {
       mutableHttpServer.unref();
 
-      // Deno.serve will deadlock on shutdown under pressure
+      // FIXME: Deno.serve will deadlock on shutdown under pressure
       await mutableHttpServer.shutdown();
     }
   });

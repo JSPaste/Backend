@@ -18,13 +18,15 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
   let stream: ReadableStream<Uint8Array>;
   switch (env.JSPB_DOCUMENT_COMPRESSION) {
     case documentVersionV1: {
-      // oxlint-disable-next-line typescript-eslint/no-non-null-assertion: ctx.req.raw.body is only null on GET/HEAD
+      // ctx.req.raw.body is only null on GET/HEAD
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       stream = ctx.req.raw.body!.pipeThrough(new CompressionStream("deflate"));
 
       break;
     }
     case documentVersionV2: {
-      // oxlint-disable-next-line typescript-eslint/no-non-null-assertion: ctx.req.raw.body is only null on GET/HEAD
+      // ctx.req.raw.body is only null on GET/HEAD
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       stream = ctx.req.raw.body!;
 
       break;

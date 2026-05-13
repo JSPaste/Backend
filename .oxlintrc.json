@@ -84,6 +84,7 @@
   },
   "options": {
     // manual check only
-    "typeAware": false
+    "typeAware": false,
+    "reportUnusedDisableDirectives": "warn"
   }
 }
