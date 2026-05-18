@@ -25,8 +25,8 @@
     "npm:blake3-jit@^1.1.0": "1.1.0",
     "npm:hono-openapi@^1.3.0": "1.3.0_@standard-community+standard-json@0.3.5__@standard-schema+spec@1.1.0__@types+json-schema@7.0.15__arktype@2.2.0__quansync@0.2.11_@standard-community+standard-openapi@0.2.9__@standard-community+standard-json@0.3.5___@standard-schema+spec@1.1.0___@types+json-schema@7.0.15___arktype@2.2.0___quansync@0.2.11__@standard-schema+spec@1.1.0__arktype@2.2.0__openapi-types@12.1.3__@types+json-schema@7.0.15__quansync@0.2.11_@types+json-schema@7.0.15_openapi-types@12.1.3_@standard-schema+spec@1.1.0_arktype@2.2.0_quansync@0.2.11",
     "npm:oxfmt@0.50": "0.50.0",
-    "npm:oxlint-tsgolint@~0.22.1": "0.22.1",
-    "npm:oxlint@^1.62.0": "1.65.0_oxlint-tsgolint@0.22.1",
+    "npm:oxlint-tsgolint@0.23": "0.23.0",
+    "npm:oxlint@^1.62.0": "1.65.0_oxlint-tsgolint@0.23.0",
     "npm:rolldown@1.0.1": "1.0.1"
   },
   "jsr": {
@@ -234,33 +234,33 @@
       "os": ["win32"],
       "cpu": ["x64"]
     },
-    "@oxlint-tsgolint/darwin-arm64@0.22.1": {
-      "integrity": "sha512-4150Lpgc1YM09GcjA6GSrra1JoPjC7aOpfywLjWEY4vW0Sd1qKzqHF1WRaiw0/qUZ40OATYdv3aRd7ipPkWQbw==",
+    "@oxlint-tsgolint/darwin-arm64@0.23.0": {
+      "integrity": "sha512-gOs9PVr2wEg4ox9z0aJo+RKhhImW86YL5N6yav8BK/rgPsIrwN/igSZ+pbRr723NFvUNKde9fgMhRA6JrXAOZw==",
       "os": ["darwin"],
       "cpu": ["arm64"]
     },
-    "@oxlint-tsgolint/darwin-x64@0.22.1": {
-      "integrity": "sha512-vFWcPWYOgZs4HWcgS1EjUZg33NLcNfEYU49KGImmCfZWkflENrmBYV4HN/C0YeAPum6ZZ/goPSvQrB/cOD+NfA==",
+    "@oxlint-tsgolint/darwin-x64@0.23.0": {
+      "integrity": "sha512-kjJ8B+7n4tB9VJdxS5A9GdJt6/bYpzbu4lXp2uO1S3sRmCB5gDEABlGoiePNApRWaW+xqL4b4xgiE727jSLhuA==",
       "os": ["darwin"],
       "cpu": ["x64"]
     },
-    "@oxlint-tsgolint/linux-arm64@0.22.1": {
-      "integrity": "sha512-6LiUpP0Zir3+29FvBm7Y28q/dBjSHqTZ5MhG1Ckw4fGhI4cAvbcwXaKvbjx1TP7rRmBNOoq/M5xdpHjTb+GAew==",
+    "@oxlint-tsgolint/linux-arm64@0.23.0": {
+      "integrity": "sha512-6dCZuKNu135seMXilkRk9SpCx6i1XgmiipYGalLij5WVRX6ZYS8c4xI7preN/zv9fCXhsQclTIMDu2Y/cytTjw==",
       "os": ["linux"],
       "cpu": ["arm64"]
     },
-    "@oxlint-tsgolint/linux-x64@0.22.1": {
-      "integrity": "sha512-fuX1hEQfpHauUbXADsfqVhRzrUrGabzGXbj5wsp2vKhV5uk/Rze8Mba9GdjFGECzvXudMGqHqxB4r6jGRdhxVA==",
+    "@oxlint-tsgolint/linux-x64@0.23.0": {
+      "integrity": "sha512-3bdilnyA7kmSTjK27rvjIjSxL5SIg3wt7vwNiRkouWB83ytssyKnuGvxSYJxgMEmFpSutzaBzcCUM2jDtPGcgA==",
       "os": ["linux"],
       "cpu": ["x64"]
     },
-    "@oxlint-tsgolint/win32-arm64@0.22.1": {
-      "integrity": "sha512-8SZidAj+jrbZf9ZjBEYW0tiNZ+KasqB2zgW26qdiPpQSF/DzURnPmXz651IeA9YsmbVdHGIooEHUmev6QJdquA==",
+    "@oxlint-tsgolint/win32-arm64@0.23.0": {
+      "integrity": "sha512-j+OEp44SVYiQ+ZD+uttsX7u6L9SvmbbQ77SO1pSFCcJlsVMeCk8qZsjhKfGKuT/jIA+ipOJMVs/+pqUfObBWNw==",
       "os": ["win32"],
       "cpu": ["arm64"]
     },
-    "@oxlint-tsgolint/win32-x64@0.22.1": {
-      "integrity": "sha512-QweSk9H5lFh5Y+WUf2Kq/OAN88V6+62ZwGhP38gqdRotI90luXSMkruFTj7Q2rYrzH4ZVNaSqx7NY8JpSfIzqg==",
+    "@oxlint-tsgolint/win32-x64@0.23.0": {
+      "integrity": "sha512-5MyjFuqf+g8OUPJBSGWHJtmoWnzFJYyOg4To9WMQshZYEWig/vtu7JtJ03VWnzHv9LJkAUeApY0gVCOywFR/iQ==",
       "os": ["win32"],
       "cpu": ["x64"]
     },
@@ -549,8 +549,8 @@
       ],
       "bin": true
     },
-    "oxlint-tsgolint@0.22.1": {
-      "integrity": "sha512-YUSGSLUnoolsu8gxISEDio3q1rtsCozwfOzASUn3DT2mR2EeQ93uEEnen7s+6LpF+lyTQFln1pQfqwBh/fsVEg==",
+    "oxlint-tsgolint@0.23.0": {
+      "integrity": "sha512-3mBv3CoPbh8dFbzfDGIWa2ytZjn2v+3EX4aKRXjIhsoGFzG8GCjfRirz3rwZf1wYbZzsNLTSgpw8VjQuWdp/jA==",
       "optionalDependencies": [
         "@oxlint-tsgolint/darwin-arm64",
         "@oxlint-tsgolint/darwin-x64",
@@ -561,7 +561,7 @@
       ],
       "bin": true
     },
-    "oxlint@1.65.0_oxlint-tsgolint@0.22.1": {
+    "oxlint@1.65.0_oxlint-tsgolint@0.23.0": {
       "integrity": "sha512-ChUuE3Q7XnAbscvT4XLMsH7HFJmLgLVv9lu+RRgFL5wSXnDqUOzTp5IS8qWDBGd/ZDSzQ2tbX8fjAmijlGLC7A==",
       "dependencies": [
         "oxlint-tsgolint"
@@ -651,7 +651,7 @@
       "npm:blake3-jit@^1.1.0",
       "npm:hono-openapi@^1.3.0",
       "npm:oxfmt@0.50",
-      "npm:oxlint-tsgolint@~0.22.1",
+      "npm:oxlint-tsgolint@0.23",
       "npm:oxlint@^1.62.0",
       "npm:rolldown@1.0.1"
     ]
