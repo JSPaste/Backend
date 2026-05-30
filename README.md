@@ -31,7 +31,7 @@ To pull and run the container:
 
 ```shell
 docker pull docker.io/jspaste/backend:latest
-docker run --env-file=.env -d -p [::1]:4000:4000 docker.io/jspaste/backend:latest
+docker run --env-file=.env -d -p [::1]:8080:8080 docker.io/jspaste/backend:latest
 ```
 
 ## Validate

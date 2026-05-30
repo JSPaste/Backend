@@ -51,7 +51,7 @@ ENV PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
 
 VOLUME /backend/storage/
 
-EXPOSE 4000
+EXPOSE 8080
 
 WORKDIR /backend/
 ENTRYPOINT ["/backend/server"]
