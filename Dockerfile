@@ -8,35 +8,35 @@ RUN set -euxo pipefail; \
 WORKDIR /build/
 COPY . ./
 
-RUN set -euxo pipefail; \
-  mise trust; \
-  GITHUB_ACTIONS=true mise run build:server
-
-RUN echo "root:x:0:root" >/tmp/.group \
-  && echo "root:x:0:0:root:/backend:/bin/ash" >/tmp/.passwd \
-  && echo "jspaste:x:7777:jspaste" >>/tmp/.group \
-  && echo "jspaste:x:7777:7777:jspaste:/backend:/bin/ash" >>/tmp/.passwd
-
-ARG TARGETOS
 ARG TARGETARCH
 
 RUN set -euxo pipefail; \
-  mise run build:standalone
+  case "$TARGETARCH" in \
+  amd64) STANDALONE_TARGET="x86_64-unknown-linux-gnu" ;; \
+  arm64) STANDALONE_TARGET="aarch64-unknown-linux-gnu" ;; \
+  *) echo "Unsupported architecture: $TARGETARCH" && exit 1 ;; \
+  esac; \
+  mise trust; \
+  STANDALONE_TARGET="$STANDALONE_TARGET" mise run build:standalone
 
-FROM --platform=$BUILDPLATFORM scratch AS dist
+FROM scratch AS dist
+COPY --chown=0:0 --from=cgr.dev/chainguard/busybox:latest / /
 
-COPY --from=builder /tmp/.passwd /etc/passwd
-COPY --from=builder /tmp/.group /etc/group
-COPY --chown=root:root --from=cgr.dev/chainguard/wolfi-base:latest / /
-COPY --chown=root:root --from=builder /tmp/.passwd /etc/passwd
-COPY --chown=root:root --from=builder /tmp/.group /etc/group
-RUN rm -rf /home/
+COPY <<EOF /etc/group
+root:x:0:
+nonroot:x:65532:
+EOF
 
-COPY --chown=7777:7777 --from=builder /build/dist/backend /backend/server
-COPY --chown=7777:7777 --from=builder /build/LICENSE /backend/
+COPY <<EOF /etc/passwd
+root:x:0:0:root:/backend/:/bin/sh
+nonroot:x:65532:65532:nonroot:/backend/:/bin/sh
+EOF
+
+COPY --chmod=555 --chown=65532:65532 --from=builder /build/dist/backend /backend/server
+COPY --chmod=444 --chown=65532:65532 --from=builder /build/LICENSE /backend/
 
 LABEL org.opencontainers.image.created="0001-01-01T00:00:00Z" \
-  org.opencontainers.image.description="JSPaste Backend" \
+  org.opencontainers.image.description="JSPaste document storage" \
   org.opencontainers.image.licenses="EUPL-1.2" \
   org.opencontainers.image.revision="unspecified" \
   org.opencontainers.image.source="https://github.com/jspaste/backend" \
@@ -47,12 +47,11 @@ LABEL org.opencontainers.image.created="0001-01-01T00:00:00Z" \
 ENV PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
   SSL_CERT_DIR="/etc/ssl/certs" \
   SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
-  HISTFILE="/dev/null" \
-  STORAGE_PATH="/backend/storage/"
+  HISTFILE="/dev/null"
+
+VOLUME /backend/storage/
 
 EXPOSE 4000
-
-VOLUME $STORAGE_PATH
 
 WORKDIR /backend/
 ENTRYPOINT ["/backend/server"]
