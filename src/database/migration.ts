@@ -6,6 +6,9 @@ import type { Database } from "#db/index.ts";
 import { Logger } from "#util/console.ts";
 import { generateHash } from "#util/crypto.ts";
 
+import sql0001 from "./migrations/0001.sql" with { type: "text" };
+import sql0002 from "./migrations/0002.sql" with { type: "text" };
+
 const log: Logger = new Logger("database::migration");
 
 type Migration = {
@@ -24,7 +27,7 @@ export const migrations: Migration[] = [
    */
   {
     id: "0001.base",
-    sql: (await import("./migrations/0001.sql", { with: { type: "text" } })).default
+    sql: sql0001
   },
 
   /**
@@ -68,6 +71,6 @@ export const migrations: Migration[] = [
         }
       }
     },
-    sql: (await import("./migrations/0002.sql", { with: { type: "text" } })).default
+    sql: sql0002
   }
 ] as const;

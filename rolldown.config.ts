@@ -18,7 +18,7 @@ export default {
     ".sql": "text"
   },
   plugins: [
-    deno(),
+    deno({ noTranspile: true }),
     bundleAnalyzerPlugin({
       fileName: "metadata.json"
     })
