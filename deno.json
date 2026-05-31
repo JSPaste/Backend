@@ -6,7 +6,7 @@
   "compilerOptions": {
     "lib": ["deno.window", "deno.unstable", "esnext"]
   },
-  "unstable": ["cron", "raw-imports", "bare-node-builtins"],
+  "unstable": ["cron", "bare-node-builtins"],
   "allowScripts": [],
   "imports": {
     "#/": "./src/",
