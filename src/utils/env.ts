@@ -17,7 +17,7 @@ export const env = arkenv(
         };
       })
       .default("::"),
-    JSPB_PORT: type.keywords.number.integer.atLeast(0).atMost(65_535).default(4000),
+    JSPB_PORT: type.keywords.number.integer.atLeast(0).atMost(65_535).default(8080),
 
     // debug
     JSPB_DEBUG_DATABASE_EPHEMERAL: type.boolean.default(false),

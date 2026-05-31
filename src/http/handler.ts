@@ -108,7 +108,7 @@ Each instance can impose restrictions to the API usage. These restrictions may i
             description: "Official JSPaste instance"
           },
           {
-            url: "http://localhost:4000",
+            url: "http://localhost:8080",
             description: "Local instance"
           }
         ]
