@@ -67,16 +67,16 @@ mise run build:standalone:windows-amd64
 The API is documented under OpenAPI specification and can be found at the following path:
 
 ```shell
-/api/oas.json
+/api/docs.json
 ```
 
 You can get a quick overview with:
 
-- [Swagger Editor](https://editor.swagger.io/?url=https://jspaste.eu/api/oas.json)
-- [Scalar Client](https://client.scalar.com/?url=https://jspaste.eu/api/oas.json)
+- [Swagger Editor](https://editor.swagger.io/?url=https://jspaste.eu/api/docs.json)
+- [Scalar Client](https://client.scalar.com/?url=https://jspaste.eu/api/docs.json)
 
 If using Scalar Client, disable the CORS proxy and follow these steps to import the
-instance `oas.json`..:
+instance `docs.json`..:
 
 ![](https://static.inetol.net/jspaste/backend/scalar-t1.webp)
 

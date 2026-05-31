@@ -1,3 +1,5 @@
+import { normalize } from "node:path/posix";
+
 import arkenv from "arkenv";
 import { type } from "arktype";
 
@@ -18,6 +20,10 @@ export const env = arkenv(
       })
       .default("::"),
     JSPB_PORT: type.keywords.number.integer.atLeast(0).atMost(65_535).default(8080),
+    JSPB_API: type(/^\/[\w/-]*$/)
+      .pipe((string) => normalize(`${string}/`))
+      .describe("a valid absolute URL path")
+      .default("/api/"),
 
     // debug
     JSPB_DEBUG_DATABASE_EPHEMERAL: type.boolean.default(false),
