@@ -79,6 +79,11 @@ description = "Build standalone binary"
 env = { STANDALONE_OUTPUT = "./dist/backend.windows-amd64.exe", STANDALONE_TARGET = "x86_64-pc-windows-msvc" }
 run = [{ task = "build:standalone_" }]
 
+[tasks."build:standalone:windows-arm64"]
+description = "Build standalone binary"
+env = { STANDALONE_OUTPUT = "./dist/backend.windows-arm64.exe", STANDALONE_TARGET = "aarch64-pc-windows-msvc" }
+run = [{ task = "build:standalone_" }]
+
 [tasks."test"]
 description = "Run all tests"
 run = [{ task = "install" }, "mise exec -- deno test -A"]

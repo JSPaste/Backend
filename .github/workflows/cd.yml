@@ -102,6 +102,12 @@ jobs:
           zip -j -X -9 -l -o ./dist/backend-${{ steps.tags.outputs.tag }}_windows-amd64.zip .env.example LICENSE README.md ./dist/backend.windows-amd64.exe
           zip -T ./dist/backend-${{ steps.tags.outputs.tag }}_windows-amd64.zip
 
+          # FIXME: Deno still doesn't expose arm64 target
+          #mise run build:standalone:windows-arm64
+          #chmod 755 ./dist/backend.windows-arm64.exe
+          #zip -j -X -9 -l -o ./dist/backend-${{ steps.tags.outputs.tag }}_windows-arm64.zip .env.example LICENSE README.md ./dist/backend.windows-arm64.exe
+          #zip -T ./dist/backend-${{ steps.tags.outputs.tag }}_windows-arm64.zip
+
       - if: inputs.artifact-action == 'build-release'
         name: Release artifact
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
