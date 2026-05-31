@@ -60,6 +60,7 @@ mise run build:standalone:linux-amd64
 mise run build:standalone:linux-arm64
 mise run build:standalone:darwin-arm64
 mise run build:standalone:windows-amd64
+mise run build:standalone:windows-arm64
 ```
 
 ## API
