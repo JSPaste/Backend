@@ -34,7 +34,7 @@
     "blake3-jit": "npm:blake3-jit@^1.1.0",
     "hono": "jsr:@hono/hono@^4.12.15",
     "nanoid": "jsr:@sitnik/nanoid@^5.1.9",
-    "oxfmt": "npm:oxfmt@^0.52.0",
+    "oxfmt": "npm:oxfmt@^0.55.0",
     "oxlint": "npm:oxlint@^1.62.0",
     "oxlint-tsgolint": "npm:oxlint-tsgolint@^0.23.0",
     "rolldown": "npm:rolldown@1.0.3"
