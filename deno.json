@@ -29,7 +29,7 @@
     "@std/fs": "jsr:@std/fs@^1.0.23",
     "@std/ulid": "jsr:@std/ulid@^1.0.0",
     "@types/node": "npm:@types/node@^25.6.0",
-    "arkenv": "npm:arkenv@~0.11.0",
+    "arkenv": "npm:arkenv@~0.12.0",
     "arktype": "npm:arktype@^2.2.0",
     "blake3-jit": "npm:blake3-jit@^1.1.0",
     "hono": "jsr:@hono/hono@^4.12.15",
