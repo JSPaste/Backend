@@ -21,7 +21,7 @@
     "jsr:@std/path@^1.1.5": "1.1.5",
     "jsr:@std/ulid@1": "1.0.0",
     "npm:@types/node@^25.6.0": "25.9.3",
-    "npm:arkenv@0.11": "0.11.1_arktype@2.2.0",
+    "npm:arkenv@0.12": "0.12.2_arktype@2.2.0",
     "npm:arktype@^2.2.0": "2.2.0",
     "npm:blake3-jit@^1.1.0": "1.1.0",
     "npm:hono-openapi@^1.3.0": "1.3.0_@standard-community+standard-json@0.3.5__@standard-schema+spec@1.1.0__@types+json-schema@7.0.15__arktype@2.2.0__quansync@0.2.11_@standard-community+standard-openapi@0.2.9__@standard-community+standard-json@0.3.5___@standard-schema+spec@1.1.0___@types+json-schema@7.0.15___arktype@2.2.0___quansync@0.2.11__@standard-schema+spec@1.1.0__arktype@2.2.0__openapi-types@12.1.3__@types+json-schema@7.0.15__quansync@0.2.11_@types+json-schema@7.0.15_openapi-types@12.1.3_@standard-schema+spec@1.1.0_arktype@2.2.0_quansync@0.2.11",
@@ -484,8 +484,8 @@
         "undici-types"
       ]
     },
-    "arkenv@0.11.1_arktype@2.2.0": {
-      "integrity": "sha512-1b0P61cgHsd0ihUS98fp0XOZrXRbju8qcpLCqGu1Corkd4GzKoDee34D4NVU3Taxlvi+tx+htSVc7g2pqePRqw==",
+    "arkenv@0.12.2_arktype@2.2.0": {
+      "integrity": "sha512-PdR+gPNc/YQKTD75qDjREhmJc9nBaY/+zR5JLYQY3uB2zIiN+kwAv+A+kpV9a4A+9ivvYJvZURNcLaoFa9FMhg==",
       "dependencies": [
         "arktype"
       ],
@@ -647,7 +647,7 @@
       "jsr:@std/fs@^1.0.23",
       "jsr:@std/ulid@1",
       "npm:@types/node@^25.6.0",
-      "npm:arkenv@0.11",
+      "npm:arkenv@0.12",
       "npm:arktype@^2.2.0",
       "npm:blake3-jit@^1.1.0",
       "npm:hono-openapi@^1.3.0",
