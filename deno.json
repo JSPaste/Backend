@@ -36,7 +36,7 @@
     "nanoid": "jsr:@sitnik/nanoid@^6.0.0",
     "oxfmt": "npm:oxfmt@^0.60.0",
     "oxlint": "npm:oxlint@^1.62.0",
-    "oxlint-tsgolint": "npm:oxlint-tsgolint@^0.24.0",
+    "oxlint-tsgolint": "npm:oxlint-tsgolint@^0.25.0",
     "rolldown": "npm:rolldown@1.2.0"
   },
   "fmt": {
