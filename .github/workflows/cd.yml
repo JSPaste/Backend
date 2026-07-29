@@ -121,7 +121,7 @@ jobs:
 
       - if: inputs.artifact-action == 'build-release'
         name: Attest artifact
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-path: |
             dist/*.tar.xz
