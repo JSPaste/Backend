@@ -37,7 +37,7 @@
     "oxfmt": "npm:oxfmt@^0.60.0",
     "oxlint": "npm:oxlint@^1.62.0",
     "oxlint-tsgolint": "npm:oxlint-tsgolint@^7.0.0",
-    "rolldown": "npm:rolldown@1.2.2"
+    "rolldown": "npm:rolldown@1.2.3"
   },
   "fmt": {
     "exclude": ["**"]
