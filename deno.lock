@@ -4,7 +4,7 @@
     "jsr:@deno/loader@0.5": "0.5.0",
     "jsr:@hono/hono@^4.12.15": "4.13.2",
     "jsr:@hono/hono@^4.8.3": "4.13.2",
-    "jsr:@hono/standard-validator@0.3": "0.3.0",
+    "jsr:@hono/standard-validator@0.4": "0.4.0",
     "jsr:@sitnik/nanoid@6": "6.0.1",
     "jsr:@standard-schema/spec@1": "1.1.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
@@ -37,8 +37,8 @@
     "@hono/hono@4.13.2": {
       "integrity": "715d8cc1b6b5d6b9e6a7519059778d775b2d79fffdc026ac0ccdd9971e75809c"
     },
-    "@hono/standard-validator@0.3.0": {
-      "integrity": "4718cec130e4a69dd602bdf127ddd48ec6615570d8ff41f3d90b134181be1fda",
+    "@hono/standard-validator@0.4.0": {
+      "integrity": "06897043fd6263cd2b771c251055613686897f521a047720a9ec8c694d7c087d",
       "dependencies": [
         "jsr:@hono/hono@^4.8.3",
         "jsr:@standard-schema/spec"
@@ -589,7 +589,7 @@
     "dependencies": [
       "jsr:@deno/loader@0.5",
       "jsr:@hono/hono@^4.12.15",
-      "jsr:@hono/standard-validator@0.3",
+      "jsr:@hono/standard-validator@0.4",
       "jsr:@sitnik/nanoid@6",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/async@^1.3.0",
