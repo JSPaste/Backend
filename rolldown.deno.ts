@@ -2,6 +2,8 @@
 // vibecode resolver
 // based on: https://github.com/denoland/deno-rolldown-plugin
 
+import { fileURLToPath } from "node:url";
+
 import {
   type Loader,
   type LoadResponse,
@@ -11,7 +13,6 @@ import {
   Workspace,
   type WorkspaceOptions
 } from "@deno/loader";
-import { fromFileUrl } from "@std/path";
 
 const MARegex = /.*/;
 
@@ -193,7 +194,7 @@ export function deno(pluginOptions: DenoPluginOptions = {}): DenoPlugin {
         }
 
         if (specifier.startsWith("file:///")) {
-          specifier = fromFileUrl(specifier);
+          specifier = fileURLToPath(specifier);
         }
 
         modules.set(specifier, {

@@ -1,5 +1,6 @@
 *
 
+!/.mise/**
 !/src/**
 !/deno.json
 !/deno.lock

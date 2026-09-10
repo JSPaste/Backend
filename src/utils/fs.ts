@@ -18,13 +18,15 @@ export const fsWrite = async (ctx: Context<Env>, { id }: Pick<Document, "id">): 
   let stream: ReadableStream<Uint8Array>;
   switch (env.JSPB_DOCUMENT_COMPRESSION) {
     case documentVersionV1: {
-      // oxlint-disable-next-line typescript-eslint/no-non-null-assertion: ctx.req.raw.body is only null on GET/HEAD
+      // ctx.req.raw.body is only null on GET/HEAD
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       stream = ctx.req.raw.body!.pipeThrough(new CompressionStream("deflate"));
 
       break;
     }
     case documentVersionV2: {
-      // oxlint-disable-next-line typescript-eslint/no-non-null-assertion: ctx.req.raw.body is only null on GET/HEAD
+      // ctx.req.raw.body is only null on GET/HEAD
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       stream = ctx.req.raw.body!;
 
       break;
@@ -60,17 +62,14 @@ export const fsDelete = async ({ id }: Pick<Document, "id">): Promise<void> => {
 
 export const fsRead = async (
   ctx: Context<Env>,
-  { id, version }: Pick<Document, "id" | "version">,
-  clientIgnoreCapabilities = false
+  { id, version }: Pick<Document, "id" | "version">
 ): Promise<ReadableStream<Uint8Array>> => {
   const handle = await Deno.open(constantPathStructStorageData + id);
-
-  const hasClientDeflate = clientIgnoreCapabilities ? false : ctx.req.header("accept-encoding")?.includes("deflate");
 
   let stream: ReadableStream<Uint8Array>;
   switch (version) {
     case documentVersionV1: {
-      if (hasClientDeflate) {
+      if (ctx.req.header("accept-encoding")?.includes("deflate")) {
         ctx.res.headers.set("content-encoding", "deflate");
         stream = handle.readable;
       } else {

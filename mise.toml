@@ -1,5 +1,5 @@
 [tools]
-deno = "2.7"
+deno = "2.8.3"
 
 [tasks."install"]
 description = "Install all dependencies"
@@ -79,6 +79,11 @@ description = "Build standalone binary"
 env = { STANDALONE_OUTPUT = "./dist/backend.windows-amd64.exe", STANDALONE_TARGET = "x86_64-pc-windows-msvc" }
 run = [{ task = "build:standalone_" }]
 
+[tasks."build:standalone:windows-arm64"]
+description = "Build standalone binary"
+env = { STANDALONE_OUTPUT = "./dist/backend.windows-arm64.exe", STANDALONE_TARGET = "aarch64-pc-windows-msvc" }
+run = [{ task = "build:standalone_" }]
+
 [tasks."test"]
 description = "Run all tests"
 run = [{ task = "install" }, "mise exec -- deno test -A"]
@@ -118,14 +123,6 @@ run = [{ task = "clean:deno" }, { task = "install:deno" }]
 [tasks."start"]
 description = "Start backend"
 run = [{ task = "start:server" }]
-
-[tasks."start:dev"]
-alias = "dev"
-description = "Start devel server"
-run = [
-  { task = "install" },
-  "JSPB_DEBUG_DATABASE_EPHEMERAL=true JSPB_LOG_VERBOSITY=4 mise exec -- deno run -A ./src/index.ts"
-]
 
 [tasks."start:build"]
 description = "Start dedicated server"
