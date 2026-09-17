@@ -4,7 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { Hono } from "hono/tiny";
 
 import { v1DocumentHandler } from "#endpoint/document/v1/index.ts";
-import { v2LegacyDocumentHandler } from "#endpoint/legacy/v2/documents/index.ts";
+import { metaHandler } from "#endpoint/meta/index.ts";
 import { v1UserHandler } from "#endpoint/user/v1/index.ts";
 import { Logger } from "#util/console.ts";
 import { env } from "#util/env.ts";
@@ -20,7 +20,7 @@ export type Env = {
 };
 
 export const handler = (): Hono<Env> => {
-  const handler = new Hono<Env>().basePath("/api");
+  const handler = new Hono<Env>();
 
   handler.notFound((ctx) => {
     return ctx.body(null, 404);
@@ -59,8 +59,10 @@ export const handler = (): Hono<Env> => {
     ctx.res.headers.set("Cache-Control", "no-transform");
   });
 
-  handler.get(
-    "/oas.json",
+  handler.route("/", metaHandler);
+
+  handler.basePath(env.JSPB_API).get(
+    "/docs.json",
     openAPIRouteHandler(handler, {
       documentation: {
         openapi: "3.1.0",
@@ -73,17 +75,7 @@ export const handler = (): Hono<Env> => {
 ## User class
 - **Anonymous:** Can alter anonymous documents, everyone can alter their documents.
 - **Registered:** Can alter their own and anonymous documents, only they and "root" can alter their documents.
-- **"root":** Can alter every document, no one can alter their documents except "root" itself.
-
-## Restrictions
-Each instance can impose restrictions to the API usage. These restrictions may include, but not limited to:
-
-(the following values might change without notice)
-- Instance registration policy: ${env.JSPB_USER_REGISTER ? "OPEN" : "CLOSED"}
-- Document size limit: ${env.JSPB_DOCUMENT_SIZE === 0 ? "unlimited" : env.JSPB_DOCUMENT_SIZE}
-- Document lifetime: ${env.JSPB_DOCUMENT_AGE.total("minutes") === 0 ? "unlimited" : env.JSPB_DOCUMENT_AGE.total("minutes")}
-- Document anonymous lifetime: ${env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes") === 0 ? "unlimited" : env.JSPB_DOCUMENT_ANONYMOUS_AGE.total("minutes")}
-`,
+- **"root":** Can alter every document, no one can alter their documents except "root" itself.`,
           license: {
             name: "EUPL-1.2",
             url: "https://eur-lex.europa.eu/eli/dec_impl/2017/863"
@@ -109,7 +101,7 @@ Each instance can impose restrictions to the API usage. These restrictions may i
             description: "Official JSPaste instance"
           },
           {
-            url: "http://localhost:4000",
+            url: "http://localhost:8080",
             description: "Local instance"
           }
         ]
@@ -117,16 +109,8 @@ Each instance can impose restrictions to the API usage. These restrictions may i
     })
   );
 
-  // deprecated
-  handler.get("/documents/*", (ctx) => {
-    return ctx.redirect(ctx.req.path.replace(/\/documents\//g, "/v2/documents/"), 307);
-  });
-
-  handler.route("/document/v1", v1DocumentHandler);
-  handler.route("/user/v1", v1UserHandler);
-
-  // deprecated
-  handler.route("/v2/documents", v2LegacyDocumentHandler);
+  handler.basePath(env.JSPB_API).route("/document/v1", v1DocumentHandler);
+  handler.basePath(env.JSPB_API).route("/user/v1", v1UserHandler);
 
   return handler;
 };
