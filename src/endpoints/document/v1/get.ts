@@ -62,18 +62,9 @@ Note: If you only need to query the document metadata, you should use HEAD metho
   validator("header", schemaHeader, validatorHandler),
   validator("query", schemaQuery, validatorHandler),
   async (ctx) => {
-    const {
-      name
-      // @ts-expect-error upstream
-    } = ctx.req.valid("param") as typeof schemaParam.infer;
-    const {
-      "x-jspaste-password": password
-      // @ts-expect-error upstream
-    } = ctx.req.valid("header") as typeof schemaHeader.infer;
-    const {
-      preview
-      // @ts-expect-error upstream
-    } = ctx.req.valid("query") as typeof schemaQuery.infer;
+    const { name } = ctx.req.valid("param") as typeof schemaParam.infer;
+    const { "x-jspaste-password": password } = ctx.req.valid("header") as typeof schemaHeader.infer;
+    const { preview } = ctx.req.valid("query") as typeof schemaQuery.infer;
 
     const document = mutableDatabase.document.get("name", name);
     if (!document?.id) {
