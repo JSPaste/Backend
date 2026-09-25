@@ -36,10 +36,7 @@ export default new Hono<Env>().delete(
   validator("param", schemaParam, validatorHandler),
   authMiddleware,
   (ctx) => {
-    const {
-      name
-      // @ts-expect-error upstream
-    } = ctx.req.valid("param") as typeof schemaParam.infer;
+    const { name } = ctx.req.valid("param") as typeof schemaParam.infer;
 
     const document = mutableDatabase.document.get("name", name);
     if (!document?.id) {

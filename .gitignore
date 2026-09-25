@@ -3,6 +3,8 @@
 !/.github/
 !/.github/renovate.json
 !/.github/workflows/*.yml
+!/.mise/
+!/.mise/**
 !/.zed/
 !/.zed/settings.json
 !/src/

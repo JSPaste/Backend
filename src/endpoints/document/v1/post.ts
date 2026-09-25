@@ -82,7 +82,6 @@ export default new Hono<Env>().post(
       "x-jspaste-password": password,
       "x-jspaste-name": name,
       "x-jspaste-name-length": nameLength
-      // @ts-expect-error upstream
     } = ctx.req.valid("header") as typeof schemaHeader.infer;
 
     let setName: string;
