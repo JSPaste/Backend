@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { Hono } from "hono/tiny";
 
+import legacyDocumentHandler from "#endpoint/document/legacy/index.ts";
 import { v1DocumentHandler } from "#endpoint/document/v1/index.ts";
 import { metaHandler } from "#endpoint/meta/index.ts";
 import { v1UserHandler } from "#endpoint/user/v1/index.ts";
@@ -111,6 +112,8 @@ export const handler = (): Hono<Env> => {
 
   handler.basePath(env.JSPB_API).route("/document/v1", v1DocumentHandler);
   handler.basePath(env.JSPB_API).route("/user/v1", v1UserHandler);
+
+  handler.basePath(env.JSPB_API).route("/v2/documents", legacyDocumentHandler);
 
   return handler;
 };
