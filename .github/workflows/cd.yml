@@ -102,11 +102,10 @@ jobs:
           zip -j -X -9 -l -o ./dist/backend-${{ steps.tags.outputs.tag }}_windows-amd64.zip .env.example LICENSE README.md ./dist/backend.windows-amd64.exe
           zip -T ./dist/backend-${{ steps.tags.outputs.tag }}_windows-amd64.zip
 
-          # FIXME: Deno still doesn't expose arm64 target
-          #mise run build:standalone:windows-arm64
-          #chmod 755 ./dist/backend.windows-arm64.exe
-          #zip -j -X -9 -l -o ./dist/backend-${{ steps.tags.outputs.tag }}_windows-arm64.zip .env.example LICENSE README.md ./dist/backend.windows-arm64.exe
-          #zip -T ./dist/backend-${{ steps.tags.outputs.tag }}_windows-arm64.zip
+          mise run build:standalone:windows-arm64
+          chmod 755 ./dist/backend.windows-arm64.exe
+          zip -j -X -9 -l -o ./dist/backend-${{ steps.tags.outputs.tag }}_windows-arm64.zip .env.example LICENSE README.md ./dist/backend.windows-arm64.exe
+          zip -T ./dist/backend-${{ steps.tags.outputs.tag }}_windows-arm64.zip
 
       - if: inputs.artifact-action == 'build-release'
         name: Release artifact
