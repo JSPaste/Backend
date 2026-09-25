@@ -73,15 +73,10 @@ Note: To remove (nullify) a value, send the header with an empty value`,
   authMiddleware,
   bodyStream,
   async (ctx) => {
-    let {
-      actualName
-      // @ts-expect-error upstream
-    } = ctx.req.valid("param") as typeof schemaParam.infer;
-    const {
-      "x-jspaste-password": newPassword,
-      "x-jspaste-name": newName
-      // @ts-expect-error upstream
-    } = ctx.req.valid("header") as typeof schemaHeader.infer;
+    let { actualName } = ctx.req.valid("param") as typeof schemaParam.infer;
+    const { "x-jspaste-password": newPassword, "x-jspaste-name": newName } = ctx.req.valid(
+      "header"
+    ) as typeof schemaHeader.infer;
 
     const document = mutableDatabase.document.get("name", actualName);
     if (!document?.id) {
