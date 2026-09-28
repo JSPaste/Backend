@@ -16,12 +16,12 @@
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/ulid@1": "1.0.0",
-    "npm:@arkenv/core@~1.0.0-rc.2": "1.0.0-rc.2_arktype@2.2.3",
+    "npm:@arkenv/core@~1.0.0-rc.2": "1.0.0-rc.4_arktype@2.2.5",
     "npm:@hono/standard-validator@0.4": "0.4.0_@standard-schema+spec@1.1.0_hono@4.13.9",
-    "npm:@types/node@^26.6.2": "26.6.2",
-    "npm:arktype@^2.2.0": "2.2.3",
+    "npm:@types/node@^26.6.2": "26.6.3",
+    "npm:arktype@^2.2.0": "2.2.5",
     "npm:blake3-jit@^1.1.0": "1.1.0",
-    "npm:hono-openapi@^1.3.3": "1.3.3_hono@4.13.9_arktype@2.2.3",
+    "npm:hono-openapi@^1.3.3": "1.3.3_hono@4.13.9_arktype@2.2.5",
     "npm:hono@^4.13.9": "4.13.9",
     "npm:oxfmt@0.70": "0.70.0",
     "npm:oxlint-tsgolint@7": "7.0.2003",
@@ -86,17 +86,17 @@
     }
   },
   "npm": {
-    "@ark/schema@0.56.2": {
-      "integrity": "sha512-Qx4D2JFbBWpntiHZaTv7bGG4H/M2rigiknezKg/WVyDSaLdE4YCcWAOoFB7pjjDqHbbV2OqRfntm1nnXvwMexg==",
+    "@ark/schema@0.56.4": {
+      "integrity": "sha512-nd4OqaWdKZJeGF5zNmZysDQO7NyyJ1ycl4S7i16Hj1VxqL+x72Z66lOn7ErpsoMUZtCtslAMHMjqJhuQSxciyw==",
       "dependencies": [
         "@ark/util"
       ]
     },
-    "@ark/util@0.56.2": {
-      "integrity": "sha512-9kU2sUE38FZEGG7l3hamYMBieLYEJh2L1mrYD2eXpT+78EnQSV1bhjxJhnxGBMSTbtwpBSDNSK+K60WvaI/DTQ=="
+    "@ark/util@0.56.4": {
+      "integrity": "sha512-KKqwGSia44cvuuDY70jGfbiUdG2E8F2cM4npdqvJ22S5a0LknlwG6nIrfQG1nF8fzxpzP30098wp0a8ASs0prQ=="
     },
-    "@arkenv/core@1.0.0-rc.2_arktype@2.2.3": {
-      "integrity": "sha512-3KUzqWnSHXR/6PH06dA5qcBQU5OdY4u40wjUwR81nD/r5ajoe+S7/sqwa8XwpmxqbaF7YjKM9aVNbluSf8U4eg==",
+    "@arkenv/core@1.0.0-rc.4_arktype@2.2.5": {
+      "integrity": "sha512-KO87DcYqWq1MJEDAx10Mtki9wzeUUeKDDiDhCbU9sp5Zg2U2VxyZcPXd1dv/T55i6gGo0Y9iYni/ksm0kLL6MA==",
       "dependencies": [
         "arktype"
       ]
@@ -409,7 +409,7 @@
     "@rolldown/pluginutils@1.0.1": {
       "integrity": "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="
     },
-    "@standard-community/standard-json@0.3.6_@standard-schema+spec@1.1.0_@types+json-schema@7.0.15_arktype@2.2.3": {
+    "@standard-community/standard-json@0.3.6_@standard-schema+spec@1.1.0_@types+json-schema@7.0.15_arktype@2.2.5": {
       "integrity": "sha512-tuXKz1Ps4al0W4xhfwii7v4lskKtOv3QE7mcouRVThrBdOR6JzY4Vea3nsxcEnte84bOJvMvXGmOMWE3IBbHyA==",
       "dependencies": [
         "@standard-schema/spec",
@@ -421,7 +421,7 @@
         "arktype"
       ]
     },
-    "@standard-community/standard-openapi@0.2.10_@standard-community+standard-json@0.3.6_@standard-schema+spec@1.1.0_arktype@2.2.3_openapi-types@12.1.3_@types+json-schema@7.0.15": {
+    "@standard-community/standard-openapi@0.2.10_@standard-community+standard-json@0.3.6_@standard-schema+spec@1.1.0_arktype@2.2.5_openapi-types@12.1.3_@types+json-schema@7.0.15": {
       "integrity": "sha512-whaCN9eu5zv5gu6Kyeh5am/S3AyS1nqo57/wAxs/KPS7+94UhBUZmkIetmXzm22qIV0zMrHt3y+2VfjkbkYYTA==",
       "dependencies": [
         "@standard-community/standard-json",
@@ -439,20 +439,20 @@
     "@types/json-schema@7.0.15": {
       "integrity": "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="
     },
-    "@types/node@26.6.2": {
-      "integrity": "sha512-X1P21scMv4zGKLYqjdGjaKa7COa0RKVYYZZN/NfvLQ1JegxFhdhpZG/Lyn8AXx6CDUavKAd11v6BvfpkDByK8g==",
+    "@types/node@26.6.3": {
+      "integrity": "sha512-dsqMQQoeTLqu9wynDD00q573mNzso3IdQOAfHRJqLCcmCFPoGo9A1bDpUcv/9tnKpErQWv9uKeGfl37EIS02Yg==",
       "dependencies": [
         "undici-types"
       ]
     },
-    "arkregex@0.0.8": {
-      "integrity": "sha512-PJcx6G1kQTgLKPUbeYlYecDRaKq15AMSGVajlKFYWlPeJRQL+j3dKE6tyMs40HZ99djS1l9Vhl3ezAHy9JBIqQ==",
+    "arkregex@0.0.10": {
+      "integrity": "sha512-+iDWBYBjH8w7wqEv8VY4loBwRldFxX84KNwKbobH3FJPay/18XI9sTesmXYpKyIrgbC5z/s16+vSJYHCC9FEvQ==",
       "dependencies": [
         "@ark/util"
       ]
     },
-    "arktype@2.2.3": {
-      "integrity": "sha512-7W+0RLTUNJiBFIIZXwOQxSR8Z273IAd6IvqBeG9+gHnQKFsIx2C0iOtGTmMrPnlX4qLXyc5+ll7A0BIj9WrbTg==",
+    "arktype@2.2.5": {
+      "integrity": "sha512-c9oqY1eBab2LceqvpWX50xae2HB8P/nJPxRhuhPVf5lEDi3WQpf7WQflJFMsyCiA3NGh6zENOlse30gWBzlwDg==",
       "dependencies": [
         "@ark/schema",
         "@ark/util",
@@ -462,7 +462,7 @@
     "blake3-jit@1.1.0": {
       "integrity": "sha512-5lNvUdIw2roA6LSV39E1mDXN8WVK8kC0dGZtaZoErkVktSgUjgRueTv4WVqHIUMHGerkfhxBuqFtMNuo/GdLrA=="
     },
-    "hono-openapi@1.3.3_hono@4.13.9_arktype@2.2.3": {
+    "hono-openapi@1.3.3_hono@4.13.9_arktype@2.2.5": {
       "integrity": "sha512-+LVFPQEc4eDrXr/Rd0QQkRh/DbEZRXnm1RZU4bVaoqmWiWgspT4nNHIQMgi44X+D9/8k1eGzHvR0KLNPJ/0xaQ==",
       "dependencies": [
         "@hono/standard-validator",
